@@ -27,3 +27,15 @@
 *.exe
 *.out
 *.app
+
+# Folders
+CMakeFiles/
+.idea/
+
+# Vim swap files
+*.swp
+
+# Cmake files
+*.cmake
+CMakeCache.txt
+Makefile

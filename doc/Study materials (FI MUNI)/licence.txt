@@ -1,0 +1,11 @@
+Licence for study materials placed in folder: "Study materials (FI MUNI)" in Github repository of project Kyrys created by user xbrakl
+
+These study materials are from Faculty of Informatics - Masaryk univerzity in Brno - Czech republic
+
+These study materials are intellectual property of their authors or Faculty of informatics - Masaryk university stated on the beggining of each document.
+
+Sharing, uploading on servers of third parts, editing or any other usage or manipulating with these materials without agreement of their authors is forbidden. 
+You can download and use these materials just for educational purposes asociated with our program Kyrys.
+
+If you need to contact authors of these study materials, use application 'People' in Information system of Masaryk university here: http://is.muni.cz/lide/?lang=en 
+or contact developers of project Kyrys. 

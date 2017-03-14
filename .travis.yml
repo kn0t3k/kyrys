@@ -1,14 +1,22 @@
-# TravisCI build settings file
-# For more info, see http://docs.travis-ci.com/user/getting-started/
-# To validate your .travis.yml, go to http://lint.travis-ci.org/
-
-# setting the project language
 language: cpp
+sudo: required
+dist: trusty
+compiler: gcc
+        
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - gcc-5
+            - g++-5
+            - cmake
 
-# setting compilers, do 2 separate sub-builds for gcc and clang
-compiler:
-  - gcc
-  - clang
-
-# script to run after build (run tests, etc.)
-script: make all test
+script:
+    - sudo ln -s /usr/bin/gcc-5 /usr/local/bin/gcc
+    - sudo ln -s /usr/bin/g++-5 /usr/local/bin/g++
+    - gcc --version && g++ --version && cmake --version
+    - export CXX=/usr/bin/g++-5
+    - export CC=/usr/bin/gcc-5
+    - cmake . && make 
+    - cd bin && ./kyrys_test

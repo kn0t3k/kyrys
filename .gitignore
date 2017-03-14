@@ -31,6 +31,7 @@
 # Folders
 CMakeFiles/
 .idea/
+Testing/
 
 # Vim swap files
 *.swp
@@ -39,3 +40,7 @@ CMakeFiles/
 *.cmake
 CMakeCache.txt
 Makefile
+
+# Astyle files
+*.orig
+

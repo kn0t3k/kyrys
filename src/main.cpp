@@ -1,13 +1,11 @@
-#include <iostream>
+#include <server.hpp>
 
-void foo(char *whtf) {
-    int heckNo;
-	(void ) whtf;
-	if(heckNo)
-		return;
-}
+#include <reference.hpp>
 
-int main() {
-    std::cout << "Ahoj" << std::endl;
-    return 0;
+int main(int argc, char **argv) {
+	QCoreApplication a(argc, argv);
+
+    Kyrys::Server server;
+
+    return a.exec();
 }

@@ -1,6 +1,5 @@
-#include <server.hpp>
-
 #include <reference.hpp>
+#include <server.hpp>
 
 using Kyrys::Server;
 using Kyrys::Enums::Resolver::Mode;

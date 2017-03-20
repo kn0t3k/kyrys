@@ -11,5 +11,8 @@
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QCoreApplication>
+#include <QtCore/QFile>
+#include <QtCore/QTextStream>
 
 #include <iostream>
+#include <fstream>

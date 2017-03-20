@@ -1,20 +1,24 @@
+#include <reference.hpp>
 #include <resolver.hpp>
 
-#include <reference.hpp>
+#include <fstream>
+#include <ctime>
 
 using Kyrys::Resolver;
-using Kyrys::Enums::Resolver::Status;
-using Kyrys::Enums::Resolver::MethodType;
-using Kyrys::Enums::Resolver::Mode;
 
+using Kyrys::Enums::Resolver::Status;
+using Kyrys::Enums::Item::MethodType;
+using Kyrys::Enums::Resolver::Mode;
+using Kyrys::Item;
 
 int Resolver::Execute(const Item &item) {
 	if (item.Method() == MethodType::REGISTER) {
-		this->Register(item);
-	} else {
+		return (this->Register(item));
+	} else if (item.Method() == MethodType::UNKNOWN) {
 		return Status::UNKNOWN_METHOD;
+	} else {
+		return Status::INVALID_CMND;
 	}
-	return Status::SUCCESS;
 }
 
 int Resolver::Parse(const QString &data, Mode m) {
@@ -28,7 +32,7 @@ int Resolver::Parse(const QString &data, Mode m) {
 
 		QJsonObject object = d.object();
 
-		Resolver::Item item(object);
+		Item item(object);
 
 		return this->Execute(item);
 	} else {
@@ -38,20 +42,20 @@ int Resolver::Parse(const QString &data, Mode m) {
 }
 
 int Resolver::Register(const Item &item) {
-	return Status::SUCCESS;
-}
-
-Resolver::Item::Item(const QJsonObject &json) {
-	if (json["method"].toString() == "register") {
-		this->mMethodType = MethodType::REGISTER;
-	} else if (json["method"].toString() == "call") {
-		this->mMethodType = MethodType::CALL;
-	} else {
-		this->mMethodType = MethodType::UNKNOWN;
+	int s = item.IsValid();
+	if (s != Status::SUCCESS) {
+		return s;
 	}
 
-	QJsonObject obj = json["args"].toObject();
-	this->mName = obj["name"].toString();
-	this->mNick = obj["nick"].toString();
-	this->ID = -1;
+	std::fstream file;
+	std::string fileLoc(TEMP_DIR);
+	fileLoc += "/db.txt";
+	file.open(fileLoc, std::ios::app);
+
+	if (file.is_open()) {
+		file << item.Serialize();
+		file.close();
+		return Status::SUCCESS;
+	}
+	return Status::FAILED;
 }

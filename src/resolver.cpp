@@ -37,7 +37,6 @@ int Resolver::Parse(const QString &data, Mode m) {
 
 		return this->Execute(item);
 	} else {
-		qDebug() << "Invalid Resolver mode";
 		return Status::FAILED;
 	}
 }

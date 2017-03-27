@@ -27,6 +27,10 @@ Item::Item(const QJsonObject &json) {
 
 	QJsonObject obj = json["args"].toObject();
 
+	if (obj.empty()) {
+		this->mMethodType = MethodType::INVALID_CMND;
+	}
+
 	this->mName = obj["name"].toString();
 	this->mNick = obj["nick"].toString();
 }
@@ -38,7 +42,6 @@ std::string Item::Serialize(int ID) const {
 	output += mName.toStdString();
 	output += FORMAT_SEPARATOR;
 	output += mNick.toStdString();
-	//output += FORMAT_NEW_LINE;
 	return output;
 }
 

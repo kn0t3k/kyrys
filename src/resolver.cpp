@@ -1,15 +1,16 @@
 #include <reference.hpp>
 #include <resolver.hpp>
 
-#include <fstream>
-#include <ctime>
-
 using Kyrys::Resolver;
 
 using Kyrys::Enums::Resolver::Status;
 using Kyrys::Enums::Item::MethodType;
 using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Item;
+
+Resolver::Resolver(const QString &path) : mPath(path) {
+
+}
 
 int Resolver::Execute(const Item &item) {
 	if (item.Method() == MethodType::REGISTER) {
@@ -47,15 +48,37 @@ int Resolver::Register(const Item &item) {
 		return s;
 	}
 
-	std::fstream file;
-	std::string fileLoc(TEMP_DIR);
-	fileLoc += "/db.txt";
-	file.open(fileLoc, std::ios::app);
+	QFile filePath(mPath + "/db.txt");
+	if (filePath.open(QIODevice::ReadWrite )) {
+		int ID = 0;
 
-	if (file.is_open()) {
-		file << item.Serialize();
-		file.close();
-		return Status::SUCCESS;
+		QTextStream fileStream(&filePath);
+		QVector<QString > lines;
+		while ( !fileStream.atEnd()) {
+			lines.append(fileStream.readLine());
+		}
+
+		if (lines.length() == 0) {
+			lines.append(QString::number(ID));
+		}
+
+		ID = lines[0].toInt();
+		ID++;
+
+		lines.append(QString::fromStdString(item.Serialize(ID)));
+		lines[0] = QString::number(ID);
+
+		filePath.close();
+
+		if (filePath.open(QIODevice::WriteOnly)) {
+			QTextStream out(&filePath);
+			for (QVector<QString>::iterator iter = lines.begin(); iter != lines.end(); iter++) {
+				out << *iter << "\r\n";
+			}
+			return Status::SUCCESS;
+		} else {
+			return Status::FAILED;
+		}
 	}
 	return Status::FAILED;
 }

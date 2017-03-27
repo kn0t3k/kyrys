@@ -4,7 +4,7 @@
 using Kyrys::Server;
 using Kyrys::Enums::Resolver::Mode;
 
-Server::Server(QObject *parent) : QObject(parent) {
+Server::Server(QObject *parent) : QObject(parent), mResolver("") {
     mServer = new QTcpServer(parent);
     connect(mServer, SIGNAL(newConnection()), this, SLOT(newConnection()));
 

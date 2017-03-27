@@ -6,7 +6,7 @@ using Kyrys::Utils::Random;
 QString Random::possibleCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 Random::Random() {
-	qsrand(mix(clock(), time(NULL), getpid()));
+	qsrand(mix(clock(), time(NULL), QTime::currentTime().msec()));
 }
 
 QString Random::GetRandomString() const {

@@ -2,6 +2,8 @@
 
 #include <reference.hpp>
 
-TEST_CASE(""){
-	REQUIRE(1 == 1);
+#include <item.hpp>
+
+TEST_CASE("Item") {
+	REQUIRE(1 == 1);	
 }

@@ -9,10 +9,13 @@ class Resolver {
 	typedef Kyrys::Item Item;
 
 public:
+	Resolver(const QString &path);
 	int Parse(const QString &data, Mode m);
 
 private:
 	int Execute(const Item &item);
 	int Register(const Item &item);
+
+	QString mPath;
 };
 }

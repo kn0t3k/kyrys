@@ -14,7 +14,9 @@ public:
 	*	
 	*/
 	Item(const QJsonObject &json);
-	std::string Serialize() const ;
+
+	std::string Serialize(int ID) const ;
+	
 	int IsValid() const ;	
 
 	const MethodType &Method() const { return mMethodType;}

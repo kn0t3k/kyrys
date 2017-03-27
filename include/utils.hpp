@@ -6,10 +6,17 @@ namespace Kyrys {
 namespace Utils {
 class Random {
 public:
+	/**
+	 * @brief      Construt a random object - initialize random generator.
+	 */
 	Random();
-	QString GetRandomString() const;
 
-	static unsigned long Hash(const char *str);
+	/**
+	 * @brief      Create a random string.
+	 *
+	 * @return     The random string.
+	 */
+	QString GetRandomString() const;
 
 private:
 	static QString possibleCharacters;

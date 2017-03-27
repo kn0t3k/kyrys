@@ -23,17 +23,6 @@ QString Random::GetRandomString() const {
 	return randomString;
 }
 
-unsigned long Random::Hash(const char *str) {
-	unsigned long hash = 5381;
-	int c;
-
-	while (c = *str++) {
-		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-	}
-
-	return hash;
-}
-
 unsigned long Random::mix(unsigned long a, unsigned long b, unsigned long c) {
 	a = a - b;  a = a - c;  a = a ^ (c >> 13);
 	b = b - c;  b = b - a;  b = b ^ (a << 8);

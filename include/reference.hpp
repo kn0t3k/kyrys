@@ -15,8 +15,8 @@
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
 #include <QtCore/QDataStream>
-#include <QtCore/QTime>
 #include <QtCore/QCommandLineParser>
+#include <QtCore/QTime>
 
 #include <iostream>
 #include <fstream>

@@ -22,8 +22,8 @@ TEST_CASE("Resolver - valid JSON syntax") {
 	REQUIRE(result == Status::SUCCESS);
 }
 
-TEST_CASE("Resolver - save to file") {
-	Kyrys::Resolver r("c:\\__TEMP__\\");
+TEST_CASE("Resolver - save to file"){
+	Kyrys::Resolver r("c:\\__TEMP__\\");;
 	Random rnd;
 	QString randStr = rnd.GetRandomString();
 

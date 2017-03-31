@@ -6,7 +6,7 @@ using Kyrys::Utils::Random;
 QString Random::possibleCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 Random::Random() {
-	qsrand(mix(clock(), time(NULL), getpid()));
+	qsrand(mix(clock(), time(NULL), QTime::currentTime().msec()));
 }
 
 QString Random::GetRandomString() const {
@@ -21,17 +21,6 @@ QString Random::GetRandomString() const {
 		randomString.append(nextChar);
 	}
 	return randomString;
-}
-
-unsigned long Random::Hash(const char *str) {
-	unsigned long hash = 5381;
-	int c;
-
-	while (c = *str++) {
-		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-	}
-
-	return hash;
 }
 
 unsigned long Random::mix(unsigned long a, unsigned long b, unsigned long c) {

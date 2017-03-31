@@ -5,17 +5,17 @@
 
 namespace Kyrys {
 class Server : public QObject {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit Server(QObject *parent = 0);
+	explicit Server(unsigned port, QObject *parent = 0);
 
 signals:
 
 public slots:
-    void newConnection();
+	void newConnection();
 
 private:
-    QTcpServer *mServer;    
-    Resolver mResolver;
+	QTcpServer *mServer;
+	Resolver mResolver;
 };
 }

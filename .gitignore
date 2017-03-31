@@ -44,3 +44,13 @@ Makefile
 # Astyle files
 *.orig
 
+
+Kyrys_autogen/
+
+lib/mbedTLS/mbedTLS_autogen/
+
+src_library_autogen/6YEA5652QU/
+
+test/kyrys_test_autogen/
+
+src_library_autogen/

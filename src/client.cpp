@@ -20,8 +20,11 @@ int Client::registration(){
 				 "Choose nickname: ";
 	std::string nickname;
 	std::getline(std::cin, nickname);
+
+	//todo: client should ask server if nickname is already used. If yes, then user have to choose another nickname
+
 	std::string password, password2;
-	for(int i = 0; i < 5; ++i){
+	for(int i = 0; i < 5; ++i){ //User has 5 tries to type password correctly twice in a row
 		std::cout << "\nChoose password: ";
 		std::getline(std::cin, password);
 		std::cout << "\nRepeat the password:";
@@ -40,6 +43,11 @@ int Client::registration(){
 	QCryptographicHash hash(QCryptographicHash::Sha3_512); //Creates QCryptographicHash object
 	hash.addData(QByteArray::fromStdString(password));     //set context of QCryptographicHash
 	m_user.User(nickname, hash.result());
+
+	//todo: call server with json message and end with 0 after server answers that registration is succesfully finished on his side
+	//I expect something like jsonMessageRegisterCall -> Socket -> Server
+	//Server -> Socket -> jsonMessageRegisterResponse(OK / not OK)
+
 	return 0;
 }
 
@@ -61,12 +69,7 @@ int Client::login (){
 	return 0;
 }
 
-std::string Client::createLoginMessage(){
-	//TODO
-	return "";
-}
-
-//User class Constructors/Getters/Setters
+//User class: Constructors/Getters/Setters
 User::User(const std::string &m_nickname, const QByteArray &m_passwordHash) : m_nickname(m_nickname), m_passwordHash(m_passwordHash) {}
 const std::string &Kyrys::User::getNickname() const 		 { return m_nickname; }
 const QByteArray &User::getPasswordHash() const 			 { return m_passwordHash; }

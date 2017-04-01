@@ -9,6 +9,9 @@ class Server : public QObject {
 public:
 	explicit Server(unsigned port, QObject *parent = 0);
 
+	//std::string jsonMessageRegisterResponse();
+	//std::string jsonMessageLoginResponse();
+
 signals:
 
 public slots:

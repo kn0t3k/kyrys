@@ -1,3 +1,8 @@
+/*
+ * This file obtains some MAN or help pages for both client and server
+ */
+
+
 #include <string>
 #include <iostream>
 

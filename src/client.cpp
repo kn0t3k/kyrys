@@ -3,7 +3,6 @@
 #include <QtCore/QCryptographicHash>
 
 using Kyrys::Client;
-using Kyrys::User;
 
 Client::Client(const QString &hostName, unsigned port, QObject *parent) : QObject(parent), m_user() {
 	QString data;
@@ -16,6 +15,7 @@ Client::Client(const QString &hostName, unsigned port, QObject *parent) : QObjec
 }
 
 int Client::registration(){
+	bool success = false; //dokoncit if
 	std::cout << "Now follows registration procedure"
 				 "Choose nickname: ";
 	std::string nickname;
@@ -33,7 +33,8 @@ int Client::registration(){
 			std::cout << "Passwords are not same!, please try it again" << std::endl;
 			password.clear();
 			password2.clear();
-		}
+		} else
+			break;
 	}
 	if(password != password2) {
 		std::cout << "Registration failed. Check help page and try it again" << std::endl;
@@ -68,13 +69,4 @@ int Client::login (){
 
 	return 0;
 }
-
-//User class: Constructors/Getters/Setters
-User::User(const std::string &m_nickname, const QByteArray &m_passwordHash) : m_nickname(m_nickname), m_passwordHash(m_passwordHash) {}
-const std::string &Kyrys::User::getNickname() const 		 { return m_nickname; }
-const QByteArray &User::getPasswordHash() const 			 { return m_passwordHash; }
-void User::setNickname(const std::string &m_nickname) 		 { User::m_nickname = m_nickname; }
-void User::setPasswordHash(const QByteArray &m_passwordHash) { User::m_passwordHash = m_passwordHash; }
-
-
 

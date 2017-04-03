@@ -25,7 +25,7 @@ namespace Kyrys {
 					BAD_PASSWORD,	   //User didn't repeat password correctly
 					SERVER_ERROR,	   //Uknown error on server's side
 					SUCCESS 		   //Registration process was finished succesfully
-				}
+				};
 			}	
 			namespace Login{
 				enum Status{
@@ -33,7 +33,7 @@ namespace Kyrys {
 					BAD_PASSWORD,	 //User wrote bad password acording to his nickname
 					SERVER_ERROR,    //Uknown error on server's side
 					SUCCESS			 //Login process was finished succesfully 
-				}
+				};
 			}
 		}
 

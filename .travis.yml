@@ -12,6 +12,10 @@ addons:
             - g++-5
             - cmake
 
+before_install:
+    - sudo apt-get update
+    - sudo apt-get install -qq qt5-dev-tools
+
 script:
     - sudo ln -s /usr/bin/gcc-5 /usr/local/bin/gcc
     - sudo ln -s /usr/bin/g++-5 /usr/local/bin/g++

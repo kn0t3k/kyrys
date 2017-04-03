@@ -1,9 +1,9 @@
 #pragma once
 #include <reference.hpp>
-#include "user.hpp"
+#include <user.hpp>
 
 namespace Kyrys {
-
+	typedef Kyrys::User User;
 	class Client : public QObject {
 		Q_OBJECT
 	public:

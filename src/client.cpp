@@ -43,7 +43,7 @@ int Client::registration(){
 
 	QCryptographicHash hash(QCryptographicHash::Sha3_512); //Creates QCryptographicHash object
 	hash.addData(QByteArray::fromStdString(password));     //set context of QCryptographicHash
-	m_user.User(nickname, hash.result());
+	m_user = User(nickname, hash.result());
 
 	//todo: call server with json message and end with 0 after server answers that registration is succesfully finished on his side
 	//I expect something like jsonMessageRegisterCall -> Socket -> Server

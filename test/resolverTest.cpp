@@ -20,7 +20,6 @@ TEST_CASE("Resolver - valid JSON syntax") {
 
 	int result = r.Parse( jsonInput, Mode::USE_JSON);
 	REQUIRE(result == Status::SUCCESS);
-	REQUIRE(1==2);
 }
 
 TEST_CASE("Resolver - save to file"){

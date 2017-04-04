@@ -24,3 +24,8 @@ Build:
 * run 'cmake . -G "MinGW Makefiles"
 * run 'mingw32-make'
 * enjoy Kyrys
+
+* when commiting:
+	- install cppcheck and add it to PATH
+	- copy file 'pre-commit' from scripts/ to .git/hooks
+	- after running 'git commit ...' a script will check if your changes will compile and if the tests will pass

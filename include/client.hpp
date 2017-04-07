@@ -3,11 +3,18 @@
 #include <user.hpp>
 
 namespace Kyrys {
-	typedef Kyrys::User User;
+	//typedef Kyrys::User User; //toto nepouzivaj globalne, trvalo mi pol dna zistit preco mam zablokovanu triedu User
 	class Client : public QObject {
-		Q_OBJECT
+	Q_OBJECT //co je toto?
+	private:
+		QTcpSocket mSocket;
+		User m_user;
 	public:
 		explicit Client(const QString &hostName, unsigned port, QObject *parent = 0);
+
+		int loadRegistrationCredentials(std::string &nickname, std::string &password);
+
+		int loadLoginCredentials(std::string &nickname, std::string &password);
 
 		/**
 		 * @brief 	 Registration of new user
@@ -25,19 +32,17 @@ namespace Kyrys {
 
 
 		/**
-		 * @brief  This method creates json message, which send client to server when want to register new user
-		 * @return
+		 * @brief  This method creates json message, which send client to server when want to authenticate user. It is used in both cases, login and registration
+		 * @param messageType	write MessageType::LOGIN_CALL in case of login
+		 * 							  MessageType::REGISTER_CALL otherwise
+		 * @return message in format QJsonDocument
+		 * @note   message format:
+		 * 		   {
+    				"method": "register/call",
+    				"nickname": "some nick",
+    				"password": "hash of password"
+				   }
 		 */
-		//std::string jsonMessageRegisterCall();
-
-
-		/**
-		 * @brief This method creates json message, which send client to server when user want to login in
-		 */
-		//std::string jsonMessageLoginCall()
-
-	private:
-		QTcpSocket mSocket;
-		User m_user;
+		QJsonDocument jsonMessageUserAuthentication(Kyrys::Enums::JsonMessage::MessageType messageType);
 	};
 }

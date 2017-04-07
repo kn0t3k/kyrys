@@ -9,6 +9,11 @@ namespace Kyrys {
 	class User {
 		std::string m_nickname;
 		QByteArray  m_passwordHash;
+		/*todo
+		 * pridaj atributy: ID uzivatela take ake ma pridelene v databaze serveru,
+		 * 					sucasna IP adresa clienta
+		 * 					pouzivana hashovacia metoda (neviem este ci si ju bude treba poznamenat)
+		 */
 
 	public:
 		User() = default;

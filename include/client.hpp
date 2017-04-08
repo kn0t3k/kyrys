@@ -7,7 +7,7 @@ namespace Kyrys {
 	class Client : public QObject {
 	Q_OBJECT //co je toto?
 	private:
-		QTcpSocket mSocket;
+		QTcpSocket m_socket;
 		User m_user;
 	public:
 		explicit Client(const QString &hostName, unsigned port, QObject *parent = 0);
@@ -38,7 +38,7 @@ namespace Kyrys {
 		 * @return message in format QJsonDocument
 		 * @note   message format:
 		 * 		   {
-    				"method": "register/call",
+    				"method": "register",
     				"nickname": "some nick",
     				"password": "hash of password"
 				   }

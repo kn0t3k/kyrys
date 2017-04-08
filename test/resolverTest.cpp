@@ -25,7 +25,7 @@ TEST_CASE("Resolver - valid JSON syntax") {
 TEST_CASE("Resolver - save to file"){
 	Kyrys::Resolver r("c:\\__TEMP__\\");;
 	Random rnd;
-	QString randStr = rnd.GetRandomString();
+	QString randStr = rnd.GetRandomString(25);
 
 	QString jsonInput = "{\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"";
 	jsonInput += randStr;

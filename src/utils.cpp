@@ -9,9 +9,7 @@ Random::Random() {
 	qsrand(mix(clock(), time(NULL), QTime::currentTime().msec()));
 }
 
-QString Random::GetRandomString() const {
-	const int randomStringLength = 25; // assuming you want random strings of 12 characters
-
+QString Random::GetRandomString(int randomStringLength) const {
 	QString randomString;
 
 	for (int i = 0; i < randomStringLength; ++i) {

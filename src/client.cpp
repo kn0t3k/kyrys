@@ -8,25 +8,25 @@ using Kyrys::Enums::JsonMessage::MessageType;
 
 Client::Client(const QString &hostName, unsigned port, QObject *parent) : QObject(parent), m_user() {
 	QString data;
-	mSocket.connectToHost(hostName, port); //warning: connectToHost expects port as quint16 type
+	m_socket.connectToHost(hostName, port); //warning: connectToHost expects port as quint16 type
 
 	QByteArray buffer;
-	buffer.append(mSocket.readAll());	
+	buffer.append(m_socket.readAll());
 
 	qDebug() << buffer;
 }
 
-int Client::loadRegistrationCredentials(std::string& nickname, std::string& password){
+int Client::loadRegistrationCredentials(std::string& nickname, std::string& password) {
 	std::cout << "Choose nickname: ";
 	std::getline(std::cin, nickname);
 
 	std::string buffer;
-	for(int i = 0; i < 5; ++i){ //User has 5 tries to type password correctly twice in a row
+	for (int i = 0; i < 5; ++i) { //User has 5 tries to type password correctly twice in a row
 		std::cout << "\nChoose password: ";
 		std::getline(std::cin, password);
 		std::cout << "\nRepeat the password:";
 		std::getline(std::cin, buffer);
-		if(password != buffer) {
+		if (password != buffer) {
 			std::cout << "Passwords are not same!, please try it again" << std::endl;
 			password.clear();
 			buffer.clear();
@@ -38,7 +38,7 @@ int Client::loadRegistrationCredentials(std::string& nickname, std::string& pass
 	return 1;
 }
 
-int Client::registration(){
+int Client::registration() {
 	using Kyrys::Enums::Client::Registration::Status;
 	Status status = Status::REGISTRATION_STARTED;
 
@@ -47,7 +47,7 @@ int Client::registration(){
 	std::string nickname;
 	std::string password;
 
-	if(!loadRegistrationCredentials(nickname, password)) {
+	if (!loadRegistrationCredentials(nickname, password)) {
 		std::cout << "Registration failed. Check help page and try it again" << std::endl;
 		return status = Status::BAD_PASSWORD;
 	} else {
@@ -58,7 +58,7 @@ int Client::registration(){
 	m_user = User(nickname, hashed_password);
 	status = Status::PASSWORD_HASHED;
 
-	QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::REGISTER_CALL); //this is message for server
+	QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::REGISTER); //this is message for server
 
 	//todo: call server with json message and end with 0 after server answers that registration is succesfully finished on his side
 	//I expect something like jsonMessageUserAuthentication -> Socket -> Server
@@ -67,7 +67,7 @@ int Client::registration(){
 	return status = Status::SUCCESS;
 }
 
-int Client::loadLoginCredentials(std::string &nickname, std::string &password){
+int Client::loadLoginCredentials(std::string &nickname, std::string &password) {
 	std::cout << "Nickname: ";
 	std::getline(std::cin, nickname);
 	std::cout << "\nPassword: ";
@@ -75,12 +75,12 @@ int Client::loadLoginCredentials(std::string &nickname, std::string &password){
 	return 0;
 }
 
-int Client::login (){
+int Client::login () {
 	using Kyrys::Enums::Client::Login::Status;
 	Status status = Status::LOGIN_STARTED;
 	std::string nickname, password;
 
-	for(int i = 0; i < 5; ++i){
+	for (int i = 0; i < 5; ++i) {
 		loadLoginCredentials(nickname, password);
 		status = Status::CREDENTIALS_LOADED;
 
@@ -88,7 +88,7 @@ int Client::login (){
 		m_user = User(nickname, hashed_password);
 		status = Status::PASSWORD_HASHED;
 
-		QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::LOGIN_CALL); //this is message for server
+		QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::LOGIN); //this is message for server
 
 		//TODO - contact server with JSON message obtaining hash of logging in user
 	}
@@ -96,15 +96,16 @@ int Client::login (){
 	return status = Status::SUCCESS;
 }
 
-QJsonDocument Client::jsonMessageUserAuthentication(MessageType messageType){
+QJsonDocument Client::jsonMessageUserAuthentication(MessageType messageType) {
 	QJsonObject jsonObject;
 	QString key = "method";
 	QString value;
-	if(messageType == MessageType::REGISTER_CALL) {
-		value = "register/call";
+	if (messageType == MessageType::REGISTER) {
+		value = "register";
 	} else {
-		value = "login/call";
-	}
+		value = "login";
+	} // missing else
+
 	jsonObject.insert(key, value);
 
 	key = "nickname";

@@ -48,32 +48,19 @@ int Resolver::Register(const Item &item) {
 	}
 
 	QFile filePath(mPath + "/db.txt");
-	if (filePath.open(QIODevice::ReadWrite )) {
-		int ID = 0;
-
+	if (filePath.open(QIODevice::ReadOnly)) {
 		QTextStream fileStream(&filePath);
-		QVector<QString > lines;
+		int ID = 0;
 		while ( !fileStream.atEnd()) {
-			lines.append(fileStream.readLine());
+			fileStream.readLine();
+			ID++;
 		}
-
-		if (lines.length() == 0) {
-			lines.append(QString::number(ID));
-		}
-
-		ID = lines[0].toInt();
-		ID++;
-
-		lines.append(QString::fromStdString(item.Serialize(ID)));
-		lines[0] = QString::number(ID);
 
 		filePath.close();
 
-		if (filePath.open(QIODevice::WriteOnly)) {
-			QTextStream out(&filePath);
-			for (QVector<QString>::iterator iter = lines.begin(); iter != lines.end(); iter++) {
-				out << *iter << "\r\n";
-			}
+		if (filePath.open(QIODevice::WriteOnly | QIODevice::Append)) {
+			filePath.write(item.Serialize(ID).c_str());
+			filePath.close();
 			return Status::SUCCESS;
 		} else {
 			return Status::FAILED;

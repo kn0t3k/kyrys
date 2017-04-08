@@ -42,6 +42,7 @@ std::string Item::Serialize(int ID) const {
 	output += mName.toStdString();
 	output += FORMAT_SEPARATOR;
 	output += mNick.toStdString();
+	output += FORMAT_NEW_LINE;
 	return output;
 }
 

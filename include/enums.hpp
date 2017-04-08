@@ -53,14 +53,15 @@ namespace Kyrys {
 			enum MethodType {
 				REGISTER,
 				CALL,
+				LOGIN,
 				INVALID_CMND,
 				UNKNOWN
 			};
 		}
 		namespace JsonMessage {
 			enum MessageType {
-				REGISTER_CALL,
-				LOGIN_CALL,
+				REGISTER,
+				LOGIN,
 				REGISTER_RESPONSE,
 				LOGIN_RESPONSE
 			};

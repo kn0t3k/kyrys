@@ -48,5 +48,7 @@ int main(int argc, char **argv) {
 			//client.run(); //todo implement run
 			return a.exec();
 		}
+	} else {
+		return 0;
 	}
 }

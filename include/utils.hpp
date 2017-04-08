@@ -16,7 +16,7 @@ public:
 	 *
 	 * @return     The random string.
 	 */
-	QString GetRandomString() const;
+	QString GetRandomString(int randomStringLen = 10) const;
 
 private:
 	static QString possibleCharacters;

@@ -1,8 +1,8 @@
 cmake_minimum_required (VERSION 3.0)
 cmake_policy(SET CMP0020 OLD)
 
-set(QT_INCLUDE_DIR "F:/Qt/Qt5.8.0/5.8/mingw53_32/include" "C:/Qt/Qt5.8.0/5.8/mingw53_32/include")
-set(CMAKE_PREFIX_PATH "F:/Qt/Qt5.8.0/5.8/mingw53_32/lib/cmake" "C:/Qt/Qt5.8.0/5.8/mingw53_32/lib/cmake") 
+set(QT_INCLUDE_DIR "C:/Qt/Qt5.8.0/5.8/mingw53_32/include")
+set(CMAKE_PREFIX_PATH "C:/Qt/Qt5.8.0/5.8/mingw53_32/lib/cmake")
 
 set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
 

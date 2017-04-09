@@ -23,7 +23,7 @@ public:
 	 *
 	 * @return     Returns serialized string.
 	 */
-	std::string Serialize(int ID) const ;
+	std::string serialize(int ID) const ;
 
 	/**
 	 * @brief      Checks whether an item is valid, ie. contains invalid method name, empty nick or name 
@@ -31,15 +31,15 @@ public:
 	 *
 	 * @return     True if valid, False otherwise.
 	 */
-	int IsValid() const ;
+	int isValid() const ;
 
-	const MethodType &Method() const { return mMethodType;}
-	const QString &Name() const { return mName;}
-	const QString &Nick() const { return mNick;}
+	const MethodType &method() const { return m_methodType;}
+	const QString &name() const { return m_name;}
+	const QString &nick() const { return m_nick;}
 
 private:
-	MethodType mMethodType;
-	QString mName;
-	QString mNick;
+	MethodType m_methodType;
+	QString m_name;
+	QString m_nick;
 };
 }

@@ -18,20 +18,20 @@ TEST_CASE("Resolver - valid JSON syntax") {
 	Kyrys::Resolver r("c:\\__TEMP__\\");
 	QString jsonInput = "{\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jak\"}}";
 
-	int result = r.Parse( jsonInput, Mode::USE_JSON);
+	int result = r.parse( jsonInput, Mode::USE_JSON);
 	REQUIRE(result == Status::SUCCESS);
 }
 
 TEST_CASE("Resolver - save to file"){
 	Kyrys::Resolver r("c:\\__TEMP__\\");;
 	Random rnd;
-	QString randStr = rnd.GetRandomString(25);
+	QString randStr = rnd.getRandomString(25);
 
 	QString jsonInput = "{\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"";
 	jsonInput += randStr;
 	jsonInput += "\"}}";
 
-	int result = r.Parse( jsonInput, Mode::USE_JSON);
+	int result = r.parse( jsonInput, Mode::USE_JSON);
 
 	REQUIRE(result == Status::SUCCESS);
 
@@ -60,48 +60,48 @@ TEST_CASE("Resolver - save to file"){
 
 TEST_CASE("Resolver - invalid JSON syntax") {
 	Kyrys::Resolver r("c:\\__TEMP__\\");;
-	int result = r.Parse( "\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jak\"}}", Mode::USE_JSON);
+	int result = r.parse( "\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jak\"}}", Mode::USE_JSON);
 	REQUIRE(result == Status::INVALID_JSON);
 }
 
 TEST_CASE("Resolver - incorrect command") {
 	Kyrys::Resolver r("c:\\__TEMP__\\");;
-	int result = r.Parse( "{\"what\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jak\"}}", Mode::USE_JSON);
+	int result = r.parse( "{\"what\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jak\"}}", Mode::USE_JSON);
 	REQUIRE(result == Status::INVALID_CMND);
 }
 
 TEST_CASE("Resolver - unknown method") {
 	Kyrys::Resolver r("c:\\__TEMP__\\");;
-	int result = r.Parse( "{\"method\": \"reg\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jak\"}}", Mode::USE_JSON);
+	int result = r.parse( "{\"method\": \"reg\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jak\"}}", Mode::USE_JSON);
 	REQUIRE(result == Status::UNKNOWN_METHOD);
 }
 
 TEST_CASE("Resolver - unknown resolver mode") {
 	Kyrys::Resolver r("c:\\__TEMP__\\");;
-	int result = r.Parse( "{\"method\": \"reg\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jak\"}}", Mode::INVALID);
+	int result = r.parse( "{\"method\": \"reg\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jak\"}}", Mode::INVALID);
 	REQUIRE(result == Status::FAILED);
 }
 
 TEST_CASE("Resolver - invalid args") {
 	Kyrys::Resolver r("c:\\__TEMP__\\");;
-	int result = r.Parse( "{\"method\": \"register\",\"ars\": {\"name\": \"Jan Novak\",\"nick\": \"Jak\"}}", Mode::USE_JSON);
+	int result = r.parse( "{\"method\": \"register\",\"ars\": {\"name\": \"Jan Novak\",\"nick\": \"Jak\"}}", Mode::USE_JSON);
 	REQUIRE(result == Status::INVALID_CMND);
 }
 
 TEST_CASE("Resolver - invalid args 2") {
 	Kyrys::Resolver r("c:\\__TEMP__\\");;
-	int result = r.Parse( "{\"method\": \"register\",\"args\": {\"nae\": \"Jan Novak\",\"nick\": \"Jak\"}}", Mode::USE_JSON);
+	int result = r.parse( "{\"method\": \"register\",\"args\": {\"nae\": \"Jan Novak\",\"nick\": \"Jak\"}}", Mode::USE_JSON);
 	REQUIRE(result == Status::INVALID_CMND);
 }
 
 TEST_CASE("Resolver - invalid args 3") {
 	Kyrys::Resolver r("c:\\__TEMP__\\");;
-	int result = r.Parse( "{\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nic\": \"Jak\"}}", Mode::USE_JSON);
+	int result = r.parse( "{\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nic\": \"Jak\"}}", Mode::USE_JSON);
 	REQUIRE(result == Status::INVALID_CMND);
 }
 
 TEST_CASE("Resolver - invalid args 4") {
 	Kyrys::Resolver r("c:\\__TEMP__\\");;
-	int result = r.Parse( "{\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"\"}}", Mode::USE_JSON);
+	int result = r.parse( "{\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"\"}}", Mode::USE_JSON);
 	REQUIRE(result == Status::INVALID_CMND);
 }

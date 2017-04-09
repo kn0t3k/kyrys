@@ -15,9 +15,9 @@ TEST_CASE("Item constructor all valid") {
 
 	Item item(set);
 
-	REQUIRE(item.Name() == "Jan Novak");
-	REQUIRE(item.Nick() == "Jak");
-	REQUIRE(item.Method() == MethodType::REGISTER);
+	REQUIRE(item.name() == "Jan Novak");
+	REQUIRE(item.nick() == "Jak");
+	REQUIRE(item.method() == MethodType::REGISTER);
 }
 
 TEST_CASE("Item constructor - invalid method - getter test") {
@@ -27,9 +27,9 @@ TEST_CASE("Item constructor - invalid method - getter test") {
 
 	Item item(set);
 
-	REQUIRE(item.Name() == "Jan Novak");
-	REQUIRE(item.Nick() == "Jak");
-	REQUIRE(item.Method() == MethodType::UNKNOWN);
+	REQUIRE(item.name() == "Jan Novak");
+	REQUIRE(item.nick() == "Jak");
+	REQUIRE(item.method() == MethodType::UNKNOWN);
 }
 
 TEST_CASE("Item constructor - invalid command - getter test") {
@@ -39,9 +39,9 @@ TEST_CASE("Item constructor - invalid command - getter test") {
 
 	Item item(set);
 
-	REQUIRE(item.Name() == "Jan Novak");
-	REQUIRE(item.Nick() == "Jak");
-	REQUIRE(item.Method() == MethodType::INVALID_CMND);
+	REQUIRE(item.name() == "Jan Novak");
+	REQUIRE(item.nick() == "Jak");
+	REQUIRE(item.method() == MethodType::INVALID_CMND);
 }
 
 TEST_CASE("Item constructor - invalid command 2 - getter test") {
@@ -51,7 +51,7 @@ TEST_CASE("Item constructor - invalid command 2 - getter test") {
 
 	Item item(set);
 
-	REQUIRE(item.Method() == MethodType::INVALID_CMND);
+	REQUIRE(item.method() == MethodType::INVALID_CMND);
 }
 
 TEST_CASE("Item constructor - invalid command 3 - getter test") {
@@ -61,7 +61,7 @@ TEST_CASE("Item constructor - invalid command 3 - getter test") {
 
 	Item item(set);
 
-	REQUIRE(item.Name() == "Jan Novak");
+	REQUIRE(item.name() == "Jan Novak");
 }
 
 TEST_CASE("Item constructor - invalid command 4 - getter test") {
@@ -71,8 +71,8 @@ TEST_CASE("Item constructor - invalid command 4 - getter test") {
 
 	Item item(set);
 
-	REQUIRE(item.Nick() == "Jak");
-	REQUIRE(item.Name() == "");
+	REQUIRE(item.nick() == "Jak");
+	REQUIRE(item.name() == "");
 }
 
 TEST_CASE("Item - IsValid - incomplete") {
@@ -82,7 +82,7 @@ TEST_CASE("Item - IsValid - incomplete") {
 
 	Item item(set);
 
-	REQUIRE(item.IsValid() != Status::SUCCESS);
+	REQUIRE(item.isValid() != Status::SUCCESS);
 }
 
 TEST_CASE("Item - IsValid - args") {
@@ -92,7 +92,7 @@ TEST_CASE("Item - IsValid - args") {
 
 	Item item(set);
 
-	REQUIRE(item.IsValid() != Status::SUCCESS);
+	REQUIRE(item.isValid() != Status::SUCCESS);
 }
 
 TEST_CASE("Item - IsValid - invalid command") {
@@ -102,7 +102,7 @@ TEST_CASE("Item - IsValid - invalid command") {
 
 	Item item(set);
 
-	REQUIRE(item.IsValid() != Status::SUCCESS);
+	REQUIRE(item.isValid() != Status::SUCCESS);
 }
 
 TEST_CASE("Item - IsValid - method unknown") {
@@ -112,7 +112,7 @@ TEST_CASE("Item - IsValid - method unknown") {
 
 	Item item(set);
 
-	REQUIRE(item.IsValid() != Status::SUCCESS);
+	REQUIRE(item.isValid() != Status::SUCCESS);
 }
 
 TEST_CASE("Item - IsValid - invalid json syntax") {
@@ -122,5 +122,5 @@ TEST_CASE("Item - IsValid - invalid json syntax") {
 
 	Item item(set);
 
-	REQUIRE(item.IsValid() != Status::SUCCESS);
+	REQUIRE(item.isValid() != Status::SUCCESS);
 }

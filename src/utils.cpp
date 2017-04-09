@@ -3,19 +3,19 @@
 
 using Kyrys::Utils::Random;
 
-QString Random::possibleCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+QString Random::m_possibleCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 Random::Random() {
 	qsrand(mix(clock(), time(NULL), QTime::currentTime().msec()));
 }
 
-QString Random::GetRandomString(int randomStringLength) const {
+QString Random::getRandomString(int randomStringLength) const {
 	QString randomString;
 
 	for (int i = 0; i < randomStringLength; ++i) {
-		int index = qrand() % possibleCharacters.length();
+		int index = qrand() % m_possibleCharacters.length();
 
-		QChar nextChar = possibleCharacters.at(index);
+		QChar nextChar = m_possibleCharacters.at(index);
 		randomString.append(nextChar);
 	}
 	return randomString;

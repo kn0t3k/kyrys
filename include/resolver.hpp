@@ -24,12 +24,12 @@ public:
 	 *
 	 * @return     Return success if succeeded, fail otherwise.
 	 */
-	int Parse(const QString &data, Mode m);
+	int parse(const QString &data, Mode m);
 
 private:
-	int Execute(const Item &item);
-	int Register(const Item &item);
+	int execute(const Item &item);
+	int registerItem(const Item &item);
 
-	QString mPath;
+	QString m_path;
 };
 }

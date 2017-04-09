@@ -16,44 +16,44 @@ using Kyrys::Utils::Random;
 
 Item::Item(const QJsonObject &json) {
 	if (json["method"].toString().isEmpty()) {
-		this->mMethodType = MethodType::INVALID_CMND;
+		this->m_methodType = MethodType::INVALID_CMND;
 	} else if (json["method"].toString() == "register") {
-		this->mMethodType = MethodType::REGISTER;
+		this->m_methodType = MethodType::REGISTER;
 	} else if (json["method"].toString() == "call") {
-		this->mMethodType = MethodType::CALL;
+		this->m_methodType = MethodType::CALL;
 	} else {
-		this->mMethodType = MethodType::UNKNOWN;
+		this->m_methodType = MethodType::UNKNOWN;
 	}
 
 	QJsonObject obj = json["args"].toObject();
 
 	if (obj.empty()) {
-		this->mMethodType = MethodType::INVALID_CMND;
+		this->m_methodType = MethodType::INVALID_CMND;
 	}
 
-	this->mName = obj["name"].toString();
-	this->mNick = obj["nick"].toString();
+	this->m_name = obj["name"].toString();
+	this->m_nick = obj["nick"].toString();
 }
 
-std::string Item::Serialize(int ID) const {
+std::string Item::serialize(int ID) const {
 	std::string output = std::to_string(ID);
 
 	output += FORMAT_SEPARATOR;
-	output += mName.toStdString();
+	output += m_name.toStdString();
 	output += FORMAT_SEPARATOR;
-	output += mNick.toStdString();
+	output += m_nick.toStdString();
 	output += FORMAT_NEW_LINE;
 	return output;
 }
 
-int Item::IsValid() const {
-	if (mMethodType == MethodType::INVALID_CMND)
+int Item::isValid() const {
+	if (m_methodType == MethodType::INVALID_CMND)
 		return Status::INVALID_CMND;
-	if (mMethodType == MethodType::UNKNOWN)
+	if (m_methodType == MethodType::UNKNOWN)
 		return Status::UNKNOWN_METHOD;
 
-	if (mMethodType == MethodType::REGISTER) {
-		if (mName.isEmpty() || mNick.isEmpty()) {
+	if (m_methodType == MethodType::REGISTER) {
+		if (m_name.isEmpty() || m_nick.isEmpty()) {
 			return Status::INVALID_CMND;
 		}
 	}

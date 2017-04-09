@@ -8,21 +8,21 @@ using Kyrys::Enums::Item::MethodType;
 using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Item;
 
-Resolver::Resolver(const QString &path) : mPath(path) {
+Resolver::Resolver(const QString &path) : m_path(path) {
 
 }
 
-int Resolver::Execute(const Item &item) {
-	if (item.Method() == MethodType::REGISTER) {
-		return (this->Register(item));
-	} else if (item.Method() == MethodType::UNKNOWN) {
+int Resolver::execute(const Item &item) {
+	if (item.method() == MethodType::REGISTER) {
+		return (this->registerItem(item));
+	} else if (item.method() == MethodType::UNKNOWN) {
 		return Status::UNKNOWN_METHOD;
 	} else {
 		return Status::INVALID_CMND;
 	}
 }
 
-int Resolver::Parse(const QString &data, Mode m) {
+int Resolver::parse(const QString &data, Mode m) {
 	if (m == Mode::USE_JSON) {
 		// input data is JSON string
 		// parse this string
@@ -35,19 +35,19 @@ int Resolver::Parse(const QString &data, Mode m) {
 
 		Item item(object);
 
-		return this->Execute(item);
+		return this->execute(item);
 	} else {
 		return Status::FAILED;
 	}
 }
 
-int Resolver::Register(const Item &item) {
-	int s = item.IsValid();
+int Resolver::registerItem(const Item &item) {
+	int s = item.isValid();
 	if (s != Status::SUCCESS) {
 		return s;
 	}
 
-	QFile filePath(mPath + "/db.txt");
+	QFile filePath(m_path + "/db.txt");
 	if (filePath.open(QIODevice::ReadOnly)) {
 		QTextStream fileStream(&filePath);
 		int ID = 0;
@@ -59,7 +59,7 @@ int Resolver::Register(const Item &item) {
 		filePath.close();
 
 		if (filePath.open(QIODevice::WriteOnly | QIODevice::Append)) {
-			filePath.write(item.Serialize(ID).c_str());
+			filePath.write(item.serialize(ID).c_str());
 			filePath.close();
 			return Status::SUCCESS;
 		} else {

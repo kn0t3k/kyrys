@@ -5,13 +5,13 @@ using Kyrys::Server;
 using Kyrys::Enums::Resolver::Mode;
 
 
-Server::Server(unsigned port, QObject *parent) : QObject(parent), mResolver("") {
-    mServer = new QTcpServer(parent);
-    connect(mServer, SIGNAL(newConnection()), this, SLOT(newConnection()));
+Server::Server(unsigned port, QObject *parent) : QObject(parent), m_resolver("C:\\__TEMP__\\") {
+    m_server = new QTcpServer(parent);
+    connect(m_server, SIGNAL(newConnection()), this, SLOT(newConnection()));
 
-    if (!mServer->listen(QHostAddress::Any, port)) {
+    if (!m_server->listen(QHostAddress::Any, port)) {
         std::cerr << "server could not start" << std::endl;
-        delete mServer;
+        delete m_server;
     } else {
         qDebug() << "server started at: " << port;
     }
@@ -19,7 +19,7 @@ Server::Server(unsigned port, QObject *parent) : QObject(parent), mResolver("") 
 
 void Server::newConnection() {
     qDebug() << "new connection";
-    QTcpSocket *socket = mServer->nextPendingConnection();
+    QTcpSocket *socket = m_server->nextPendingConnection();
 
     // receive data from client
 

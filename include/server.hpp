@@ -18,7 +18,7 @@ public slots:
 	void newConnection();
 
 private:
-	QTcpServer *mServer;
-	Resolver mResolver;
+	QTcpServer *m_server;
+	Resolver m_resolver;
 };
 }

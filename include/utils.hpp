@@ -16,10 +16,10 @@ public:
 	 *
 	 * @return     The random string.
 	 */
-	QString GetRandomString(int randomStringLen = 10) const;
+	QString getRandomString(int randomStringLen = 10) const;
 
 private:
-	static QString possibleCharacters;
+	static QString m_possibleCharacters;
 
 	unsigned long mix(unsigned long a, unsigned long b, unsigned long c) ;
 };

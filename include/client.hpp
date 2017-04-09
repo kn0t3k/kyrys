@@ -16,6 +16,8 @@ private:
 public:
 	explicit Client(const QString &hostName, unsigned port, QObject *parent = 0);
 
+	const User &getUser() const;
+
 	int loadRegistrationCredentials(string &nickname, string &password, std::istream &in = std::cin);
 
 	int loadLoginCredentials(string &nickname, string &password, std::istream &in = std::cin);

@@ -6,6 +6,7 @@
 using Kyrys::Client;
 using Kyrys::Enums::JsonMessage::MessageType;
 
+//Constructors
 Client::Client(const QString &hostName, unsigned port, QObject *parent) : QObject(parent), m_user() {
 	QString data;
 	m_socket.connectToHost(hostName, port); //warning: connectToHost expects port as quint16 type
@@ -16,22 +17,29 @@ Client::Client(const QString &hostName, unsigned port, QObject *parent) : QObjec
 	qDebug() << buffer;
 }
 
+//Getters
+const Client::User &Client::getUser() const { return m_user; }
+
 int Client::loadRegistrationCredentials(std::string &nickname, std::string &password, std::istream &in) {
 	std::cout << "Choose nickname: ";
-	std::getline(std::cin, nickname);
+	std::getline(in, nickname);
 
-	std::string buffer;
+	std::string passwordBuffer1;
+	std::string passwordBuffer2;
+
 	for (int i = 0; i < 5; ++i) { //User has 5 tries to type password correctly twice in a row
 		std::cout << "\nChoose password: ";
-		std::getline(std::cin, password);
+		std::getline(in, passwordBuffer1);
 		std::cout << "\nRepeat the password:";
-		std::getline(std::cin, buffer);
-		if (password != buffer) {
+		std::getline(in, passwordBuffer2);
+		if (passwordBuffer1 != passwordBuffer2) {
 			std::cout << "Passwords are not same!, please try it again" << std::endl;
-			password.clear();
-			buffer.clear();
+			passwordBuffer1.clear();
+			passwordBuffer2.clear();
 		} else {
-			buffer.clear(); //security precaution
+			password = passwordBuffer1;
+			passwordBuffer1.clear(); //security precautions
+			passwordBuffer2.clear();
 			return 0;
 		}
 	}
@@ -70,9 +78,9 @@ int Client::registration(std::istream &in) {
 
 int Client::loadLoginCredentials(std::string &nickname, std::string &password, std::istream &in) {
 	std::cout << "Nickname: ";
-	std::getline(std::cin, nickname);
+	std::getline(in, nickname);
 	std::cout << "\nPassword: ";
-	std::getline(std::cin, password);
+	std::getline(in, password);
 	return 0;
 }
 
@@ -123,4 +131,5 @@ QJsonDocument Client::jsonMessageUserAuthentication(MessageType messageType) {
 	return QJsonDocument(root_obj); //niesom si isty co to urobi s tym zanorenym Qjsonobject
 									//snad to rekursivne prechadza celu strukturu
 }
+
 

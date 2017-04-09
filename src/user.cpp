@@ -3,7 +3,7 @@
 
 using Kyrys::User;
 
-//User class: Constructors/Getters/Setters
+//Constructors
 User::User(const std::string &nickname, const QByteArray &passwordHash, QCryptographicHash::Algorithm usedHashAlgorithm) : m_nickname(nickname), m_passwordHash(passwordHash), m_usedHashAlgorithm(usedHashAlgorithm) {}
 
 //Getters
@@ -14,5 +14,3 @@ QCryptographicHash::Algorithm User::getUsedHashAlgorithm() const { return m_used
 //Setters
 void User::setNickname(const std::string &m_nickname) 		 { User::m_nickname = m_nickname; }
 void User::setPasswordHash(const QByteArray &m_passwordHash) { User::m_passwordHash = m_passwordHash; }
-
-

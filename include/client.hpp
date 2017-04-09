@@ -1,6 +1,7 @@
 #pragma once
 #include <reference.hpp>
 #include <user.hpp>
+#include <istream>
 
 namespace Kyrys {
 	//typedef Kyrys::User User; //toto nepouzivaj globalne, trvalo mi pol dna zistit preco mam zablokovanu triedu User
@@ -12,9 +13,9 @@ namespace Kyrys {
 	public:
 		explicit Client(const QString &hostName, unsigned port, QObject *parent = 0);
 
-		int loadRegistrationCredentials(std::string &nickname, std::string &password);
+		int loadRegistrationCredentials(std::string &nickname, std::string &password, std::istream &in = std::cin);
 
-		int loadLoginCredentials(std::string &nickname, std::string &password);
+		int loadLoginCredentials(std::string &nickname, std::string &password, std::istream &in = std::cin);
 
 		/**
 		 * @brief 	 Registration of new user
@@ -22,13 +23,13 @@ namespace Kyrys {
 		 * @return	 0 in case of succesfull registration, non-zero code otherwise
 		 * 			 code 1 = user was not able to type same password twice at least one time
 		 */
-		int registration(); //not finished yet
+		int registration(std::istream &in = std::cin); //not finished yet
 
 		/**
 		 * @brief  Login of registered user
 		 * @return Same as registration
 		 */
-		int login(); //not finished yet
+		int login(std::istream &in = std::cin); //not finished yet
 
 
 		/**
@@ -36,12 +37,30 @@ namespace Kyrys {
 		 * @param messageType	write MessageType::LOGIN_CALL in case of login
 		 * 							  MessageType::REGISTER_CALL otherwise
 		 * @return message in format QJsonDocument
-		 * @note   message format:
+		 * @note   message format examples:
+		 * 		   EXAMPLE 1:
 		 * 		   {
-    				"method": "register",
-    				"nickname": "some nick",
-    				"password": "hash of password"
+		 * 		   		"messageType": "REGISTER_REQUEST",
+    					"method": "register",
+    					"args" : {
+    						"nickname": "nickname of user",
+    						"password": "hash of user's password",
+    						"hash algorithm": "sha3_512",
+				   		}
 				   }
+
+				   EXAMPLE 2:
+				   {
+		 		   		"messageType": "LOGIN_REQUEST",
+    					"method": "login",
+    					"args" : {
+    						"nickname": "nickname of user",
+    						"password": "hash of user's password"
+    						"hash algorithm": "sha3_512",
+				   		}
+				   }
+
+
 		 */
 		QJsonDocument jsonMessageUserAuthentication(Kyrys::Enums::JsonMessage::MessageType messageType);
 	};

@@ -16,7 +16,7 @@ Client::Client(const QString &hostName, unsigned port, QObject *parent) : QObjec
 	qDebug() << buffer;
 }
 
-int Client::loadRegistrationCredentials(std::string& nickname, std::string& password) {
+int Client::loadRegistrationCredentials(std::string &nickname, std::string &password, std::istream &in) {
 	std::cout << "Choose nickname: ";
 	std::getline(std::cin, nickname);
 
@@ -38,27 +38,28 @@ int Client::loadRegistrationCredentials(std::string& nickname, std::string& pass
 	return 1;
 }
 
-int Client::registration() {
+int Client::registration(std::istream &in) {
 	using Kyrys::Enums::Client::Registration::Status;
 	Status status = Status::REGISTRATION_STARTED;
+	QCryptographicHash::Algorithm usedHashAlgorithm = QCryptographicHash::Sha3_512;
 
 	std::cout << "Now follows registration procedure" << std::endl;
 
 	std::string nickname;
 	std::string password;
 
-	if (!loadRegistrationCredentials(nickname, password)) {
+	if (!loadRegistrationCredentials(nickname, password, in)) {
 		std::cout << "Registration failed. Check help page and try it again" << std::endl;
 		return status = Status::BAD_PASSWORD;
 	} else {
 		status = Status::CREDENTIALS_LOADED;
 	}
 
-	const QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), QCryptographicHash::Sha3_512);
-	m_user = User(nickname, hashed_password);
+	const QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), usedHashAlgorithm);
+	m_user = User(nickname, hashed_password, usedHashAlgorithm);
 	status = Status::PASSWORD_HASHED;
 
-	QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::REGISTER); //this is message for server
+	QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::REGISTER_REQUEST); //this is message for server
 
 	//todo: call server with json message and end with 0 after server answers that registration is succesfully finished on his side
 	//I expect something like jsonMessageUserAuthentication -> Socket -> Server
@@ -67,7 +68,7 @@ int Client::registration() {
 	return status = Status::SUCCESS;
 }
 
-int Client::loadLoginCredentials(std::string &nickname, std::string &password) {
+int Client::loadLoginCredentials(std::string &nickname, std::string &password, std::istream &in) {
 	std::cout << "Nickname: ";
 	std::getline(std::cin, nickname);
 	std::cout << "\nPassword: ";
@@ -75,20 +76,21 @@ int Client::loadLoginCredentials(std::string &nickname, std::string &password) {
 	return 0;
 }
 
-int Client::login () {
+int Client::login (std::istream &in) {
 	using Kyrys::Enums::Client::Login::Status;
 	Status status = Status::LOGIN_STARTED;
 	std::string nickname, password;
+	QCryptographicHash::Algorithm usedHashAlgorithm = QCryptographicHash::Sha3_512;
 
 	for (int i = 0; i < 5; ++i) {
-		loadLoginCredentials(nickname, password);
+		loadLoginCredentials(nickname, password, in);
 		status = Status::CREDENTIALS_LOADED;
 
-		const QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), QCryptographicHash::Sha3_512);
-		m_user = User(nickname, hashed_password);
+		const QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), usedHashAlgorithm);
+		m_user = User(nickname, hashed_password, usedHashAlgorithm);
 		status = Status::PASSWORD_HASHED;
 
-		QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::LOGIN); //this is message for server
+		QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::LOGIN_REQUEST); //this is message for server
 
 		//TODO - contact server with JSON message obtaining hash of logging in user
 	}
@@ -97,26 +99,28 @@ int Client::login () {
 }
 
 QJsonDocument Client::jsonMessageUserAuthentication(MessageType messageType) {
-	QJsonObject jsonObject;
-	QString key = "method";
+	QJsonObject args_obj;
+	QJsonObject root_obj;
+	QString key;
 	QString value;
-	if (messageType == MessageType::REGISTER) {
-		value = "register";
+	if (messageType == MessageType::REGISTER_REQUEST) {
+		root_obj["messageType"] = "REGISTER_REQUEST";
+		root_obj["method"] = "register";
 	} else {
-		value = "login";
-	} // missing else
+		root_obj["messageType"] = "LOGIN_REQUEST";
+		root_obj["method"] = "login";
+	} // missing else //what you mean? Look 3 lines upper
 
-	jsonObject.insert(key, value);
+	args_obj["nickname"] = QString::fromStdString(m_user.getNickname());
+	args_obj["password"] = m_user.getPasswordHash().toStdString().c_str();
+	args_obj["hash algorithm"] = m_user.getUsedHashAlgorithm();
 
-	key = "nickname";
-	value = QString::fromStdString(m_user.getNickname());
-	jsonObject.insert(key, value);
+	root_obj.insert("args", args_obj);
 
-	key = "password";
-	jsonObject.insert(key, m_user.getPasswordHash().toStdString().c_str());
 	// todo add - salt of random values at the end of JSON message
 	//		    - ID of message (maybe)
 
-	return QJsonDocument(jsonObject);
+	return QJsonDocument(root_obj); //niesom si isty co to urobi s tym zanorenym Qjsonobject
+									//snad to rekursivne prechadza celu strukturu
 }
 

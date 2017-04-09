@@ -18,14 +18,14 @@ namespace Kyrys {
 				INVALID
 			};
 		}
-		namespace Client { //todo vymysli stavy
+		namespace Client {
 			namespace Registration{
 				enum Status {
 					SUCCESS = 0,	   		//Registration process was finished succesfully
 					REGISTRATION_STARTED, 	//Registration has started
 					BAD_PASSWORD,	   	  	//User didn't repeat password correctly
 					CREDENTIALS_LOADED,   	//User wrote nick and password correctly
-					PASSWORD_HASHED,			//Password was succesfully hashed
+					PASSWORD_HASHED,		//Password was succesfully hashed
 					MODIFIED_NICKNAME,    	//User wrote nickname which is already registered, so server changed it to similar and unique form
 					SERVER_ERROR	   		//Uknown error on server's side
 				};
@@ -60,10 +60,16 @@ namespace Kyrys {
 		}
 		namespace JsonMessage {
 			enum MessageType {
-				REGISTER,
-				LOGIN,
+				REGISTER_REQUEST,
 				REGISTER_RESPONSE,
+				LOGIN_REQUEST,
 				LOGIN_RESPONSE
+			};
+		}
+		namespace User {
+			enum SocketType{ //This enum describes which type of socket will be used by User
+				SSL,
+				NO_SSL
 			};
 		}
 	}

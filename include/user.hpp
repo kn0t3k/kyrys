@@ -19,7 +19,6 @@ namespace Kyrys {
 		/*todo
 		 * pridaj atributy: ID uzivatela take ake ma pridelene v databaze serveru,
 		 * 					sucasna IP adresa clienta
-		 * 					pouzivana hashovacia metoda (neviem este ci si ju bude treba poznamenat)
 		 * 					typ socketu aky bude pouzivat user pocas komunikacie
 		 */
 

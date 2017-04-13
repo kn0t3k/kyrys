@@ -25,8 +25,7 @@ namespace Kyrys {
 	public:
 		//Constructors
 		User() = default;
-		User(const std::string &nickname, const QByteArray &passwordHash,
-			 QCryptographicHash::Algorithm usedHashAlgorithm);
+		User(const std::string &nickname, const QByteArray &passwordHash, QCryptographicHash::Algorithm usedHashAlgorithm);
 
 		//Getters
 		const std::string &getNickname() const;

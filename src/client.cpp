@@ -6,6 +6,9 @@
 using Kyrys::Client;
 using Kyrys::Enums::JsonMessage::MessageType;
 
+typedef Kyrys::Enums::Client::Login::Status 	   loginStatus;
+typedef Kyrys::Enums::Client::Registration::Status registrationStatus;
+
 //Constructors
 Client::Client(const QString &hostName, unsigned port, QObject *parent) : QObject(parent), m_user() {
 	QString data;
@@ -21,8 +24,9 @@ Client::Client(const QString &hostName, unsigned port, QObject *parent) : QObjec
 const Client::User &Client::getUser() const { return m_user; }
 
 int Client::loadRegistrationCredentials(std::string &nickname, std::string &password, std::istream &in) {
+	std::string nicknameBuffer;
 	std::cout << "Choose nickname: ";
-	std::getline(in, nickname);
+	std::getline(in, nicknameBuffer);
 
 	std::string passwordBuffer1;
 	std::string passwordBuffer2;
@@ -37,18 +41,18 @@ int Client::loadRegistrationCredentials(std::string &nickname, std::string &pass
 			passwordBuffer1.clear();
 			passwordBuffer2.clear();
 		} else {
+			nickname = nicknameBuffer;
 			password = passwordBuffer1;
 			passwordBuffer1.clear(); //security precautions
 			passwordBuffer2.clear();
-			return 0;
+			return registrationStatus::SUCCESS;
 		}
 	}
-	return 1;
+	return registrationStatus::BAD_PASSWORD;
 }
 
 int Client::registration(std::istream &in) {
-	using Kyrys::Enums::Client::Registration::Status;
-	Status status = Status::REGISTRATION_STARTED;
+	registrationStatus status = registrationStatus::REGISTRATION_STARTED;
 	QCryptographicHash::Algorithm usedHashAlgorithm = QCryptographicHash::Sha3_512;
 
 	std::cout << "Now follows registration procedure" << std::endl;
@@ -56,16 +60,16 @@ int Client::registration(std::istream &in) {
 	std::string nickname;
 	std::string password;
 
-	if (!loadRegistrationCredentials(nickname, password, in)) {
+	if (loadRegistrationCredentials(nickname, password, in) == registrationStatus::BAD_PASSWORD) {
 		std::cout << "Registration failed. Check help page and try it again" << std::endl;
-		return status = Status::BAD_PASSWORD;
+		return status = registrationStatus::BAD_PASSWORD;
 	} else {
-		status = Status::CREDENTIALS_LOADED;
+		status = registrationStatus::CREDENTIALS_LOADED;
 	}
 
 	const QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), usedHashAlgorithm);
 	m_user = User(nickname, hashed_password, usedHashAlgorithm);
-	status = Status::PASSWORD_HASHED;
+	status = registrationStatus::PASSWORD_HASHED;
 
 	QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::REGISTER_REQUEST); //this is message for server
 
@@ -73,7 +77,7 @@ int Client::registration(std::istream &in) {
 	//I expect something like jsonMessageUserAuthentication -> Socket -> Server
 	//Server -> Socket -> jsonMessageRegisterResponse(OK / not OK)
 
-	return status = Status::SUCCESS;
+	return status = registrationStatus::SUCCESS;
 }
 
 int Client::loadLoginCredentials(std::string &nickname, std::string &password, std::istream &in) {
@@ -90,18 +94,19 @@ int Client::login (std::istream &in) {
 	std::string nickname, password;
 	QCryptographicHash::Algorithm usedHashAlgorithm = QCryptographicHash::Sha3_512;
 
-	for (int i = 0; i < 5; ++i) {
-		loadLoginCredentials(nickname, password, in);
-		status = Status::CREDENTIALS_LOADED;
+	//cyclus begin
+	loadLoginCredentials(nickname, password, in);
+	status = Status::CREDENTIALS_LOADED;
 
-		const QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), usedHashAlgorithm);
-		m_user = User(nickname, hashed_password, usedHashAlgorithm);
-		status = Status::PASSWORD_HASHED;
+	QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), usedHashAlgorithm);
+	m_user = User(nickname, hashed_password, usedHashAlgorithm);
+	hashed_password.clear();
+	status = Status::PASSWORD_HASHED;
 
-		QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::LOGIN_REQUEST); //this is message for server
+	QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::LOGIN_REQUEST); //this is message for server
+	//cyclus end
 
-		//TODO - contact server with JSON message obtaining hash of logging in user
-	}
+	//TODO - contact server with JSON message obtaining hash of logging in user
 
 	return status = Status::SUCCESS;
 }
@@ -117,7 +122,7 @@ QJsonDocument Client::jsonMessageUserAuthentication(MessageType messageType) {
 	} else {
 		root_obj["messageType"] = "LOGIN_REQUEST";
 		root_obj["method"] = "login";
-	} // missing else //what you mean? Look 3 lines upper
+	}
 
 	args_obj["nickname"] = QString::fromStdString(m_user.getNickname());
 	args_obj["password"] = m_user.getPasswordHash().toStdString().c_str();
@@ -128,8 +133,7 @@ QJsonDocument Client::jsonMessageUserAuthentication(MessageType messageType) {
 	// todo add - salt of random values at the end of JSON message
 	//		    - ID of message (maybe)
 
-	return QJsonDocument(root_obj); //niesom si isty co to urobi s tym zanorenym Qjsonobject
-									//snad to rekursivne prechadza celu strukturu
+	return QJsonDocument(root_obj);
 }
 
 

@@ -6,8 +6,9 @@
 using Kyrys::Client;
 using Kyrys::Enums::JsonMessage::MessageType;
 
-typedef Kyrys::Enums::Client::Login::Status 	   loginStatus;
-typedef Kyrys::Enums::Client::Registration::Status registrationStatus;
+typedef Kyrys::Enums::Client::Login::Status 	   				loginStatus;
+typedef Kyrys::Enums::Client::Registration::Status 				registrationStatus;
+typedef Kyrys::Enums::Client::Registration::PasswordSecQuality 	passwordQuality;
 
 //Constructors
 Client::Client(const QString &hostName, unsigned port, QObject *parent) : QObject(parent), m_user() {
@@ -34,21 +35,43 @@ int Client::loadRegistrationCredentials(std::string &nickname, std::string &pass
 	for (int i = 0; i < 5; ++i) { //User has 5 tries to type password correctly twice in a row
 		std::cout << "\nChoose password: ";
 		std::getline(in, passwordBuffer1);
-		std::cout << "\nRepeat the password:";
-		std::getline(in, passwordBuffer2);
-		if (passwordBuffer1 != passwordBuffer2) {
-			std::cout << "Passwords are not same!, please try it again" << std::endl;
+		if(controlPasswordSecQuality(passwordBuffer1) != passwordQuality::GOOD) {
+			std::cout << "\nPassword is too short\nChoose password at least 8 characters long!" << std::endl;
 			passwordBuffer1.clear();
-			passwordBuffer2.clear();
+			continue;
 		} else {
-			nickname = nicknameBuffer;
-			password = passwordBuffer1;
-			passwordBuffer1.clear(); //security precautions
-			passwordBuffer2.clear();
-			return registrationStatus::SUCCESS;
+			std::cout << "\nRepeat the password:";
+			std::getline(in, passwordBuffer2);
+			if (passwordBuffer1 != passwordBuffer2) {
+				std::cout << "Passwords are not same!, please try it again" << std::endl;
+				passwordBuffer1.clear();
+				passwordBuffer2.clear();
+				continue;
+			} else {
+				nickname = nicknameBuffer;
+				password = passwordBuffer1;
+				passwordBuffer1.clear(); //security precautions
+				passwordBuffer2.clear();
+				return registrationStatus::SUCCESS;
+			}
 		}
 	}
 	return registrationStatus::BAD_PASSWORD;
+}
+
+int Client::loadLoginCredentials(std::string &nickname, std::string &password, std::istream &in) {
+	std::cout << "Nickname: ";
+	std::getline(in, nickname);
+	std::cout << "\nPassword: ";
+	std::getline(in, password);
+	return 0;
+}
+
+int Client::controlPasswordSecQuality(const std::string& password) const {
+	if(password.length() > 8)
+		return passwordQuality::GOOD;
+	else
+		return passwordQuality::TOO_SHORT;
 }
 
 int Client::registration(std::istream &in) {
@@ -78,14 +101,6 @@ int Client::registration(std::istream &in) {
 	//Server -> Socket -> jsonMessageRegisterResponse(OK / not OK)
 
 	return status = registrationStatus::SUCCESS;
-}
-
-int Client::loadLoginCredentials(std::string &nickname, std::string &password, std::istream &in) {
-	std::cout << "Nickname: ";
-	std::getline(in, nickname);
-	std::cout << "\nPassword: ";
-	std::getline(in, password);
-	return 0;
 }
 
 int Client::login (std::istream &in) {
@@ -136,4 +151,11 @@ QJsonDocument Client::jsonMessageUserAuthentication(MessageType messageType) {
 	return QJsonDocument(root_obj);
 }
 
+void Client::run(std::istream& in){
+	std::string command;
+	do{
+		std::getline(in, command);
+
+	}while(command != "quit");
+}
 

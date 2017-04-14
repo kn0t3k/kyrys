@@ -56,25 +56,40 @@ TEST_CASE("Client - LoadRegistrationCredentials - successfull registration"){
 	string passwordControl = "random password";
 	string nicknameBuffer;
 	string passwordBuffer;
-
-	in.str(nicknameControl + "\n" + passwordControl + "\n" + passwordControl + "\n");
-
+	string badPassword	   = "bad password";
+	string password8charslong = "88888888";
 	Client client("localhost", 12345);
+
+	//Test of same password after 1th try
+	in.str(nicknameControl + "\n" + passwordControl + "\n" + passwordControl + "\n");
 	int returnValue = client.loadRegistrationCredentials(nicknameBuffer, passwordBuffer, in);
+
 	REQUIRE(returnValue == registrationStatus::SUCCESS);
 	REQUIRE(nicknameControl == nicknameBuffer);
 	REQUIRE(passwordControl == passwordBuffer);
 
-	string badPassword	   = "bad password";
+	nicknameBuffer.clear();
+	passwordBuffer.clear();
+
+	//Test of same password on last try
 	in.str(nicknameControl + "\n" + passwordControl + "\n" + badPassword + "\n"
 		  						  + passwordControl + "\n" + badPassword + "\n"
 		                          + passwordControl + "\n" + badPassword + "\n"
 		                          + passwordControl + "\n" + badPassword + "\n"
 		                          + passwordControl + "\n" + passwordControl + "\n");
 
+	returnValue = client.loadRegistrationCredentials(nicknameBuffer, passwordBuffer, in);
+	REQUIRE(returnValue == registrationStatus::SUCCESS);
+	REQUIRE(nicknameControl == nicknameBuffer);
+	REQUIRE(passwordControl == passwordBuffer);
+
 	nicknameBuffer.clear();
 	passwordBuffer.clear();
+
+	//Test of same password with minimum length 8 chars
+	in.str(nicknameControl + "\n" + password8charslong + "\n" + password8charslong + "\n");
 	returnValue = client.loadRegistrationCredentials(nicknameBuffer, passwordBuffer, in);
+
 	REQUIRE(returnValue == registrationStatus::SUCCESS);
 	REQUIRE(nicknameControl == nicknameBuffer);
 	REQUIRE(passwordControl == passwordBuffer);
@@ -90,22 +105,39 @@ TEST_CASE("Client - LoadRegistrationCredentials - failed registration"){
 	string nicknameControl = "random nickname";
 	string passwordControl = "random password";
 	string badPassword	   = "bad password";
+	string password7charslong = "777|777";
 	string nicknameBuffer;
 	string passwordBuffer;
+	Client client("localhost", 12345);
 
+	//Test of different passwords
 	in.str(nicknameControl + "\n" + passwordControl + "\n" + badPassword + "\n"
 		                          + passwordControl + "\n" + badPassword + "\n"
 		                          + passwordControl + "\n" + badPassword + "\n"
 		                          + passwordControl + "\n" + badPassword + "\n"
 		                          + passwordControl + "\n" + badPassword + "\n");
 
-	Client client("localhost", 12345);
 	int returnValue = client.loadRegistrationCredentials(nicknameBuffer, passwordBuffer, in);
 	REQUIRE(returnValue == registrationStatus::BAD_PASSWORD);
 	REQUIRE(nicknameControl != nicknameBuffer);
-	REQUIRE(nicknameBuffer.empty() == true);
+	REQUIRE(nicknameBuffer.empty());
 	REQUIRE(passwordControl != passwordBuffer);
-	REQUIRE(passwordBuffer.empty() == true);
+	REQUIRE(passwordBuffer.empty());
+
+	nicknameBuffer.clear();
+	passwordBuffer.clear();
+
+	//Test of too short password
+	in.str(password7charslong + "\n" +
+		   password7charslong + "\n" +
+		   password7charslong + "\n" +
+		   password7charslong + "\n" +
+		   password7charslong + "\n");
+
+	returnValue = client.loadRegistrationCredentials(nicknameBuffer, passwordBuffer, in);
+	REQUIRE(returnValue == registrationStatus::BAD_PASSWORD);
+	REQUIRE(nicknameBuffer.empty());
+	REQUIRE(passwordBuffer.empty());
 
 	cout << "\n\n" << endl;
 }

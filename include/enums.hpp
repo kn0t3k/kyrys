@@ -29,6 +29,10 @@ namespace Kyrys {
 					MODIFIED_NICKNAME,    	//User wrote nickname which is already registered, so server changed it to similar and unique form
 					SERVER_ERROR	   		//Uknown error on server's side
 				};
+				enum PasswordSecQuality {
+					GOOD = 0,
+					TOO_SHORT
+				};
 			}	
 			namespace Login{
 				enum Status{

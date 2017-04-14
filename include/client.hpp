@@ -19,8 +19,8 @@ public:
 	const User &getUser() const;
 
 	int loadRegistrationCredentials(string &nickname, string &password, std::istream &in = std::cin);
-
 	int loadLoginCredentials(string &nickname, string &password, std::istream &in = std::cin);
+	int controlPasswordSecQuality(const string& password) const;
 
 	/**
 	 * @brief 	 Registration of new user
@@ -43,7 +43,7 @@ public:
 	 * 							  MessageType::REGISTER_CALL otherwise
 	 * @return message in format QJsonDocument
 	 * @note   message format examples:
-	 * 		   EXAMPLE 1:
+	 * 		   EXAMPLE 1 - Registration:
 	 * 		   {
 	 * 		   		"messageType": "REGISTER_REQUEST",
 					"method": "register",
@@ -54,7 +54,7 @@ public:
 			   		}
 			   }
 
-			   EXAMPLE 2:
+			   EXAMPLE 2 - login:
 			   {
 	 		   		"messageType": "LOGIN_REQUEST",
 					"method": "login",
@@ -62,11 +62,31 @@ public:
 						"nickname": "nickname of user",
 						"password": "hash of user's password"
 						"hash algorithm": "sha3_512",
+						"required socket": "SSL" or "TCP" //not implemented
 			   		}
 			   }
-
-
+		@note po registracii by bolo dobre vyzadovat login ktory posle serveru dalsie informacie
 	 */
 	QJsonDocument jsonMessageUserAuthentication(MessageType messageType);
+
+
+	/**
+	 EXAMPLE:
+	{
+	 	"messageType": "UPDATE_REQUEST",
+	 	"method": "update",
+	 	"args" : {
+			"IP adress": "IPv4 adress",
+			"Port": "quint16 type"
+		}
+	}
+	 */
+	//QJsonDocument jsonMessageUserUpdate(MessageType messageType);
+
+	/**
+	 * @brief run	It's a method executing commands from Client commandline.
+	 * @param in 	In is parameter for pushing fake input instead of standard input from std::cin. Use this param for testing purpose. Default value is std::cin
+	 */
+	void run(std::istream& in = std::cin);
 };
 }

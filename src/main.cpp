@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 			return a.exec();
 		} else {
 			Kyrys::Client client("localhost", defaultPort);
-			//client.run(); //todo implement run
+			client.run(); //todo implement run
 			return a.exec();
 		}
 	} else {

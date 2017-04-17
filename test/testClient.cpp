@@ -20,8 +20,8 @@ using std::istringstream;
 using std::endl;
 using std::cout;
 
-typedef Kyrys::Enums::Client::Login::Status 	   loginStatus;
-typedef Kyrys::Enums::Client::Registration::Status registrationStatus;
+typedef Kyrys::Enums::Client::Login::Status 	   lStatus;
+typedef Kyrys::Enums::Client::Registration::Status rStatus;
 typedef Kyrys::Enums::JsonMessage::MessageType MessageType;
 
 
@@ -40,7 +40,7 @@ TEST_CASE("Client - loadLoginCredentials - automatic istream demonstration"){
 
 	Client client("localhost", 12345);
 	int returnValue = client.loadLoginCredentials(nicknameBuffer, passwordBuffer, in);
-	REQUIRE(returnValue == loginStatus::SUCCESS);
+	REQUIRE(returnValue == lStatus::SUCCESS);
 	REQUIRE(nicknameControl == nicknameBuffer);
 	REQUIRE(passwordControl == passwordBuffer);
 
@@ -64,7 +64,7 @@ TEST_CASE("Client - LoadRegistrationCredentials - successfull registration"){
 	in.str(nicknameControl + "\n" + passwordControl + "\n" + passwordControl + "\n");
 	int returnValue = client.loadRegistrationCredentials(nicknameBuffer, passwordBuffer, in);
 
-	REQUIRE(returnValue == registrationStatus::SUCCESS);
+	REQUIRE(returnValue == rStatus::SUCCESS);
 	REQUIRE(nicknameControl == nicknameBuffer);
 	REQUIRE(passwordControl == passwordBuffer);
 
@@ -79,7 +79,7 @@ TEST_CASE("Client - LoadRegistrationCredentials - successfull registration"){
 		                          + passwordControl + "\n" + passwordControl + "\n");
 
 	returnValue = client.loadRegistrationCredentials(nicknameBuffer, passwordBuffer, in);
-	REQUIRE(returnValue == registrationStatus::SUCCESS);
+	REQUIRE(returnValue == rStatus::SUCCESS);
 	REQUIRE(nicknameControl == nicknameBuffer);
 	REQUIRE(passwordControl == passwordBuffer);
 
@@ -90,7 +90,7 @@ TEST_CASE("Client - LoadRegistrationCredentials - successfull registration"){
 	in.str(nicknameControl + "\n" + password8charslong + "\n" + password8charslong + "\n");
 	returnValue = client.loadRegistrationCredentials(nicknameBuffer, passwordBuffer, in);
 
-	REQUIRE(returnValue == registrationStatus::SUCCESS);
+	REQUIRE(returnValue == rStatus::SUCCESS);
 	REQUIRE(nicknameControl == nicknameBuffer);
 	REQUIRE(passwordControl == passwordBuffer);
 
@@ -118,7 +118,7 @@ TEST_CASE("Client - LoadRegistrationCredentials - failed registration"){
 		                          + passwordControl + "\n" + badPassword + "\n");
 
 	int returnValue = client.loadRegistrationCredentials(nicknameBuffer, passwordBuffer, in);
-	REQUIRE(returnValue == registrationStatus::BAD_PASSWORD);
+	REQUIRE(returnValue == rStatus::BAD_PASSWORD);
 	REQUIRE(nicknameControl != nicknameBuffer);
 	REQUIRE(nicknameBuffer.empty());
 	REQUIRE(passwordControl != passwordBuffer);
@@ -135,7 +135,7 @@ TEST_CASE("Client - LoadRegistrationCredentials - failed registration"){
 		   password7charslong + "\n");
 
 	returnValue = client.loadRegistrationCredentials(nicknameBuffer, passwordBuffer, in);
-	REQUIRE(returnValue == registrationStatus::BAD_PASSWORD);
+	REQUIRE(returnValue == rStatus::BAD_PASSWORD);
 	REQUIRE(nicknameBuffer.empty());
 	REQUIRE(passwordBuffer.empty());
 
@@ -156,7 +156,7 @@ TEST_CASE("Client - Login - success"){
 
 	Client client("localhost", 12345);
 	int returnValue = client.login(in);
-	REQUIRE(returnValue == loginStatus::SUCCESS);
+	REQUIRE(returnValue == lStatus::SUCCESS);
 	REQUIRE(client.getUser().getNickname() == nicknameControl);
 
 	REQUIRE(client.getUser().getUsedHashAlgorithm() == QCryptographicHash::Sha3_512);
@@ -180,7 +180,7 @@ TEST_CASE("Client - Registration - success"){
 
 	Client client("localhost", 12345);
 	int returnValue = client.registration(in);
-	REQUIRE(returnValue == registrationStatus::SUCCESS);
+	REQUIRE(returnValue == rStatus::SUCCESS);
 	REQUIRE(client.getUser().getNickname() == nicknameControl);
 
 	REQUIRE(client.getUser().getUsedHashAlgorithm() == QCryptographicHash::Sha3_512);

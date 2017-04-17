@@ -5,14 +5,16 @@
 
 namespace Kyrys {
 class Client : public QObject {
+	Q_OBJECT
+
 	typedef Kyrys::User User;
 	typedef std::string string;
 	typedef Kyrys::Enums::JsonMessage::MessageType MessageType;
 
-	Q_OBJECT 
 private:
 	QTcpSocket m_socket;
 	User m_user;
+
 public:
 	explicit Client(const QString &hostName, unsigned port, QObject *parent = 0);
 

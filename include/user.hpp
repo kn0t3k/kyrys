@@ -12,15 +12,10 @@ namespace Kyrys {
 	 *
 	 */
 	class User {
-		std::string m_nickname;
-		QByteArray  m_passwordHash;
-		QCryptographicHash::Algorithm m_usedHashAlgorithm;
-
-		/*todo
-		 * pridaj atributy: ID uzivatela take ake ma pridelene v databaze serveru,
-		 * 					sucasna IP adresa clienta
-		 * 					typ socketu aky bude pouzivat user pocas komunikacie
-		 */
+		unsigned int 					m_ID;
+		std::string 					m_nickname;
+		QByteArray  					m_passwordHash;
+		QCryptographicHash::Algorithm 	m_usedHashAlgorithm;
 
 	public:
 		//Constructors

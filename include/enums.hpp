@@ -30,8 +30,8 @@ namespace Kyrys {
 					SERVER_ERROR	   		//Uknown error on server's side
 				};
 				enum PasswordSecQuality {
-					GOOD = 0,
-					TOO_SHORT
+					GOOD = 0,				//Good password which fullfill all security requirements
+					TOO_SHORT				//Too short password less than 8 chars long
 				};
 			}	
 			namespace Login{
@@ -50,7 +50,7 @@ namespace Kyrys {
 		namespace Server {
 			enum Type {
 				SSL,
-				NO_SSL
+				NO_SSL //todo: replace NO_SSL by TCP so it better coresponds with QTcpSocket like in User / SocketType
 			};
 		}
 		namespace Item {
@@ -72,8 +72,8 @@ namespace Kyrys {
 		}
 		namespace User {
 			enum SocketType{ //This enum describes which type of socket will be used by User
-				SSL,
-				NO_SSL
+				SSL, //SSL is TCP Socket with TLS encryption
+				TCP
 			};
 		}
 	}

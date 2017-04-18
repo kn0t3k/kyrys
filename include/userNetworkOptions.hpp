@@ -1,6 +1,7 @@
 #pragma once
 #include <reference.hpp>
 #include <QtNetwork/QAbstractSocket>
+#include <QtNetwork/QSslSocket>
 
 namespace Kyrys {
 
@@ -11,20 +12,24 @@ namespace Kyrys {
 	 */
 	class UserNetworkOptions {
 	private:
-		QHostAddress 		m_ipAddress;
-		quint16 			m_port;
-		SocketType	 		m_socketType;
-		QAbstractSocket 	m_socket;
+		QHostAddress 		m_userIPAddress;
+		QHostAddress		m_serverIPAddress;
+		quint16 			m_port; 			//server m_port
+		SocketType	 		m_socketType; 		//asi toto odstranime
+		//QSslSocket 			m_socket;
 
 	public:
+
+		//UserNetworkOptions();
+
 		//Getters
-		const QHostAddress &getIPAdress() const;
+		const QHostAddress &getUserIPAdress() const;
 		quint16 getPort() const;
 		SocketType getSocketType() const;
-		const QAbstractSocket &getSocket() const;
+		//const QAbstractSocket &getSocket() const;
 
 		//Setters
-		void setIPAdress(const QHostAddress &m_ipAdress);
+		void setUserIPAdress(const QHostAddress &m_ipAdress);
 		void setPort(quint16 m_port);
 		void setSocketType(SocketType m_socketType);
 		//void setSocket(const QAbstractSocket &m_socket);

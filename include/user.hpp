@@ -1,6 +1,7 @@
 #pragma once
 #include <reference.hpp>
 #include <QtCore/QCryptographicHash>
+#include <userNetworkOptions.hpp>
 
 namespace Kyrys {
 	/**
@@ -16,6 +17,9 @@ namespace Kyrys {
 		std::string 					m_nickname;
 		QByteArray  					m_passwordHash;
 		QCryptographicHash::Algorithm 	m_usedHashAlgorithm;
+		UserNetworkOptions				m_userNetworkOptions;
+
+		//TODO: Add list of friends and maybe more member atributes
 
 	public:
 		//Constructors

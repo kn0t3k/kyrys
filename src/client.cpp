@@ -6,15 +6,15 @@
 using Kyrys::Client;
 using Kyrys::Enums::JsonMessage::MessageType;
 
-typedef Kyrys::Enums::Client::Login::Status 	   				lStatus; //login status
-typedef Kyrys::Enums::Client::Registration::Status 				rStatus; //registration status
+typedef Kyrys::Enums::Client::Login::Status 	   				lStatus; 			//login status
+typedef Kyrys::Enums::Client::Registration::Status 				rStatus; 			//registration status
 typedef Kyrys::Enums::Client::Registration::PasswordSecQuality 	passwordQuality;
 
 //Constructors
-Client::Client(const QString &hostName, unsigned port, QObject *parent) : QObject(parent), m_user() {
+Client::Client(const QString &hostName, quint16 port, QObject *parent) : QObject(parent), m_user() {
 	QString data;
-	m_socket.connectToHost(hostName, port); //warning: connectToHost expects port as quint16 type
-											//warning: client by mal skontrolovat ci sa podarilo vytvorit spojenie a ak sa nepodarilo, tak by mal ukoncit clienta
+	m_socket.connectToHost(hostName, port); //warning: client by mal skontrolovat ci sa podarilo vytvorit spojenie a ak sa nepodarilo, tak by mal ukoncit clienta
+
 	QByteArray buffer;
 	buffer.append(m_socket.readAll());
 
@@ -68,7 +68,7 @@ int Client::loadLoginCredentials(std::string &nickname, std::string &password, s
 }
 
 int Client::controlPasswordSecQuality(const std::string& password) const {
-	if(password.length() > 8)
+	if(password.length() >= 8)
 		return passwordQuality::GOOD;
 	else
 		return passwordQuality::TOO_SHORT;

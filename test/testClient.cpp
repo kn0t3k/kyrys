@@ -92,7 +92,7 @@ TEST_CASE("Client - LoadRegistrationCredentials - successfull registration"){
 
 	REQUIRE(returnValue == rStatus::SUCCESS);
 	REQUIRE(nicknameControl == nicknameBuffer);
-	REQUIRE(passwordControl == passwordBuffer);
+	REQUIRE(password8charslong == passwordBuffer);
 
 	cout << "\n\n" << endl;
 }
@@ -210,3 +210,29 @@ TEST_CASE("Client - jsonMessageUserAuthentication - Login version - JSON decodin
 	cout << "\n\n" << endl;
 }
  */
+
+
+TEST_CASE("Client - quint16 conversion test"){
+	QString correctPort1 = "0";
+	QString correctPort2 = "1";
+	QString correctPort3 = "65535"; //last possible m_port number = (2^16) - 1
+	QString incorrectPort = "65536";
+
+	quint16 testPort;
+	bool returnValue = false;
+
+	testPort = correctPort1.toUShort(&returnValue);
+	REQUIRE(0 == testPort);
+	REQUIRE(returnValue);
+
+	testPort = correctPort2.toUShort(&returnValue);
+	REQUIRE(1 == testPort);
+	REQUIRE(returnValue);
+
+	testPort = correctPort3.toUShort(&returnValue);
+	REQUIRE(65535 == testPort);
+	REQUIRE(returnValue);
+
+	testPort = incorrectPort.toUShort(&returnValue);
+	REQUIRE(!returnValue);
+}

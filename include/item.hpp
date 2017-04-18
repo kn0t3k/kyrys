@@ -6,6 +6,10 @@ namespace Kyrys {
 class Item {
 	typedef Kyrys::Enums::Item::MethodType MethodType;
 	typedef Kyrys::Enums::Resolver::Mode Mode;
+private:
+	MethodType m_methodType;
+	QString m_name;
+	QString m_nick;
 
 public:
 	/**
@@ -23,7 +27,7 @@ public:
 	 *
 	 * @return     Returns serialized string.
 	 */
-	std::string serialize(int ID) const ;
+	std::string serialize(int ID) const;
 
 	/**
 	 * @brief      Checks whether an item is valid, ie. contains invalid method name, empty nick or name 
@@ -33,13 +37,9 @@ public:
 	 */
 	int isValid() const ;
 
-	const MethodType &method() const { return m_methodType;}
-	const QString &name() const { return m_name;}
-	const QString &nick() const { return m_nick;}
-
-private:
-	MethodType m_methodType;
-	QString m_name;
-	QString m_nick;
+//Getters
+	const MethodType &method() const;
+	const QString &name() const;
+	const QString &nick() const;
 };
 }

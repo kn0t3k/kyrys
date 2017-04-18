@@ -10,15 +10,70 @@ typedef Kyrys::Enums::Client::Login::Status 	   				lStatus; 			//login status
 typedef Kyrys::Enums::Client::Registration::Status 				rStatus; 			//registration status
 typedef Kyrys::Enums::Client::Registration::PasswordSecQuality 	passwordQuality;
 
-//Constructors
-Client::Client(const QString &hostName, quint16 port, QObject *parent) : QObject(parent), m_user() {
-	QString data;
-	m_socket.connectToHost(hostName, port); //warning: client by mal skontrolovat ci sa podarilo vytvorit spojenie a ak sa nepodarilo, tak by mal ukoncit clienta
+Client::Client(const QString &hostName, qint16 port, QObject *parent) :
+	QObject(parent),
+	m_socket(0),
+	m_user(),
+	m_hostname(hostName),
+	m_port(port) {
 
-	QByteArray buffer;
-	buffer.append(m_socket.readAll());
+}
 
-	qDebug() << buffer;
+bool Client::secureConnect() {
+	if (!m_socket) {
+		qDebug() << "new socket";
+		m_socket = new QSslSocket(this);
+		m_socket->setProtocol(QSsl::SslV3);
+		connect(m_socket, SIGNAL(encrypted()),
+		        this, SLOT(socketEncrypted()));
+		connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)),
+		        this, SLOT(socketError(QAbstractSocket::SocketError)));
+		connect(m_socket, SIGNAL(sslErrors(QList<QSslError>)),
+		        this, SLOT(sslErrors(QList<QSslError>)));
+		connect(m_socket, SIGNAL(readyRead()),
+		        this, SLOT(socketReadyRead()));
+	}
+	qDebug() << "connecting to host";
+
+	QFile certFile("ia.crt");
+	Q_ASSERT(certFile.open(QIODevice::ReadOnly));
+	QSslCertificate cert(&certFile, QSsl::Pem);
+	m_socket->addCaCertificate(cert);
+
+	m_socket->connectToHostEncrypted(m_hostname, m_port);
+	if (m_socket->waitForEncrypted(10000)) {
+		qDebug() << "connected";
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool Client::sendData(const QString &data) {
+	m_socket->write(data.toLatin1().data());
+	return m_socket->waitForBytesWritten(200);
+}
+
+void Client::socketError(QAbstractSocket::SocketError) {
+	qDebug() << "client error: " << m_socket->errorString();
+
+}
+
+void Client::socketReadyRead() {
+	qDebug() << "client received: " << QString::fromUtf8(m_socket->readAll());
+}
+
+void Client::socketEncrypted() {
+	if (!m_socket) {
+		return;
+	}
+	qDebug() << "socketEncrypted";
+}
+
+void Client::sslErrors(const QList<QSslError> &errors) {
+	foreach (const QSslError &e, errors){
+		qDebug() << "Client error:\t" << e.errorString();
+	}
 }
 
 //Getters
@@ -94,12 +149,12 @@ int Client::registration(std::istream &in) {
 	m_user = User(nickname, hashed_password, usedHashAlgorithm);
 	status = rStatus::PASSWORD_HASHED;
 
-	m_socket.write(jsonMessageUserAuthentication(MessageType::REGISTER_REQUEST).toJson()); //REGISTER_REQUEST message was send
-	m_socket.waitForBytesWritten();
-	if(!m_socket.waitForReadyRead()){
+	m_socket->write(jsonMessageUserAuthentication(MessageType::REGISTER_REQUEST).toJson()); //REGISTER_REQUEST message was send
+	m_socket->waitForBytesWritten();
+	if(!m_socket->waitForReadyRead()){
 		return status = rStatus::SERVER_ERROR;
 	} else {
-		QJsonDocument response = QJsonDocument::fromJson(m_socket.readAll());
+		QJsonDocument response = QJsonDocument::fromJson(m_socket->readAll());
 		//todo: parse data from socket
 	}
 
@@ -166,3 +221,6 @@ void Client::run(std::istream& in){
 	}while(command != "quit");
 }
 
+Client::~Client() {
+	delete m_socket;
+}

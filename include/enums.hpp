@@ -2,6 +2,11 @@
 
 namespace Kyrys {
 	namespace Enums {
+		namespace Defaults {
+			enum DefaultPortNumber {
+				DEFAULT = 14251			//default port at which both client and server run
+			};
+		}
 		namespace Resolver {
 			enum Status {
 				UNKNOWN_METHOD,
@@ -47,12 +52,6 @@ namespace Kyrys {
 				};
 			}
 		}
-		namespace Server {
-			enum Type {
-				SSL,
-				NO_SSL //todo: replace NO_SSL by TCP so it better coresponds with QTcpSocket like in User / SocketType
-			};
-		}
 		namespace Item {
 			enum MethodType {
 				REGISTER,
@@ -68,12 +67,6 @@ namespace Kyrys {
 				REGISTER_RESPONSE,
 				LOGIN_REQUEST,
 				LOGIN_RESPONSE
-			};
-		}
-		namespace User {
-			enum SocketType{ //This enum describes which type of socket will be used by User
-				SSL, //SSL is TCP Socket with TLS encryption
-				TCP
 			};
 		}
 	}

@@ -35,7 +35,7 @@ TEST_CASE("Resolver - save to file"){
 
 	REQUIRE(result == Status::SUCCESS);
 
-	QString fileLoc(TEMP_DIR);
+	QString fileLoc("c:\\__TEMP__\\");
 	fileLoc += "/db.txt";
 	QFile file(fileLoc);
 

@@ -11,6 +11,9 @@ class Resolver {
 private:
 	QString m_path;
 
+	int execute(const Item &item);
+	int registerItem(const Item &item);
+
 public:
 	/**
 	 * @brief      Construct a resolver object.
@@ -28,10 +31,5 @@ public:
 	 * @return     Return success if succeeded, fail otherwise.
 	 */
 	int parse(const QString &data, Mode m);
-
-private:
-	int execute(const Item &item);
-
-	int registerItem(const Item &item);
 };
 }

@@ -12,13 +12,49 @@ class Client : public QObject {
 	typedef Kyrys::Enums::JsonMessage::MessageType MessageType;
 
 private:
-	QTcpSocket m_socket; //This socket should serve the client not user, so it is used for registration and login
-	quint16 m_port; //quint16 is actually typedef unsigned short so for conversion from qstring to quint16 use method QString::toUshort
-				  //from client's socket point of view, it's probably server's incoming m_port
-	User m_user; //Current user
+	QSslSocket *m_socket = nullptr;
+	User m_user;
+	QString m_hostname;
+	quint16 m_port;
+
+private slots:
+	void socketEncrypted();
+	void socketReadyRead();
+	void sslErrors(const QList<QSslError> &errors);
+	void socketError(QAbstractSocket::SocketError error);
 
 public:
-	explicit Client(const QString &hostName, quint16 port, QObject *parent = 0);
+	/**
+	* @brief Client constructor.
+	* @details Constructs a new client and prepares it to connect to a server.
+	*
+	* @param hostName Hostname of the server to connect to.
+	* @param port Port at which the server listens.
+	* @param parent QT parent object.
+	*/
+	explicit Client(const QString &hostName, qint16 port, QObject *parent = 0);
+
+	/**
+	 * @brief Client destructor.
+	 * @details De-allocates the used memory.
+	 */
+	~Client();
+
+		/**
+	 * @brief Connect to the specified server.
+	 * @details Sets up a connection between a client and server, compares the server-supplied
+	 * certificate to the one distributed with the client to check server authority.
+	 * @return Return true if connection was succesfull.
+	 */
+	bool secureConnect();
+
+	/**
+	 * @brief Send specified data throught the socket.
+	 * @details Converts data from QString to char * and sends it.
+	 * @param data Input data.
+	 * @return Return true if succeeded, false otherwise.
+	 */
+	bool sendData(const QString &data);
 
 	const User &getUser() const;
 

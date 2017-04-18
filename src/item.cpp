@@ -16,13 +16,13 @@ using Kyrys::Utils::Random;
 
 Item::Item(const QJsonObject &json) {
 	if (json["method"].toString().isEmpty()) {
-		this->m_methodType = MethodType::INVALID_CMND;
+		m_methodType = MethodType::INVALID_CMND;
 	} else if (json["method"].toString() == "register") {
-		this->m_methodType = MethodType::REGISTER;
+		m_methodType = MethodType::REGISTER;
 	} else if (json["method"].toString() == "call") {
-		this->m_methodType = MethodType::CALL;
+		m_methodType = MethodType::CALL;
 	} else {
-		this->m_methodType = MethodType::UNKNOWN;
+		m_methodType = MethodType::UNKNOWN;
 	}
 
 	QJsonObject obj = json["args"].toObject();
@@ -31,8 +31,8 @@ Item::Item(const QJsonObject &json) {
 		this->m_methodType = MethodType::INVALID_CMND;
 	}
 
-	this->m_name = obj["name"].toString();
-	this->m_nick = obj["nick"].toString();
+	m_name = obj["name"].toString();
+	m_nick = obj["nick"].toString();
 }
 
 std::string Item::serialize(int ID) const {
@@ -60,3 +60,9 @@ int Item::isValid() const {
 
 	return Status::SUCCESS;
 }
+
+
+//Getters
+const MethodType &Kyrys::Item::method() const { return m_methodType; }
+const QString &Kyrys::Item::name() const { return m_name; }
+const QString &Kyrys::Item::nick() const { return m_nick; }

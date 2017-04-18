@@ -8,6 +8,9 @@ class Resolver {
 	typedef Kyrys::Enums::Resolver::Mode Mode;
 	typedef Kyrys::Item Item;
 
+private:
+	QString m_path;
+
 public:
 	/**
 	 * @brief      Construct a resolver object.
@@ -28,8 +31,7 @@ public:
 
 private:
 	int execute(const Item &item);
-	int registerItem(const Item &item);
 
-	QString m_path;
+	int registerItem(const Item &item);
 };
 }

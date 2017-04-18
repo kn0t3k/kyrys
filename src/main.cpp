@@ -41,11 +41,11 @@ int main(int argc, char **argv) {
 		}
 	} else if (parser.isSet("c")) {
 		if (parser.isSet("p")) {
-			Kyrys::Client client("localhost", parser.value("p").toInt());
+			Kyrys::Client client("localhost", parser.value("p").toUShort());
 			return a.exec();
 		} else {
 			Kyrys::Client client("localhost", defaultPort);
-			client.run(); //todo implement run
+			client.run();
 			return a.exec();
 		}
 	} else {

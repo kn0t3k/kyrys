@@ -5,21 +5,32 @@
 
 namespace Kyrys {
 class Client : public QObject {
+	Q_OBJECT
+
 	typedef Kyrys::User User;
 	typedef std::string string;
 	typedef Kyrys::Enums::JsonMessage::MessageType MessageType;
 
-	Q_OBJECT 
 private:
-	QTcpSocket m_socket;
-	User m_user;
+	QTcpSocket m_socket; //This socket should serve the client not user, so it is used for registration and login
+	quint16 m_port; //quint16 is actually typedef unsigned short so for conversion from qstring to quint16 use method QString::toUshort
+				  //from client's socket point of view, it's probably server's incoming m_port
+	User m_user; //Current user
+
 public:
-	explicit Client(const QString &hostName, unsigned port, QObject *parent = 0);
+	explicit Client(const QString &hostName, quint16 port, QObject *parent = 0);
 
 	const User &getUser() const;
 
 	int loadRegistrationCredentials(string &nickname, string &password, std::istream &in = std::cin);
+
 	int loadLoginCredentials(string &nickname, string &password, std::istream &in = std::cin);
+
+	/**
+	 * @brief			This method controls if password meets the safety requiremets
+	 * @param password	Password whish will be controlled
+	 * @return			PasswordSecQuality::GOOD = 0 if password is ok different value otherwise, more info in enums.hpp
+	 */
 	int controlPasswordSecQuality(const string& password) const;
 
 	/**
@@ -27,12 +38,14 @@ public:
 	 * @warning  User's password has to be salted and hashed inside method. Password must not leave method in open format.
 	 * @return	 0 in case of succesfull registration, non-zero code otherwise
 	 * 			 code 1 = user was not able to type same password twice at least one time
+	 * @note	 Registered user is not automatically logged in. After registration you have to pass login procedure.
 	 */
 	int registration(std::istream &in = std::cin); //not finished yet
 
 	/**
 	 * @brief  Login of registered user
 	 * @return Same as registration
+	 * @note
 	 */
 	int login(std::istream &in = std::cin); //not finished yet
 
@@ -50,7 +63,7 @@ public:
 					"args" : {
 						"nickname": "nickname of user",
 						"password": "hash of user's password",
-						"hash algorithm": "sha3_512",
+						"hash algorithm": "sha3_512", //delete hash algorithm everywhere
 			   		}
 			   }
 
@@ -61,8 +74,8 @@ public:
 					"args" : {
 						"nickname": "nickname of user",
 						"password": "hash of user's password"
-						"hash algorithm": "sha3_512",
-						"required socket": "SSL" or "TCP" //not implemented
+						"hash algorithm": "sha3_512", //delete
+						"required socket": "SSL" or "TCP" //delete yatial napevno sssl
 			   		}
 			   }
 		@note po registracii by bolo dobre vyzadovat login ktory posle serveru dalsie informacie

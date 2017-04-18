@@ -8,9 +8,7 @@ using Kyrys::Enums::Item::MethodType;
 using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Item;
 
-Resolver::Resolver(const QString &path) : m_path(path) {
-
-}
+Resolver::Resolver(const QString &path) : m_path(path) {}
 
 int Resolver::execute(const Item &item) {
 	if (item.method() == MethodType::REGISTER) {

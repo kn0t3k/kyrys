@@ -1,6 +1,7 @@
 #pragma once
 #include <reference.hpp>
 #include <QtCore/QCryptographicHash>
+#include <userNetworkOptions.hpp>
 
 namespace Kyrys {
 	/**
@@ -12,15 +13,13 @@ namespace Kyrys {
 	 *
 	 */
 	class User {
-		std::string m_nickname;
-		QByteArray  m_passwordHash;
-		QCryptographicHash::Algorithm m_usedHashAlgorithm;
+		unsigned int 					m_ID;
+		std::string 					m_nickname;
+		QByteArray  					m_passwordHash;
+		QCryptographicHash::Algorithm 	m_usedHashAlgorithm;
+		UserNetworkOptions				m_userNetworkOptions;
 
-		/*todo
-		 * pridaj atributy: ID uzivatela take ake ma pridelene v databaze serveru,
-		 * 					sucasna IP adresa clienta
-		 * 					typ socketu aky bude pouzivat user pocas komunikacie
-		 */
+		//TODO: Add list of friends and maybe more member atributes
 
 	public:
 		//Constructors

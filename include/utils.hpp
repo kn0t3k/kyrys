@@ -5,6 +5,11 @@
 namespace Kyrys {
 namespace Utils {
 class Random {
+private:
+	static QString m_possibleCharacters;
+
+	unsigned long mix(unsigned long a, unsigned long b, unsigned long c) ;
+
 public:
 	/**
 	 * @brief      Construt a random object - initialize random generator.
@@ -18,10 +23,6 @@ public:
 	 */
 	QString getRandomString(int randomStringLen = 10) const;
 
-private:
-	static QString m_possibleCharacters;
-
-	unsigned long mix(unsigned long a, unsigned long b, unsigned long c) ;
 };
 }
 }

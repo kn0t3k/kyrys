@@ -4,6 +4,7 @@
 #include <QtNetwork/QHostAddress>
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
+#include <QtNetwork/QSslError>
 
 //Qt JSON
 #include <QtCore/QJsonObject>
@@ -21,6 +22,8 @@
 #include <QtCore/QDataStream>
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QTime>
+#include <QtCore/QThread>
+#include <QtCore/QList>
 
 //STD library
 #include <iostream>
@@ -28,6 +31,3 @@
 
 //Our own *.hpp files from include directory
 #include <enums.hpp>
-
-//todo : Od vytvorenia reference.hpp sme sa uz posunuli nejakym smerom
-// a tak by trebalo zvazit ci sem nepridame nejake nove subory, napr. #include <QCryptographicHash> alebo std string

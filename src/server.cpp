@@ -1,35 +1,31 @@
 #include <reference.hpp>
 #include <server.hpp>
+#include <socketThread.hpp>
+
 
 using Kyrys::Server;
-using Kyrys::Enums::Resolver::Mode;
+using Kyrys::SocketThread;
 
 
-Server::Server(unsigned port, QObject *parent) : QObject(parent), m_resolver("C:\\__TEMP__\\") {
-    m_server = new QTcpServer(parent);
-    connect(m_server, SIGNAL(newConnection()), this, SLOT(newConnection()));
+Server::Server(QObject *parent) :
+    QTcpServer(parent) {
 
-    if (!m_server->listen(QHostAddress::Any, port)) {
-        std::cerr << "server could not start" << std::endl;
-        delete m_server;
+}
+
+void Server::startServer(qint16 port_no) {
+    if (!listen(QHostAddress::Any, port_no)) {
+        qDebug() << "server could not start";
     } else {
-        qDebug() << "server started at: " << port;
+        qDebug() << "listening on: " << port_no;
     }
+    
 }
 
-void Server::newConnection() {
-    qDebug() << "new connection";
-    QTcpSocket *socket = m_server->nextPendingConnection();
+void Server::incomingConnection(int descriptor) {
+    qDebug() << "conneciton incoming" << descriptor;
 
-    // receive data from client
-
-    // resolve this data,
-    // check return value if client's request was succesful
-
-    // just for example, works with telnet
-    socket->write("OK");
-    socket->flush();
-    socket->waitForBytesWritten(3000);
-
-    socket->close();
+    SocketThread *thr = new SocketThread(descriptor, this);
+    connect(thr, SIGNAL(finished()), thr, SLOT(deleteLater()));
+    thr->start();
 }
+

@@ -149,6 +149,7 @@ int Client::registration(std::istream &in) {
 	m_user = User(nickname, hashed_password, usedHashAlgorithm);
 	status = rStatus::PASSWORD_HASHED;
 
+/* //This part of code crushing program
 	m_socket->write(jsonMessageUserAuthentication(MessageType::REGISTER_REQUEST).toJson()); //REGISTER_REQUEST message was send
 	m_socket->waitForBytesWritten();
 	if(!m_socket->waitForReadyRead()){
@@ -157,6 +158,7 @@ int Client::registration(std::istream &in) {
 		QJsonDocument response = QJsonDocument::fromJson(m_socket->readAll());
 		//todo: parse data from socket
 	}
+*/
 
 	//todo: call server with json message and end with 0 after server answers that registration is succesfully finished on his side
 	//I expect something like jsonMessageUserAuthentication -> Socket -> Server

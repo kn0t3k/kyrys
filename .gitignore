@@ -60,3 +60,7 @@ cmake
 mingw32-make
 
 CMakeCache\.txt_88ed2e2c-e14d-4221-914f-e1e9bee28582
+
+KyrysClient_autogen/
+
+KyrysServer_autogen/

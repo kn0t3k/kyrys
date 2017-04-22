@@ -4,12 +4,6 @@ Kyrys is small terminal app used for P2P encrypted chat between 2 clients. We ar
 
 ---
 
-Automatic build status:
-
-* TravisCI: ![Build Status](https://travis-ci.org/kn0t3k/kyrys.svg?branch=master)
-
----
-
 Study materials:
 
 * [Private study materials FI MUNI](https://is.muni.cz/auth/www/410316/68411172/)

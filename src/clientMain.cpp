@@ -35,9 +35,8 @@ int main(int argc, char **argv) {
 	if (!client.secureConnect()) {
 		qDebug() << "client could not connect to server: " << hostName << ":" << portNo;
 	} else {
-		for (int i = 0 ; i < 5; i++) {
-			client.sendData("ahoj!");
-		}
+        //client.sendData("{\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jaak\", \"password\":\"mojetajneheslo\"}}");
+		client.sendData("{\"method\": \"login\",\"args\": {\"nick\": \"Jaak\", \"password\":\"mojetajneheslo\"}}");
 	}
 
 	return a.exec();

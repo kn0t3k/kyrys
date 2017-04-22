@@ -1,6 +1,6 @@
 #include <reference.hpp>
 #include <item.hpp>
-#include <resolver.hpp>
+#include <serverResolver.hpp>
 #include <utils.hpp>
 
 #define FORMAT_SEPARATOR ";"
@@ -8,7 +8,7 @@
 
 using Kyrys::Item;
 
-using Kyrys::Resolver;
+using Kyrys::ServerResolver;
 using Kyrys::Enums::Resolver::Status;
 using Kyrys::Enums::Item::MethodType;
 using Kyrys::Enums::Resolver::Mode;

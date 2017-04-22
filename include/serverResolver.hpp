@@ -7,7 +7,7 @@
 #include <QtCore/QMutex>
 
 namespace Kyrys {
-    class Resolver {
+    class ServerResolver {
         typedef Kyrys::Enums::Item::MethodType MethodType;
         typedef Kyrys::Enums::Resolver::Mode Mode;
         typedef Kyrys::Item Item;
@@ -44,7 +44,7 @@ namespace Kyrys {
          *
          * @param[in]  path  The path to the directory which should contain database file.
          */
-        Resolver(const QString &path, QMutex *const mutexFile = nullptr);
+        ServerResolver(const QString &path, QMutex *const mutexFile = nullptr);
 
         /**
          * @brief      Parse input string using specified mode.

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <reference.hpp>
-#include <resolver.hpp>
+#include <serverResolver.hpp>
 #include <server.hpp>
 
 #include <QtNetwork/QSslSocket>
@@ -12,7 +12,7 @@
 
 namespace Kyrys {
     class SocketThread : public QThread {
-        typedef Kyrys::Resolver Resolver;
+        typedef Kyrys::ServerResolver Resolver;
         typedef Kyrys::Server Server;
     Q_OBJECT
 

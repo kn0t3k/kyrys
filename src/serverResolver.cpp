@@ -1,14 +1,14 @@
 #include <reference.hpp>
-#include <resolver.hpp>
+#include <serverResolver.hpp>
 
-using Kyrys::Resolver;
+using Kyrys::ServerResolver;
 
 using Kyrys::Enums::Resolver::Status;
 using Kyrys::Enums::Item::MethodType;
 using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Item;
 
-Resolver::Resolver(const QString &path, QMutex *const mutexFile)
+ServerResolver::ServerResolver(const QString &path, QMutex *const mutexFile)
         :
         m_path(path),
         m_item(),
@@ -20,7 +20,7 @@ Resolver::Resolver(const QString &path, QMutex *const mutexFile)
 
 }
 
-int Resolver::execute() {
+int ServerResolver::execute() {
     m_stateIsForward = false;
     m_stateIsLogin = false;
 
@@ -40,7 +40,7 @@ int Resolver::execute() {
     }
 }
 
-int Resolver::parse(const QString &data, Mode m) {
+int ServerResolver::parse(const QString &data, Mode m) {
     clear();
     if (m == Mode::USE_JSON) {
         QJsonDocument d = QJsonDocument::fromJson(data.toUtf8());
@@ -60,7 +60,7 @@ int Resolver::parse(const QString &data, Mode m) {
     }
 }
 
-int Resolver::registerUser() {
+int ServerResolver::registerUser() {
     int s = m_item.isValid();
     if (s != Status::SUCCESS) {
         return s;
@@ -104,7 +104,7 @@ int Resolver::registerUser() {
     return status;
 }
 
-QByteArray Resolver::prepareResponse() {
+QByteArray ServerResolver::prepareResponse() {
     QJsonObject root_obj;
     QJsonObject args_obj;
     QJsonDocument document;
@@ -140,7 +140,7 @@ QByteArray Resolver::prepareResponse() {
     return QJsonDocument(root_obj).toJson();
 }
 
-int Resolver::getUserID(const QString &nickName) {
+int ServerResolver::getUserID(const QString &nickName) {
     if (m_mutexFile != nullptr) {
         m_mutexFile->lock();
     }
@@ -179,7 +179,7 @@ int Resolver::getUserID(const QString &nickName) {
     return ID;
 }
 
-void Resolver::clear() {
+void ServerResolver::clear() {
     m_result = Status::FAILED;
     m_item = Item();
     m_stateIsForward = false;
@@ -187,7 +187,7 @@ void Resolver::clear() {
     m_user = User("", "", QCryptographicHash::Sha3_512);
 }
 
-int Resolver::loginUser() {
+int ServerResolver::loginUser() {
     int isItemValid = m_item.isValid();
     if (isItemValid != Status::SUCCESS) {
         return isItemValid;

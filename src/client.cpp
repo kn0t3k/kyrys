@@ -6,19 +6,18 @@
 using Kyrys::Client;
 using Kyrys::Enums::JsonMessage::MessageType;
 
-typedef Kyrys::Enums::Client::Login::Status lStatus;            //login status
-typedef Kyrys::Enums::Client::Registration::Status rStatus;            //registration status
+typedef Kyrys::Enums::Client::Login::Status lStatus;                            //login status
+typedef Kyrys::Enums::Client::Registration::Status rStatus;                     //registration status
 typedef Kyrys::Enums::Client::Registration::PasswordSecQuality passwordQuality;
 
-Client::Client(const QString &hostName, quint16 port, QObject *parent)
-        :
+
+
+Client::Client(const QString &hostName, quint16 port, QObject *parent) :
         QObject(parent),
         m_socket(0),
         m_user(),
         m_hostname(hostName),
-        m_port(port) {
-
-}
+        m_port(port) {}
 
 bool Client::secureConnect() {
     if (!m_socket) {
@@ -80,6 +79,8 @@ void Client::sslErrors(const QList<QSslError> &errors) {
 //Getters
 const Client::User &Client::getUser() const { return m_user; }
 
+
+//Other methods
 int Client::loadRegistrationCredentials(std::string &nickname, std::string &password, std::istream &in) {
     std::string nicknameBuffer;
     std::cout << "Choose nickname: ";
@@ -224,6 +225,4 @@ void Client::run(std::istream &in) {
     } while (command != "quit");
 }
 
-Client::~Client() {
-    delete m_socket;
-}
+Client::~Client() { delete m_socket; }

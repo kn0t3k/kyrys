@@ -4,9 +4,11 @@
 
 namespace Kyrys {
     class Item {
+
         typedef Kyrys::Enums::Item::MethodType MethodType;
         typedef Kyrys::Enums::Resolver::Mode Mode;
-    private:
+
+	private:
         MethodType 	m_methodType;
         QString 	m_name;
         QString 	m_nick;
@@ -16,8 +18,12 @@ namespace Kyrys {
         int 		m_ID;
 
         void parse(const QJsonObject &json);
+		void parseRegisterRequest(const QJsonObject &json);
+		void parseLoginRequest(const QJsonObject &json);
+		void parseRegisterResponse(const QJsonObject &json); //todo
+		void parseLoginResponse(const QJsonObject &json); //todo
 
-    public:
+	public:
         //Constructors
         /**
          * Default constructor, its purpose is mainly to reset item values.

@@ -1,6 +1,7 @@
 #pragma once
 #include <reference.hpp>
 #include <item.hpp>
+#include <user.hpp>
 
 #define DEBUGGING_CLIENT_RESOLVER
 #ifdef DEBUGGING_CLIENT_RESOLVER
@@ -13,6 +14,7 @@ namespace Kyrys {
 
 	private:
 		QString m_path;
+		Item	m_item;                 // incoming response from server
 
 	private:
 		/**
@@ -21,13 +23,6 @@ namespace Kyrys {
 		 * @return
 		 */
 		int execute(const Item &item);
-
-		/**
-		 * @brief		Registers new user into servers database
-		 * @param item
-		 * @return
-		 */
-		int registerItem(const Item &item);
 
 	public:
 		/**
@@ -46,6 +41,21 @@ namespace Kyrys {
 		 * @return     Return success if succeeded, fail otherwise.
 		 */
 		int parse(const QString &data, Mode m);
+
+		/**
+		 * @brief		This metod analyze REGISTER_RESPONSE message from server and returns for client result of server's response
+		 * @param[in] 	item	Item created from RESPONSE_MESSAGE
+		 * @param[in]	user	Reference to user where method writes data from message
+		 * @return 		Returns Client::Registration::Status
+		 * 				SUCCESS = 0		   	- Registration process was finished succesfully on server's side
+		 *				MODIFIED_NICKNAME   - User wrote nickname which is already registered, so server changed it to similar and unique form
+		 *				SERVER_ERROR	   		//Uknown error on server's side
+		 */
+		int analyzeRegisterResponse(const Item &item);
+
+		int analyzeLoginResponse(const Item &item);
+
+		const Item &getItem() const;
 	};
 }
 #endif

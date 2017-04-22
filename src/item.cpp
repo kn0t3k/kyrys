@@ -91,32 +91,46 @@ void Item::parse(const QJsonObject &json) {
     if (json["method"].toString().isEmpty()) {
         m_methodType = MethodType::INVALID_CMND;
     } else if (json["method"].toString() == "register") {
-        QJsonObject args = json["args"].toObject();
-
-        if (args.empty()) {
-            m_methodType = MethodType::INVALID_CMND;
-        } else {
-            m_methodType = MethodType::REGISTER;
-        }
-
-        m_name = args["name"].toString();
-        m_nick = args["nick"].toString();
-        m_passwordHash = args["password"].toString();
-
-        m_nickOriginal = m_nick;
+		parseRegisterRequest(json); //replaced
 
     } else if (json["method"].toString() == "login") {
-        QJsonObject args = json["args"].toObject();
-        if (args.empty()) {
-            m_methodType = MethodType::INVALID_CMND;
-        } else {
-            m_methodType = MethodType::LOGIN;
-        }
-        m_nick = args["nick"].toString();
-        m_passwordHash = args["password"].toString();
+        parseLoginRequest(json);
     } else {
         m_methodType = MethodType::UNKNOWN;
     }
 }
 
+void Item::parseRegisterRequest(const QJsonObject &json){
+	QJsonObject args = json["args"].toObject();
 
+	if (args.empty()) {
+		m_methodType = MethodType::INVALID_CMND;
+	} else {
+		m_methodType = MethodType::REGISTER;
+	}
+
+	m_name = args["name"].toString(); //there is no "name" key in any register message
+	m_nick = args["nick"].toString(); //same as "name", this should be "nickname"
+	m_passwordHash = args["password"].toString();
+
+	m_nickOriginal = m_nick;
+}
+
+void Item::parseLoginRequest(const QJsonObject &json) {
+	QJsonObject args = json["args"].toObject();
+	if (args.empty()) {
+		m_methodType = MethodType::INVALID_CMND;
+	} else {
+		m_methodType = MethodType::LOGIN;
+	}
+	m_nick = args["nick"].toString();
+	m_passwordHash = args["password"].toString();
+}
+
+void Item::parseRegisterResponse(const QJsonObject &json){
+	//todo
+}
+
+void Item::parseLoginResponse(const QJsonObject &json){
+	//todo
+}

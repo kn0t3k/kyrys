@@ -8,7 +8,7 @@ namespace Kyrys {
 										//todo: rename to e.g. DEFAULT_PORT because there is name colision with possible new default values
 			};
 			enum DefaultHashAlgorithm {
-				DEFAULT_ALGORITHM = QCryptographicHash::Sha3_512 //This should create error because enums.hpp doesn't know anything about hash header from Qt
+				DEFAULT_HASH_ALGORITHM = QCryptographicHash::Sha3_512 //This should create error because enums.hpp doesn't know anything about hash header from Qt
 			};
 		}
 		namespace Resolver {

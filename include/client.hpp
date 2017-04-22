@@ -32,7 +32,7 @@ public:
 	* @param port Port at which the server listens.
 	* @param parent QT parent object.
 	*/
-	explicit Client(const QString &hostName, qint16 port, QObject *parent = 0);
+	explicit Client(const QString &hostName, quint16 port, QObject *parent = 0);
 
 	/**
 	 * @brief Client destructor.
@@ -98,8 +98,7 @@ public:
 					"method": "register",
 					"args" : {
 						"nickname": "nickname of user",
-						"password": "hash of user's password",
-						"hash algorithm": "sha3_512", //delete hash algorithm everywhere
+						"password": "hash of user's password"
 			   		}
 			   }
 
@@ -110,11 +109,8 @@ public:
 					"args" : {
 						"nickname": "nickname of user",
 						"password": "hash of user's password"
-						"hash algorithm": "sha3_512", //delete
-						"required socket": "SSL" or "TCP" //delete yatial napevno sssl
 			   		}
 			   }
-		@note po registracii by bolo dobre vyzadovat login ktory posle serveru dalsie informacie
 	 */
 	QJsonDocument jsonMessageUserAuthentication(MessageType messageType);
 

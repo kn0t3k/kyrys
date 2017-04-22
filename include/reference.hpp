@@ -31,3 +31,5 @@
 
 //Our own *.hpp files from include directory
 #include <enums.hpp>
+
+typedef std::string string;

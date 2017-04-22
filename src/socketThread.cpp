@@ -1,56 +1,48 @@
 #include <reference.hpp>
 #include <socketThread.hpp>
-#include <resolver.hpp>
 
-using Kyrys::Enums::Resolver::Mode;
-using Kyrys::Resolver;
 using Kyrys::SocketThread;
 
-SocketThread::SocketThread(int socketID, QObject *parent) :
-    QThread(parent),
-    m_socketID(socketID) {
-    qDebug() << "Constructing new thread";
+using Kyrys::Enums::Resolver::Mode;
+
+SocketThread::SocketThread(int socketID, const QString &resolverPath, QMutex *const mutexFile, Server *parent)
+        :
+        QThread(dynamic_cast<QObject *>(parent)),
+        m_socketID(socketID),
+        m_resolver(resolverPath, mutexFile),
+        m_server(parent) {
 
 }
 
 void SocketThread::encrypted() {
     qDebug() << "encrypted";
-    connect( m_socket, SIGNAL(readyRead()),
-             this, SLOT(readData()), Qt::DirectConnection);
+    connect(m_socket, SIGNAL(readyRead()),
+            this, SLOT(readData()), Qt::DirectConnection);
 }
 
 void SocketThread::run() {
-    qDebug() << "run";
-
     m_socket = new QSslSocket(NULL);
 
-    m_socket->setProtocol(QSsl::SslV3);
+    m_socket->setProtocol(QSsl::TlsV1SslV3);
 
     QByteArray key;
     QByteArray cert;
 
     QFile file_key("ia.key");
-    if (file_key.open(QIODevice::ReadOnly))
-    {
+    if (file_key.open(QIODevice::ReadOnly)) {
         key = file_key.readAll();
         file_key.close();
-    }
-    else
-    {
+    } else {
         qDebug() << file_key.errorString();
     }
 
     QFile file_cert("ia.crt");
-    if (file_cert.open(QIODevice::ReadOnly))
-    {
+    if (file_cert.open(QIODevice::ReadOnly)) {
         cert = file_cert.readAll();
         file_cert.close();
-    }
-    else
-    {
+    } else {
         qDebug() << file_cert.errorString();
     }
-
 
     QSslKey ssl_key(key, QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey, "server");
 
@@ -60,15 +52,13 @@ void SocketThread::run() {
     m_socket->setLocalCertificate(ssl_cert);
     m_socket->setPrivateKey(ssl_key);
 
+    connect(m_socket, SIGNAL(sslErrors(QList<QSslError>)),
+            this, SLOT(sslError(QList<QSslError>)));
 
-    connect( m_socket, SIGNAL(sslErrors(QList<QSslError>)),
-             this, SLOT(sslError(QList<QSslError>)) );
-
-    m_socket->setSocketOption(QAbstractSocket::KeepAliveOption, true );
+    m_socket->setSocketOption(QAbstractSocket::KeepAliveOption, true);
 
     if (!m_socket->setSocketDescriptor(m_socketID)) {
         qDebug() << "descriptor fail";
-        return;
     } else {
         connect(m_socket, SIGNAL(encrypted()), this, SLOT(encrypted()), Qt::DirectConnection);
         connect(m_socket, SIGNAL(disconnected()), this, SLOT(quit()));
@@ -79,8 +69,17 @@ void SocketThread::run() {
 }
 
 void SocketThread::readData() {
-    qDebug() << "thread Reading data:" << QString::fromUtf8(m_socket->readAll());
-    //cal resolver and communicate with client
+    qDebug() << "availible: " << m_socket->bytesAvailable();
+    QString incomingData = QString::fromUtf8(m_socket->readAll());
+    int result = m_resolver.parse(incomingData, Mode::USE_JSON);
+    qDebug() << "parse result: " << result;
+
+    if (m_resolver.isLogin()) {
+        m_server->logUser(m_resolver.getItem().getID(), m_socket);
+    } else if (m_resolver.isForward()) {
+
+    }
+    sendData(m_resolver.prepareResponse());
 }
 
 void SocketThread::quit() {
@@ -90,7 +89,16 @@ void SocketThread::quit() {
 }
 
 void SocketThread::sslError(QList<QSslError> errors) {
-    foreach (const QSslError &e, errors){
-        qDebug() << "Server error:\t" << e.errorString();
+            foreach (const QSslError &e, errors) {
+            qDebug() << "Server error:\t" << e.errorString();
+        }
+}
+
+void SocketThread::sendData(const QString &data) {
+    m_socket->write(data.toLatin1().data());
+    if (m_socket->waitForBytesWritten(300)) {
+        qDebug() << "success";
+    } else {
+        qDebug() << "fail" << m_socket->errorString();
     }
 }

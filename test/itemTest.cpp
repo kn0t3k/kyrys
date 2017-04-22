@@ -15,9 +15,9 @@ TEST_CASE("Item constructor all valid") {
 
 	Item item(set);
 
-	REQUIRE(item.name() == "Jan Novak");
-	REQUIRE(item.nick() == "Jak");
-	REQUIRE(item.method() == MethodType::REGISTER);
+	REQUIRE(item.getName() == "Jan Novak");
+	REQUIRE(item.getNick() == "Jak");
+	REQUIRE(item.getMethodType() == MethodType::REGISTER);
 }
 
 TEST_CASE("Item constructor - invalid method - getter test") {
@@ -27,9 +27,7 @@ TEST_CASE("Item constructor - invalid method - getter test") {
 
 	Item item(set);
 
-	REQUIRE(item.name() == "Jan Novak");
-	REQUIRE(item.nick() == "Jak");
-	REQUIRE(item.method() == MethodType::UNKNOWN);
+	REQUIRE(item.getMethodType() == MethodType::UNKNOWN);
 }
 
 TEST_CASE("Item constructor - invalid command - getter test") {
@@ -39,9 +37,7 @@ TEST_CASE("Item constructor - invalid command - getter test") {
 
 	Item item(set);
 
-	REQUIRE(item.name() == "Jan Novak");
-	REQUIRE(item.nick() == "Jak");
-	REQUIRE(item.method() == MethodType::INVALID_CMND);
+	REQUIRE(item.getMethodType() == MethodType::INVALID_CMND);
 }
 
 TEST_CASE("Item constructor - invalid command 2 - getter test") {
@@ -51,7 +47,7 @@ TEST_CASE("Item constructor - invalid command 2 - getter test") {
 
 	Item item(set);
 
-	REQUIRE(item.method() == MethodType::INVALID_CMND);
+	REQUIRE(item.getMethodType() == MethodType::INVALID_CMND);
 }
 
 TEST_CASE("Item constructor - invalid command 3 - getter test") {
@@ -61,7 +57,7 @@ TEST_CASE("Item constructor - invalid command 3 - getter test") {
 
 	Item item(set);
 
-	REQUIRE(item.name() == "Jan Novak");
+	REQUIRE(item.getName() == "Jan Novak");
 }
 
 TEST_CASE("Item constructor - invalid command 4 - getter test") {
@@ -71,8 +67,8 @@ TEST_CASE("Item constructor - invalid command 4 - getter test") {
 
 	Item item(set);
 
-	REQUIRE(item.nick() == "Jak");
-	REQUIRE(item.name() == "");
+	REQUIRE(item.getNick() == "Jak");
+	REQUIRE(item.getName() == "");
 }
 
 TEST_CASE("Item - IsValid - incomplete") {
@@ -124,3 +120,70 @@ TEST_CASE("Item - IsValid - invalid json syntax") {
 
 	REQUIRE(item.isValid() != Status::SUCCESS);
 }
+
+TEST_CASE("Item - login - all valid"){
+	QString json = "{\"method\": \"login\",\"args\": {\"nick\": \"Jak\", \"password\" : \"nejakeheslo\"}}";
+	QJsonDocument d = QJsonDocument::fromJson(json.toUtf8());
+	QJsonObject set = d.object();
+
+	Item item(set);
+
+	REQUIRE(item.isValid() == Status::SUCCESS);
+}
+
+TEST_CASE("Item - login - invalid method"){
+    QString json = "{\"method\": \"log\",\"args\": {\"nick\": \"Jak\", \"password\" : \"nejakeheslo\"}}";
+    QJsonDocument d = QJsonDocument::fromJson(json.toUtf8());
+    QJsonObject set = d.object();
+
+    Item item(set);
+
+    REQUIRE(item.isValid() == Status::UNKNOWN_METHOD);
+}
+
+TEST_CASE("Item - login - unknown command"){
+    QString json = "{\"meth\": \"login\",\"args\": {\"nick\": \"Jak\", \"password\" : \"nejakeheslo\"}}";
+    QJsonDocument d = QJsonDocument::fromJson(json.toUtf8());
+    QJsonObject set = d.object();
+
+    Item item(set);
+
+    REQUIRE(item.isValid() == Status::INVALID_CMND);
+}
+
+TEST_CASE("Item - login - invalid json"){
+    QString json = "{\"method\": \"login\" \"args\": {\"nick\": \"Jak\", \"password\" : \"nejakeheslo\"}}";
+    QJsonDocument d = QJsonDocument::fromJson(json.toUtf8());
+    QJsonObject set = d.object();
+
+    Item item(set);
+
+    REQUIRE(item.isValid() == Status::INVALID_CMND);
+}
+
+
+TEST_CASE("Item - login - invalid args 1"){
+    QString json = "{\"method\": \"login\", \"arg\": {\"nick\": \"Jak\", \"password\" : \"nejakeheslo\"}}";
+    QJsonDocument d = QJsonDocument::fromJson(json.toUtf8());
+    QJsonObject set = d.object();
+
+    Item item(set);
+
+    REQUIRE(item.isValid() == Status::INVALID_CMND);
+}
+
+
+TEST_CASE("Item - login - invalid args 2"){
+    QString json = "{\"method\": \"login\", \"args\": {\"nic\": \"Jak\", \"password\" : \"nejakeheslo\"}}";
+    QJsonDocument d = QJsonDocument::fromJson(json.toUtf8());
+    QJsonObject set = d.object();
+
+    Item item(set);
+
+    REQUIRE(item.isValid() == Status::INVALID_CMND);
+}
+
+
+
+
+

@@ -15,54 +15,111 @@ using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Utils::Random;
 
 Item::Item(const QJsonObject &json) {
-	if (json["method"].toString().isEmpty()) {
-		m_methodType = MethodType::INVALID_CMND;
-	} else if (json["method"].toString() == "register") {
-		m_methodType = MethodType::REGISTER;
-	} else if (json["method"].toString() == "call") {
-		m_methodType = MethodType::CALL;
-	} else {
-		m_methodType = MethodType::UNKNOWN;
-	}
+    m_methodType = MethodType::UNKNOWN;
+    m_name = "";
+    m_nick = "";
+    m_nickOriginal = "";
+    m_passwordHash = "";
+    m_extension = 0;
+    m_ID = 0;
 
-	QJsonObject obj = json["args"].toObject();
+    if (json["method"].toString().isEmpty()) {
+        m_methodType = MethodType::INVALID_CMND;
+    } else if (json["method"].toString() == "register") {
+        QJsonObject args = json["args"].toObject();
 
-	if (obj.empty()) {
-		this->m_methodType = MethodType::INVALID_CMND;
-	}
+        if (args.empty()) {
+            m_methodType = MethodType::INVALID_CMND;
+        } else {
+            m_methodType = MethodType::REGISTER;
+        }
 
-	m_name = obj["name"].toString();
-	m_nick = obj["nick"].toString();
+        m_name = args["name"].toString();
+        m_nick = args["nick"].toString();
+        m_passwordHash = args["password"].toString();
+
+        m_nickOriginal = m_nick;
+
+    } else if (json["method"].toString() == "login") {
+        QJsonObject args = json["args"].toObject();
+        if (args.empty()) {
+            m_methodType = MethodType::INVALID_CMND;
+        } else {
+            m_methodType = MethodType::LOGIN;
+        }
+        m_nick = args["nick"].toString();
+        m_passwordHash = args["password"].toString();
+    } else {
+        m_methodType = MethodType::UNKNOWN;
+    }
+
+    m_extension = 0;
 }
 
 std::string Item::serialize(int ID) const {
-	std::string output = std::to_string(ID);
+    std::string output = std::to_string(ID);
 
-	output += FORMAT_SEPARATOR;
-	output += m_name.toStdString();
-	output += FORMAT_SEPARATOR;
-	output += m_nick.toStdString();
-	output += FORMAT_NEW_LINE;
-	return output;
+    output += FORMAT_SEPARATOR;
+    output += m_name.toStdString();
+    output += FORMAT_SEPARATOR;
+    output += m_nick.toStdString();
+    output += FORMAT_SEPARATOR;
+    output += m_passwordHash.toStdString();
+    output += FORMAT_NEW_LINE;
+    return output;
 }
 
 int Item::isValid() const {
-	if (m_methodType == MethodType::INVALID_CMND)
-		return Status::INVALID_CMND;
-	if (m_methodType == MethodType::UNKNOWN)
-		return Status::UNKNOWN_METHOD;
+    if (m_methodType == MethodType::INVALID_CMND)
+        return Status::INVALID_CMND;
+    if (m_methodType == MethodType::UNKNOWN)
+        return Status::UNKNOWN_METHOD;
 
-	if (m_methodType == MethodType::REGISTER) {
-		if (m_name.isEmpty() || m_nick.isEmpty()) {
-			return Status::INVALID_CMND;
-		}
-	}
+    if (m_methodType == MethodType::REGISTER) {
+        if (m_name.isEmpty() || m_nick.isEmpty() || m_passwordHash.isEmpty()) {
+            return Status::INVALID_CMND;
+        }
+    }
 
-	return Status::SUCCESS;
+    if(m_methodType == MethodType::LOGIN){
+        if (m_nick.isEmpty() || m_passwordHash.isEmpty()) {
+            return Status::INVALID_CMND;
+        }
+    }
+
+    return Status::SUCCESS;
+}
+
+//Getters
+const MethodType &Kyrys::Item::getMethodType() const { return m_methodType; }
+
+const QString &Kyrys::Item::getName() const { return m_name; }
+
+const QString &Kyrys::Item::getNick() const { return m_nick; }
+
+int Item::getID() const { return m_ID; }
+
+void Item::increaseNick() {
+    m_nick = m_nickOriginal + QString::number(m_extension);
+    m_extension++;
+}
+
+void Item::setID(int ID) {
+    m_ID = ID;
+}
+
+Item::Item() :
+        m_name(),
+        m_nick(),
+        m_nickOriginal(),
+        m_passwordHash() {
+    m_methodType = MethodType::UNKNOWN;
+    m_extension = 0;
+    m_ID = 0;
+}
+
+const QString &Item::getPasswordHash() const {
+    return m_passwordHash;
 }
 
 
-//Getters
-const MethodType &Kyrys::Item::method() const { return m_methodType; }
-const QString &Kyrys::Item::name() const { return m_name; }
-const QString &Kyrys::Item::nick() const { return m_nick; }

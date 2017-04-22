@@ -15,6 +15,7 @@ namespace Kyrys {
 				FAILED,
 				INVALID_ARGS,
 				INVALID_CMND,
+				INVALID_CRED,
 				SUCCESS
 			};
 
@@ -55,7 +56,6 @@ namespace Kyrys {
 		namespace Item {
 			enum MethodType {
 				REGISTER,
-				CALL,
 				LOGIN,
 				INVALID_CMND,
 				UNKNOWN

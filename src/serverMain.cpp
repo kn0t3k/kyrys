@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 	}
 
 	Kyrys::Server server(&a);
-	server.startServer(portNo);
+	server.startServer(static_cast<quint16>(portNo));
 
 	return a.exec();
 }

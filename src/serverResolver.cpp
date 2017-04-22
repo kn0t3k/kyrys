@@ -8,12 +8,13 @@ using Kyrys::Enums::Item::MethodType;
 using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Item;
 
-ServerResolver::ServerResolver(const QString &path, QMutex *const mutexFile)
+ServerResolver::ServerResolver(const QString &path, const QString &file, QMutex *const mutexFile)
         :
         m_path(path),
         m_item(),
         m_user("", "", QCryptographicHash::Sha3_512),
-        m_mutexFile(mutexFile) {
+        m_mutexFile(mutexFile),
+        m_fileName(file) {
     m_result = -1;
     m_stateIsLogin = false;
     m_stateIsForward = false;
@@ -72,7 +73,7 @@ int ServerResolver::registerUser() {
 
     int status = Status::FAILED;
 
-    QFile filePath(m_path + "/db.txt");
+    QFile filePath(m_path + m_fileName);
     if (filePath.open(QIODevice::ReadOnly)) {
         QTextStream fileStream(&filePath);
         int ID = 0;
@@ -147,7 +148,7 @@ int ServerResolver::getUserID(const QString &nickName) {
 
     int ID = -1;
 
-    QFile filePath(m_path + "/db.txt");
+    QFile filePath(m_path + m_fileName);
     if (filePath.open(QIODevice::ReadOnly)) {
         QTextStream fileStream(&filePath);
 

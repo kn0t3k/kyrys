@@ -24,7 +24,7 @@ void Server::startServer(qint16 port_no) {
 void Server::incomingConnection(int descriptor) {
     qDebug() << "conneciton incoming" << descriptor;
 
-    SocketThread *thr = new SocketThread(descriptor, "C:/__TEMP__/", &m_mutexFile, this);
+    SocketThread *thr = new SocketThread(descriptor, "C\\__TEMP__\\", &m_mutexFile, this);
     connect(thr, SIGNAL(finished()), thr, SLOT(deleteLater()));
     thr->start();
 }

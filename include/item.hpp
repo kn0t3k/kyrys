@@ -15,6 +15,8 @@ namespace Kyrys {
         int m_extension;
         int m_ID;
 
+        void parse(const QJsonObject &json);
+
     public:
         /**
          * Default constructor, its purpose is mainly to reset item values.

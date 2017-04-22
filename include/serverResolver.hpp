@@ -28,6 +28,8 @@ namespace Kyrys {
 
         QMutex *const m_mutexFile;
 
+        QString m_fileName;
+
         int execute();
 
         int registerUser();
@@ -40,11 +42,12 @@ namespace Kyrys {
 
      public:
         /**
-         * @brief      Construct a resolver object.
-         *
-         * @param[in]  path  The path to the directory which should contain database file.
+         * Construct a resolver object.
+         * @param path The path to the directory which should contain database file.
+         * @param file The file name which shall contain the DB.
+         * @param mutexFile Lock of the file to prevent data race.
          */
-        ServerResolver(const QString &path, QMutex *const mutexFile = nullptr);
+        ServerResolver(const QString &path, const QString &file, QMutex *const mutexFile = nullptr);
 
         /**
          * @brief      Parse input string using specified mode.

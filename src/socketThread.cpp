@@ -9,7 +9,7 @@ SocketThread::SocketThread(int socketID, const QString &resolverPath, QMutex *co
         :
         QThread(dynamic_cast<QObject *>(parent)),
         m_socketID(socketID),
-        m_resolver(resolverPath, mutexFile),
+        m_resolver(resolverPath, "db.txt", mutexFile),
         m_server(parent) {
 
 }

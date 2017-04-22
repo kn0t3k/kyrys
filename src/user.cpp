@@ -10,13 +10,10 @@ User::User(const std::string &nickname, const QByteArray &passwordHash, QCryptog
           m_usedHashAlgorithm(usedHashAlgorithm) {}
 
 //Getters
-const std::string &User::getNickname() const { return m_nickname; }
-
-const QByteArray &User::getPasswordHash() const { return m_passwordHash; }
-
-QCryptographicHash::Algorithm User::getUsedHashAlgorithm() const { return m_usedHashAlgorithm; }
+const std::string 				&User::getNickname() const 			{ return m_nickname; }
+const QByteArray 				&User::getPasswordHash() const 		{ return m_passwordHash; }
+QCryptographicHash::Algorithm 	 User::getUsedHashAlgorithm() const { return m_usedHashAlgorithm; }
 
 //Setters
 void User::setNickname(const std::string &m_nickname) { User::m_nickname = m_nickname; }
-
 void User::setPasswordHash(const QByteArray &m_passwordHash) { User::m_passwordHash = m_passwordHash; }

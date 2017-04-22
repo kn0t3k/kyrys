@@ -14,33 +14,34 @@ namespace Kyrys {
         typedef Kyrys::User User;
 
      private:
-        QString m_path;
+        //todo: add comments what's purpose of these atributes
+        QString         m_path;                 //path to folder where are saved all databases ?
+        int             m_result;
+        Item            m_item;                 // incoming request from client
+        bool            m_stateIsLogin;
+        bool            m_stateIsForward;
+        User            m_user;                 // info about user, from database
+        QMutex *const   m_mutexFile;
+        QString         m_fileName;             //filename of what?
 
-        int m_result;
+		//Getters
+		int getUserID(const QString &nickName);
 
-        Item m_item;    // incoming request from client
 
-        bool m_stateIsLogin;
-
-        bool m_stateIsForward;
-
-        User m_user;    // info about user, from database
-
-        QMutex *const m_mutexFile;
-
-        QString m_fileName;
-
+		//Other methods
         int execute();
 
         int registerUser();
 
-        int getUserID(const QString &nickName);
-
+        /**
+         * @brief   Clear sets class to default state and resets all atributes to default value
+         */
         void clear();
 
         int loginUser();
 
      public:
+        //Constructors
         /**
          * Construct a resolver object.
          * @param path The path to the directory which should contain database file.
@@ -49,6 +50,24 @@ namespace Kyrys {
          */
         ServerResolver(const QString &path, const QString &file, QMutex *const mutexFile = nullptr);
 
+
+        //Getters
+        /**
+         * Check if resolver is in state which shall forward a message.
+         * @return True if forwarding, false otherwise.
+         */
+        bool isForward();
+
+        /**
+         * Check if resolver is in state which shall login a user.
+         * @return Return true if login, false otherwise.
+         */
+        bool isLogin();
+
+        const Item &getItem() const;
+
+
+        //Other methods
         /**
          * @brief      Parse input string using specified mode.
          *
@@ -60,10 +79,12 @@ namespace Kyrys {
         int parse(const QString &data, Mode m);
 
         /**
-         * Prepares JSON message in QByteArray, which containc corerct response for
+         * Prepares JSON message in QByteArray, which contains corerect response for
          * a particular request - login response for login etc.
+         *
          * @return QByteArray with the  response, can be empty of method type is not
          * supported.
+         *
          * EXAMPLES:
          * register response:
          * {
@@ -86,19 +107,5 @@ namespace Kyrys {
          *  }
          */
         QByteArray prepareResponse();
-
-        /**
-         * Check if resolver is in state which shall forward a message.
-         * @return True if forwarding, false otherwise.
-         */
-        bool isForward() { return m_stateIsForward; }
-
-        /**
-         * Check if resolver is in state which shall login a user.
-         * @return Return true if login, false otherwise.
-         */
-        bool isLogin() { return m_stateIsLogin; }
-
-        const Item &getItem() const { return m_item; }
     };
 }

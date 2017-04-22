@@ -1,5 +1,8 @@
 #include <reference.hpp>
-#include <clientResolverUnique.hpp>
+#include <clientResolver.hpp>
+
+
+#ifdef test
 
 using Kyrys::ClientResolver;
 
@@ -75,3 +78,5 @@ int ClientResolver::registerItem(const Item &item) {
 	}
 	return Status::FAILED;
 }
+
+#endif

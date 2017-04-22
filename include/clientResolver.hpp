@@ -2,6 +2,9 @@
 #include <reference.hpp>
 #include <item.hpp>
 
+#define DEBUGGING_CLIENT_RESOLVER
+#ifdef DEBUGGING_CLIENT_RESOLVER
+
 namespace Kyrys {
 	class ClientResolver {
 		typedef Kyrys::Enums::Item::MethodType MethodType;
@@ -45,3 +48,4 @@ namespace Kyrys {
 		int parse(const QString &data, Mode m);
 	};
 }
+#endif

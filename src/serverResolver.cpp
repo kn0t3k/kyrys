@@ -8,19 +8,24 @@ using Kyrys::Enums::Item::MethodType;
 using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Item;
 
-ServerResolver::ServerResolver(const QString &path, const QString &file, QMutex *const mutexFile)
-        :
-        m_path(path),
-        m_item(),
-        m_user("", "", QCryptographicHash::Sha3_512),
-        m_mutexFile(mutexFile),
-        m_fileName(file) {
+//Constructors
+ServerResolver::ServerResolver(const QString &path, const QString &file, QMutex *const mutexFile) : m_path(path),
+                                                                                                    m_item(),
+                                                                                                    m_user("", "", QCryptographicHash::Sha3_512),
+                                                                                                    m_mutexFile(mutexFile),
+                                                                                                    m_fileName(file) {
     m_result = -1;
     m_stateIsLogin = false;
     m_stateIsForward = false;
-
 }
 
+//Getters
+bool ServerResolver::isForward() { return m_stateIsForward; }
+bool ServerResolver::isLogin() { return m_stateIsLogin; }
+const Item &ServerResolver::getItem() const { return m_item; }
+
+
+//Other methods
 int ServerResolver::execute() {
     m_stateIsForward = false;
     m_stateIsLogin = false;
@@ -79,7 +84,7 @@ int ServerResolver::registerUser() {
         int ID = 0;
         while (!fileStream.atEnd()) {
             auto line = fileStream.readLine();
-            while (line.contains(m_item.getNick())) {
+            while (line.contains(m_item.getNick())) { //todo: here should be called controlNick and then increaseNick
                 m_item.increaseNick();
             }
             ID++;
@@ -128,7 +133,7 @@ QByteArray ServerResolver::prepareResponse() {
         case MethodType::LOGIN : {
             root_obj["messageType"] = "LOGIN_RESPONSE";
             root_obj["method"] = "login";
-            args_obj["success"] = static_cast<int>(m_stateIsLogin);
+            args_obj["success"] = static_cast<int>(m_stateIsLogin); //be careful, here is conversion from bool to int
             root_obj.insert("args", args_obj);
             break;
         }
@@ -163,7 +168,7 @@ int ServerResolver::getUserID(const QString &nickName) {
                     ID = -1;
                 }
 
-                m_user.setPasswordHash(args.value(3).toLatin1());
+                m_user.setPasswordHash(args.value(3).toLatin1()); //setPasswordHash expects QByteArray which is C-array made of 1B fields, so maybe better is to use method toLocal8Bit
 
                 break;
             }

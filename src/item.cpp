@@ -14,18 +14,40 @@ using Kyrys::Enums::Item::MethodType;
 using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Utils::Random;
 
-Item::Item(const QJsonObject &json)
-        :
-        m_name(),
-        m_nick(),
-        m_nickOriginal(),
-        m_passwordHash() {
+//Constructors
+Item::Item(const QJsonObject &json) : m_name(),
+                                      m_nick(),
+                                      m_nickOriginal(),
+                                      m_passwordHash() {
     m_methodType = MethodType::UNKNOWN;
     m_extension = 0;
     m_ID = 0;
     parse(json);
 }
 
+Item::Item() : m_name(),
+               m_nick(),
+               m_nickOriginal(),
+               m_passwordHash() {
+    m_methodType = MethodType::UNKNOWN;
+    m_extension = 0;
+    m_ID = 0;
+}
+
+
+//Getters
+const MethodType &Kyrys::Item::getMethodType() const { return m_methodType; }
+const QString &Kyrys::Item::getName() const { return m_name; }
+const QString &Kyrys::Item::getNick() const { return m_nick; }
+int Item::getID() const { return m_ID; }
+const QString &Item::getPasswordHash() const { return m_passwordHash; }
+
+
+//Setters
+void Item::setID(int ID) { m_ID = ID; }
+
+
+//Other methods
 std::string Item::serialize(int ID) const {
     std::string output = std::to_string(ID);
 
@@ -60,37 +82,9 @@ int Item::isValid() const {
     return Status::SUCCESS;
 }
 
-//Getters
-const MethodType &Kyrys::Item::getMethodType() const { return m_methodType; }
-
-const QString &Kyrys::Item::getName() const { return m_name; }
-
-const QString &Kyrys::Item::getNick() const { return m_nick; }
-
-int Item::getID() const { return m_ID; }
-
 void Item::increaseNick() {
     m_nick = m_nickOriginal + QString::number(m_extension);
     m_extension++;
-}
-
-void Item::setID(int ID) {
-    m_ID = ID;
-}
-
-Item::Item()
-        :
-        m_name(),
-        m_nick(),
-        m_nickOriginal(),
-        m_passwordHash() {
-    m_methodType = MethodType::UNKNOWN;
-    m_extension = 0;
-    m_ID = 0;
-}
-
-const QString &Item::getPasswordHash() const {
-    return m_passwordHash;
 }
 
 void Item::parse(const QJsonObject &json) {

@@ -16,10 +16,11 @@ using Kyrys::Utils::Random;
 
 QString fileDBName = "testDB.txt";
 
+QString correctRegisterRequest = "{\"messageType\": \"REGISTER_REQUEST\",\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jak1\", \"password\": \"somepass\" }}";
 
 TEST_CASE("Resolver - valid JSON syntax") {
     Kyrys::ServerResolver r("c:\\__TEMP__\\", fileDBName);
-    QString jsonInput = "{\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jak1\", \"password\": \"somepass\" }}";
+    QString jsonInput = correctRegisterRequest; //"{\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jak1\", \"password\": \"somepass\" }}";
 
     int result = r.parse(jsonInput, Mode::USE_JSON);
     REQUIRE(result == Status::SUCCESS);

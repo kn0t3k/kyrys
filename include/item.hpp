@@ -21,8 +21,10 @@ namespace Kyrys {
 		bool m_success;				//flag if process was succesfully finished on server's side
 
 
-		//Parsing methods of JSON messages
+		//Parsing system
         void parse(const QJsonObject &json);
+
+		//Parsing JSON messages
 		void parseRegisterRequest(const QJsonObject &json);
 		void parseLoginRequest(const QJsonObject &json);
 		void parseRegisterResponse(const QJsonObject &json);
@@ -37,7 +39,7 @@ namespace Kyrys {
         Item();
 
         /**
-         * @brief      Constructor of item, construct abstract item which holds info
+         * @brief      Parametric constructor of item, construct abstract item which holds info
          *             about what should execute etc.
          *
          * @param[in]  json  The json is input json object containing data to populate item with.
@@ -65,6 +67,16 @@ namespace Kyrys {
         void setID(int ID);
 
 
+		//Validation system
+		/**
+         * @brief      Checks whether an item is valid, ie. contains invalid method name, empty nick or name
+         *             or any other invalid data. Can vary depending on which method is to be used.
+         *
+         * @return     True if valid, False otherwise.
+         */
+		int isValid() const; //We will expand and refactor validation system with new methods covering all JSON messages
+
+
         //Other methods
         /**
          * @brief      Serializes item content to string. Good for saving to file.
@@ -74,14 +86,6 @@ namespace Kyrys {
          * @return     Returns serialized string.
          */
         std::string serialize(int ID) const;
-
-        /**
-         * @brief      Checks whether an item is valid, ie. contains invalid method name, empty nick or name
-         *             or any other invalid data. Can vary depending on which method is to be used.
-         *
-         * @return     True if valid, False otherwise.
-         */
-        int isValid() const;
 
         /**
          * @brief      If nick of the user has already been found in the DB,

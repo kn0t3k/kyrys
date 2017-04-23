@@ -13,8 +13,8 @@ namespace Kyrys {
 		typedef Kyrys::Item Item;
 
 	private:
-		QString m_path;
-		Item	m_item;                 // incoming response from server
+		QString m_path;	// path to database of friends
+		Item	m_item;	// incoming response from server
 
 	private:
 		/**
@@ -22,7 +22,7 @@ namespace Kyrys {
 		 * @param item
 		 * @return
 		 */
-		int execute(const Item &item);
+		int execute();
 
 	public:
 		/**

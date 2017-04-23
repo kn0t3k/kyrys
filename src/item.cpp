@@ -27,7 +27,7 @@ Item::Item(const QJsonObject &json)
     m_ID = 0;
 	m_nick_modified = false;
 	m_success = false;
-    parse(json);
+    parse(json); //todo: change this according to Issue #27.16
 }
 
 Item::Item()
@@ -75,7 +75,10 @@ std::string Item::serialize(int ID) const {
     return output;
 }
 
-int Item::isValid() const { //todo: refactor and expand
+
+//todo: refactor and expand isValid system
+//Validation system
+int Item::isValid() const {
     if (m_methodType == MethodType::INVALID_CMND)
         return Status::INVALID_CMND;
     if (m_methodType == MethodType::UNKNOWN)
@@ -102,32 +105,41 @@ int Item::isValid() const { //todo: refactor and expand
     return Status::SUCCESS;
 }
 
-void Item::increaseNick() {
-    m_nick = m_nickOriginal + QString::number(m_extension);
-    m_extension++;
-}
 
+//Parsing system
 void Item::parse(const QJsonObject &json) {
     if (json["method"].toString().isEmpty()) {								//Checking if method is invalid
         m_methodType = MethodType::INVALID_CMND;
 
 	} else if (json["method"].toString() == "register") {					//Checking if method = register
+		//parseRegisterRequest(json);
+
 		if(json["messageType"].toString() == "REGISTER_REQUEST") {
 			parseRegisterRequest(json);
-		} else if(json["messageType"].toString() == "REGISTER_RESPONSE") {
-			parseRegisterResponse(json);
-		} else {
-			m_methodType = MethodType::UNKNOWN;
+			return;
 		}
+		if(json["messageType"].toString() == "REGISTER_RESPONSE") {
+			parseRegisterResponse(json);
+			return;
+		} else
+			m_methodType = MethodType::UNKNOWN;
+
+
 
     } else if (json["method"].toString() == "login") {						//Checking if method = login
+		//parseLoginRequest(json);
+
 		if(json["messageType"].toString() == "LOGIN_REQUEST") {
 			parseLoginRequest(json);
-		} else if(json["messageType"].toString() == "LOGIN_RESPONSE") {
-			parseLoginResponse(json);
-		} else {
-			m_methodType = MethodType::UNKNOWN;
+			return;
 		}
+		if(json["messageType"].toString() == "LOGIN_RESPONSE") {
+			parseLoginResponse(json);
+			return;
+		} else
+			m_methodType = MethodType::UNKNOWN;
+
+
 
     } else if (json["method"].toString() == "forward") {					//Checking if method = forward
 		parseForward(json);
@@ -137,28 +149,6 @@ void Item::parse(const QJsonObject &json) {
     }
 }
 
-/** EXAMPLES:
-* register response:
-* {
-*      methodType : "REGISTER_RESPONSE",
-*      method : "register",
-*      args : {
-*              "nickname" : "XXX",
-*              "ID" : ID,
-*              "success" : 1 | 0   // true of false
-*              }
-*  }
-*
-*  login response:
-*  {
-*      methodType : "LOGIN_RESPONSE",
-*      method : "login",
-*      args : {
-*              "success" : 1 | 0   //true or false
-*              }
-*  }
-*/
-
 void Item::parseRegisterResponse(const QJsonObject &json){
 	QJsonObject args = json["args"].toObject();
 	if (args.empty()) {
@@ -166,7 +156,7 @@ void Item::parseRegisterResponse(const QJsonObject &json){
 	} else {
 		m_methodType = MethodType::REGISTER;
 	}
-	m_nick = args["nick"].toString();
+	m_nick = args["nickname"].toString();
 	m_ID = args["ID"].toInt();
 	//m_nick_modified = args["modified_nickname"].toBool(); //repair message first
 	m_success = args["success"].toBool();
@@ -190,7 +180,7 @@ void Item::parseLoginRequest(const QJsonObject &json) {
 	} else {
 		m_methodType = MethodType::LOGIN;
 	}
-	m_nick = args["nick"].toString();
+	m_nick = args["nickname"].toString();
 	m_passwordHash = args["password"].toString();
 }
 
@@ -221,6 +211,12 @@ void Item::parseForward(const QJsonObject &json){
 	}
 }
 
+
+//Other methods
+void Item::increaseNick() {
+	m_nick = m_nickOriginal + QString::number(m_extension);
+	m_extension++;
+}
 
 const QString &Item::getRecepient() const {
     return m_forwardTo;

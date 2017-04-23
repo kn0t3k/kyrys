@@ -142,6 +142,7 @@ TEST_CASE("Client - LoadRegistrationCredentials - failed registration"){
 	cout << "\n\n" << endl;
 }
 
+/*
 TEST_CASE("Client - Login - success"){
 	cout << "Client - Login - success" << endl;
 
@@ -165,7 +166,10 @@ TEST_CASE("Client - Login - success"){
 
 	cout << "\n\n" << endl;
 }
+ */
 
+
+/*
 TEST_CASE("Client - Registration - success"){
 	cout << "Client - Registration - success" << endl;
 
@@ -189,6 +193,8 @@ TEST_CASE("Client - Registration - success"){
 
 	cout << "\n\n" << endl;
 }
+ */
+
 /*
 TEST_CASE("Client - jsonMessageUserAuthentication - Login version - JSON decoding demonstration"){
 	cout << "Client - Registration - success" << endl;

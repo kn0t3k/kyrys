@@ -13,7 +13,9 @@ using Kyrys::Item;
 
 
 //Constructors
-ClientResolver::ClientResolver(const QString &path) : m_path(path) {}
+ClientResolver::ClientResolver(const QString &path) : m_path(path) {
+	m_item = Item(); //test this
+}
 
 //Getters
 const Item &ClientResolver::getItem() const { return m_item; }
@@ -23,17 +25,12 @@ const Item &ClientResolver::getItem() const { return m_item; }
 
 
 //Other methods
-int ClientResolver::execute(const Item &item) {
-	//First we control if "item" is on list of implemented methods
-	int itemValidity = item.isValid();
-	if (itemValidity != Status::SUCCESS)
-		return itemValidity;
-
-	switch (item.getMethodType()){
+int ClientResolver::execute() { //I will probably delete this method
+	switch (m_item.getMethodType()){
 		case (MethodType::INVALID_CMND) : return Status::INVALID_CMND;
 		case (MethodType::UNKNOWN) 		: return Status::UNKNOWN_METHOD;
-		case (MethodType::REGISTER)		: return analyzeRegisterResponse(item);
-		case (MethodType::LOGIN)		: return analyzeLoginResponse(item);
+		case (MethodType::REGISTER)		: return Status::SUCCESS;
+		case (MethodType::LOGIN)		: return Status::SUCCESS;
 		default							: return Status::FAILED;
 	}
 }
@@ -41,18 +38,19 @@ int ClientResolver::execute(const Item &item) {
 
 int ClientResolver::parse(const QString &data, Mode m) {
 	if (m == Mode::USE_JSON) {
-		// input data is JSON string
-		// parse this string
-		QJsonDocument jsonDoc = QJsonDocument::fromJson(data.toUtf8());
-
-		if (jsonDoc.isNull())	// fail - invalid JSON
-			return Status::INVALID_JSON;
-
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(data.toUtf8());	// input data is JSON message in QString
+		if (jsonDoc.isNull())
+			return Status::INVALID_JSON;								// fail - invalid JSON
 		QJsonObject object = jsonDoc.object();
+		m_item = Item(object);	// Parsing object
 
-		Item item(object);
+		//Validation of parsed JSON message
+		int validValue = m_item.isValid();
+		if(validValue != Status::SUCCESS)
+			return validValue;
 
-		return this->execute(item);
+
+		return this->execute();
 	} else
 		return Status::FAILED;
 }

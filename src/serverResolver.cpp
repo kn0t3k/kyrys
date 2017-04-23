@@ -19,10 +19,7 @@ ServerResolver::ServerResolver(const QString &path,
           m_mutexFile(
                   mutexFile),
           m_fileName(file) {
-    m_result = -1;
-    m_IDofRecipient = -1;
-    m_stateIsLogin = false;
-    m_stateIsForward = false;
+    clear();
 }
 
 //Getters
@@ -37,6 +34,11 @@ const Item &ServerResolver::getItem() const { return m_item; }
 int ServerResolver::execute() {
     m_stateIsForward = false;
     m_stateIsLogin = false;
+
+    int s = m_item.isValid();
+    if (s != Status::SUCCESS) {
+        return s;
+    }
 
     switch (m_item.getMethodType()) {
         case MethodType::REGISTER : {
@@ -84,11 +86,6 @@ int ServerResolver::parse(const QString &data, Mode m) {
 }
 
 int ServerResolver::registerUser() {
-    int s = m_item.isValid();
-    if (s != Status::SUCCESS) {
-        return s;
-    }
-
     if (m_mutexFile != nullptr) {
         m_mutexFile->lock();
     }
@@ -213,28 +210,25 @@ void ServerResolver::clear() {
     m_stateIsForward = false;
     m_stateIsLogin = false;
     m_user = User("", "", QCryptographicHash::Sha3_512);
+    m_IDofRecipient = -1;
 }
 
 int ServerResolver::loginUser() {
-    int isItemValid = m_item.isValid();
-    if (isItemValid != Status::SUCCESS) {
-        return isItemValid;
+    // get user ID from db, search by nick, set this ID to m_item
+    int ID = getUserID(m_item.getNick());
+    if (ID == -1) {
+        return Status::INVALID_CRED;
     } else {
-        // get user ID from db, search by nick, set this ID to m_item
-        int ID = getUserID(m_item.getNick());
-        if (ID == -1) {
-            return Status::INVALID_CRED;
+        // compare received hash with the one from database
+        if (m_item.getPasswordHash() == QString(m_user.getPasswordHash())) {
+            m_item.setID(ID);
+            m_stateIsLogin = true;
         } else {
-            // compare received hash with the one from database
-            if (m_item.getPasswordHash() == QString(m_user.getPasswordHash())) {
-                m_item.setID(ID);
-                m_stateIsLogin = true;
-            } else {
-                return Status::INVALID_CRED;
-            }
+            return Status::INVALID_CRED;
         }
-        return Status::SUCCESS;
     }
+    return Status::SUCCESS;
+
 }
 
 int ServerResolver::getRecipientID() const {

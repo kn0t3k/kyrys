@@ -16,18 +16,17 @@ namespace Kyrys {
      private:
         //todo: add comments what's purpose of these atributes
         QString m_path;                 //path to folder where are saved all databases ?
-        int m_result;
-        int m_IDofRecipient;
+        int m_result;   // general result value to hold return values of various functions
+        int m_IDofRecipient;    // id of user that the message shall be forwarded to
         Item m_item;                 // incoming request from client
-        bool m_stateIsLogin;
-        bool m_stateIsForward;
+        bool m_stateIsLogin;    // if resolver is in state of logging a user in
+        bool m_stateIsForward;  // if resolver is in state of forwarding a message
         User m_user;                 // info about user, from database
-        QMutex *const m_mutexFile;
+        QMutex *const m_mutexFile;      // mutex to protect file from data race
         QString m_fileName;             //filename of what?
 
         //Getters
         int getUserID(const QString &nickName);
-
 
         //Other methods
         int execute();

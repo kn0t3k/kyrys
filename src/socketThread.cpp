@@ -76,10 +76,19 @@ void SocketThread::readData() {
 
     if (m_resolver.isLogin()) {
         m_server->logUser(m_resolver.getItem().getID(), m_socket);
+        sendData(m_resolver.prepareResponse());
     } else if (m_resolver.isForward()) {
-
+        auto userSocket = m_server->getUserSocket(m_resolver.getRecipientID());
+        if(userSocket == nullptr){
+            qDebug() << "user not logged in";
+        } else {
+            qDebug() << "forwarding to ..." << m_resolver.getRecipientID();
+            userSocket->write(m_resolver.prepareResponse());
+        }
+    } else {
+        sendData(m_resolver.prepareResponse());
     }
-    sendData(m_resolver.prepareResponse());
+
 }
 
 void SocketThread::quit() {

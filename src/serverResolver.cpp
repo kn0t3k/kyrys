@@ -9,19 +9,24 @@ using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Item;
 
 //Constructors
-ServerResolver::ServerResolver(const QString &path, const QString &file, QMutex *const mutexFile) : m_path(path),
-                                                                                                    m_item(),
-                                                                                                    m_user("", "", QCryptographicHash::Sha3_512),
-                                                                                                    m_mutexFile(mutexFile),
-                                                                                                    m_fileName(file) {
-    m_result = -1;
-    m_stateIsLogin = false;
-    m_stateIsForward = false;
+ServerResolver::ServerResolver(const QString &path,
+                               const QString &file,
+                               QMutex *const mutexFile)
+        : m_path(path),
+          m_item(),
+          m_user("", "",
+                 QCryptographicHash::Sha3_512),
+          m_mutexFile(
+                  mutexFile),
+          m_fileName(file) {
+    clear();
 }
 
 //Getters
 bool ServerResolver::isForward() { return m_stateIsForward; }
+
 bool ServerResolver::isLogin() { return m_stateIsLogin; }
+
 const Item &ServerResolver::getItem() const { return m_item; }
 
 
@@ -29,6 +34,11 @@ const Item &ServerResolver::getItem() const { return m_item; }
 int ServerResolver::execute() {
     m_stateIsForward = false;
     m_stateIsLogin = false;
+
+    int s = m_item.isValid();
+    if (s != Status::SUCCESS) {
+        return s;
+    }
 
     switch (m_item.getMethodType()) {
         case MethodType::REGISTER : {
@@ -39,6 +49,15 @@ int ServerResolver::execute() {
         }
         case MethodType::UNKNOWN : {
             return Status::UNKNOWN_METHOD;
+        }
+        case MethodType::FORWARD : {
+            m_IDofRecipient = getUserID(m_item.getRecepient());
+            if (m_IDofRecipient != -1) {
+                m_stateIsForward = true;
+                return Status::SUCCESS;
+            } else {
+                return Status::INVALID_CMND;
+            }
         }
         default: {
             return Status::INVALID_CMND;
@@ -67,11 +86,6 @@ int ServerResolver::parse(const QString &data, Mode m) {
 }
 
 int ServerResolver::registerUser() {
-    int s = m_item.isValid();
-    if (s != Status::SUCCESS) {
-        return s;
-    }
-
     if (m_mutexFile != nullptr) {
         m_mutexFile->lock();
     }
@@ -84,7 +98,7 @@ int ServerResolver::registerUser() {
         int ID = 0;
         while (!fileStream.atEnd()) {
             auto line = fileStream.readLine();
-            while (line.contains(m_item.getNick())) { //todo: here should be called controlNick and then increaseNick
+            while (line.contains(m_item.getNick())) {
                 m_item.increaseNick();
             }
             ID++;
@@ -133,8 +147,13 @@ QByteArray ServerResolver::prepareResponse() {
         case MethodType::LOGIN : {
             root_obj["messageType"] = "LOGIN_RESPONSE";
             root_obj["method"] = "login";
-            args_obj["success"] = static_cast<int>(m_stateIsLogin); //be careful, here is conversion from bool to int
+            args_obj["success"] = static_cast<int>(m_stateIsLogin);
             root_obj.insert("args", args_obj);
+            break;
+        }
+        case MethodType::FORWARD : {
+            root_obj["method"] = "forward";
+            root_obj["args"] = m_item.getArgs();
             break;
         }
         default : {
@@ -168,7 +187,7 @@ int ServerResolver::getUserID(const QString &nickName) {
                     ID = -1;
                 }
 
-                m_user.setPasswordHash(args.value(3).toLatin1()); //setPasswordHash expects QByteArray which is C-array made of 1B fields, so maybe better is to use method toLocal8Bit
+                m_user.setPasswordHash(args.value(3).toLatin1());
 
                 break;
             }
@@ -176,7 +195,7 @@ int ServerResolver::getUserID(const QString &nickName) {
 
         filePath.close();
     } else {
-        qDebug() << "Failed to open database file";
+        qDebug() << "Failed to open database file: " << filePath.fileName();
     }
 
     if (m_mutexFile != nullptr) {
@@ -191,26 +210,27 @@ void ServerResolver::clear() {
     m_stateIsForward = false;
     m_stateIsLogin = false;
     m_user = User("", "", QCryptographicHash::Sha3_512);
+    m_IDofRecipient = -1;
 }
 
 int ServerResolver::loginUser() {
-    int isItemValid = m_item.isValid();
-    if (isItemValid != Status::SUCCESS) {
-        return isItemValid;
+    // get user ID from db, search by nick, set this ID to m_item
+    int ID = getUserID(m_item.getNick());
+    if (ID == -1) {
+        return Status::INVALID_CRED;
     } else {
-        // get user ID from db, search by nick, set this ID to m_item
-        int ID = getUserID(m_item.getNick());
-        if (ID == -1) {
-            return Status::INVALID_CRED;
+        // compare received hash with the one from database
+        if (m_item.getPasswordHash() == QString(m_user.getPasswordHash())) {
+            m_item.setID(ID);
+            m_stateIsLogin = true;
         } else {
-            // compare received hash with the one from database
-            if (m_item.getPasswordHash() == QString(m_user.getPasswordHash())) {
-                m_item.setID(ID);
-                m_stateIsLogin = true;
-            } else {
-                return Status::INVALID_CRED;
-            }
+            return Status::INVALID_CRED;
         }
-        return Status::SUCCESS;
     }
+    return Status::SUCCESS;
+
+}
+
+int ServerResolver::getRecipientID() const {
+    return m_IDofRecipient;
 }

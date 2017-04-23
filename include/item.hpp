@@ -9,23 +9,27 @@ namespace Kyrys {
         typedef Kyrys::Enums::Resolver::Mode Mode;
      private:
         MethodType m_methodType;
-        QString m_name;
-        QString m_nick;
-        QString m_nickOriginal;
-        QString m_passwordHash;
-        QString m_forwardTo;    // to whom the message shall be forwarded
-        QString m_args; // the args of the message, only the receiving user will be able to de-crypt this
-        int m_extension;
-        int m_ID;
+        QString m_name;				//todo: maybe delete this
+        QString m_nick;				//modified nickname
+        QString m_nickOriginal;		//origin nickname
+        QString m_passwordHash;		//hash of user's password
+        QString m_forwardTo;    	//to whom the message shall be forwarded
+        QString m_args; 			//the args of the message, only the receiving user will be able to de-crypt this
+        int m_extension;			//???
+        int m_ID;					//ID of user assigned by server during registration process
+		bool m_nick_modified;		//flag if nickname was modified by
+		bool m_success;				//flag if process was succesfully finished on server's side
 
 
+		//Parsing methods of JSON messages
         void parse(const QJsonObject &json);
 		void parseRegisterRequest(const QJsonObject &json);
 		void parseLoginRequest(const QJsonObject &json);
-		void parseRegisterResponse(const QJsonObject &json); //todo
-		void parseLoginResponse(const QJsonObject &json); //todo
+		void parseRegisterResponse(const QJsonObject &json);
+		void parseLoginResponse(const QJsonObject &json);
+		void parseForward(const QJsonObject &json);
 
-     public:
+			public:
         //Constructors
         /**
          * Default constructor, its purpose is mainly to reset item values.

@@ -1,14 +1,13 @@
 #pragma once
 
+#define HASH QCryptographicHash::Sha3_512 //Default Hashing algorithm for
+
 namespace Kyrys {
     namespace Enums {
         namespace Defaults {
             enum DefaultPortNumber {
                 DEFAULT = 14251            //default port at which both client and server run
                 //todo: rename to e.g. DEFAULT_PORT because there is name colision with possible new default values
-            };
-            enum DefaultHashAlgorithm {
-                DEFAULT_ALGORITHM = QCryptographicHash::Sha3_512 //This should create error because enums.hpp doesn't know anything about hash header from Qt
             };
         }
         namespace Resolver {
@@ -34,7 +33,7 @@ namespace Kyrys {
                     SUCCESS = 0,            //Registration process was finished succesfully
                     REGISTRATION_STARTED,    //Registration has started
                     BAD_PASSWORD,            //User didn't repeat password correctly
-                    CREDENTIALS_LOADED,    //User wrote nick and password correctly
+                    CREDENTIALS_LOADED,    	//User wrote nick and password correctly
                     PASSWORD_HASHED,        //Password was succesfully hashed
                     MODIFIED_NICKNAME,        //User wrote nickname which is already registered, so server changed it to similar and unique form
                     SERVER_ERROR            //Uknown error on server's side

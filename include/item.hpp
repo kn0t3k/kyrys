@@ -6,18 +6,21 @@ namespace Kyrys {
     class Item {
         typedef Kyrys::Enums::Item::MethodType MethodType;
         typedef Kyrys::Enums::Resolver::Mode Mode;
-    private:
-        MethodType 	m_methodType;
-        QString 	m_name;
-        QString 	m_nick;
-        QString 	m_nickOriginal;
-        QString 	m_passwordHash;
-        int 		m_extension;
-        int 		m_ID;
+     private:
+        MethodType m_methodType;
+        QString m_name;
+        QString m_nick;
+        QString m_nickOriginal;
+        QString m_passwordHash;
+        QString m_forwardTo;    // to whom the message shall be forwarded
+        QString m_args; // the args of the message, only the receiving user will be able to de-crypt this
+        int m_extension;
+        int m_ID;
+
 
         void parse(const QJsonObject &json);
 
-    public:
+     public:
         //Constructors
         /**
          * Default constructor, its purpose is mainly to reset item values.
@@ -35,9 +38,17 @@ namespace Kyrys {
 
         //Getters
         const MethodType &getMethodType() const;
+
         const QString &getName() const;
+
         const QString &getNick() const;
+
         const QString &getPasswordHash() const;
+
+        const QString &getRecepient() const;
+
+        const QString &getArgs() const;
+
         int getID() const;
 
 

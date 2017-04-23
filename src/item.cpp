@@ -15,20 +15,26 @@ using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Utils::Random;
 
 //Constructors
-Item::Item(const QJsonObject &json) : m_name(),
-                                      m_nick(),
-                                      m_nickOriginal(),
-                                      m_passwordHash() {
+Item::Item(const QJsonObject &json)
+        : m_name(),
+          m_nick(),
+          m_nickOriginal(),
+          m_passwordHash(),
+          m_forwardTo(),
+          m_args() {
     m_methodType = MethodType::UNKNOWN;
     m_extension = 0;
     m_ID = 0;
     parse(json);
 }
 
-Item::Item() : m_name(),
-               m_nick(),
-               m_nickOriginal(),
-               m_passwordHash() {
+Item::Item()
+        : m_name(),
+          m_nick(),
+          m_nickOriginal(),
+          m_passwordHash(),
+          m_forwardTo(),
+          m_args() {
     m_methodType = MethodType::UNKNOWN;
     m_extension = 0;
     m_ID = 0;
@@ -37,9 +43,13 @@ Item::Item() : m_name(),
 
 //Getters
 const MethodType &Kyrys::Item::getMethodType() const { return m_methodType; }
+
 const QString &Kyrys::Item::getName() const { return m_name; }
+
 const QString &Kyrys::Item::getNick() const { return m_nick; }
+
 int Item::getID() const { return m_ID; }
+
 const QString &Item::getPasswordHash() const { return m_passwordHash; }
 
 
@@ -79,6 +89,12 @@ int Item::isValid() const {
         }
     }
 
+    if (m_methodType == MethodType::FORWARD) {
+        if (m_args.isEmpty()) {
+            return Status::INVALID_CMND;
+        }
+    }
+
     return Status::SUCCESS;
 }
 
@@ -114,9 +130,26 @@ void Item::parse(const QJsonObject &json) {
         }
         m_nick = args["nick"].toString();
         m_passwordHash = args["password"].toString();
+    } else if (json["method"].toString() == "forward") {
+        m_forwardTo = json["to"].toString();
+        if (m_forwardTo.isEmpty()) {
+            m_methodType = MethodType::INVALID_CMND;
+        } else {
+            m_args = QString(QJsonDocument(json["args"].toObject()).toJson());
+            m_methodType = MethodType::FORWARD;
+            qDebug() << m_args << "::" << m_forwardTo;
+        }
     } else {
         m_methodType = MethodType::UNKNOWN;
     }
+}
+
+const QString &Item::getRecepient() const {
+    return m_forwardTo;
+}
+
+const QString &Item::getArgs() const {
+    return m_args;
 }
 
 

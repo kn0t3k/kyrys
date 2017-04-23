@@ -39,6 +39,8 @@ namespace Kyrys {
          */
         void logUser(int ID, QSslSocket *const userSocket);
 
+        QSslSocket *getUserSocket(int ID);
+
     protected:
         void incomingConnection(int descriptor);
     };

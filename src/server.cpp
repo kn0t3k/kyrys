@@ -24,7 +24,7 @@ void Server::startServer(qint16 port_no) {
 void Server::incomingConnection(int descriptor) {
     qDebug() << "conneciton incoming" << descriptor;
 
-    SocketThread *thr = new SocketThread(descriptor, "C\\__TEMP__\\", &m_mutexFile, this);
+    SocketThread *thr = new SocketThread(descriptor, "C:\\__TEMP__\\", &m_mutexFile, this);
     connect(thr, SIGNAL(finished()), thr, SLOT(deleteLater()));
     thr->start();
 }
@@ -40,5 +40,13 @@ void Server::logUser(int ID, QSslSocket *const userSocket) {
         std::cout << "logged: " << item.first << std::endl;
     }
     m_mutexLoggedVector.unlock();
+}
+
+QSslSocket *Server::getUserSocket(int ID) {
+    auto userSocketIterator = m_loggedUsers.find(ID);
+    if(userSocketIterator == m_loggedUsers.end()){
+        return nullptr;
+    }
+    return userSocketIterator->second;
 }
 

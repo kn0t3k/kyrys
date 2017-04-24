@@ -2,6 +2,7 @@
 #include <reference.hpp>
 #include <user.hpp>
 #include <istream>
+#include <item.hpp>
 
 namespace Kyrys {
 class Client : public QObject {
@@ -22,6 +23,8 @@ private slots:
 	void socketReadyRead();
 	void sslErrors(const QList<QSslError> &errors);
 	void socketError(QAbstractSocket::SocketError error);
+
+	void copyRegistrationItem(const Item& item); //copy informations from Item to client and user
 
 public:
 	/**

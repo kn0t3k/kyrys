@@ -35,10 +35,12 @@ int main(int argc, char **argv) {
     if (!client.secureConnect()) {
         qDebug() << "client could not connect to server: " << hostName << ":" << portNo;
     } else {
+        client.run(); //runs infinite loop parsing commands
         //client.sendData("{\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jaak\", \"password\":\"mojetajneheslo\"}}");
-        client.sendData("{\"method\": \"login\",\"args\": {\"nick\": \"Jaak1\", \"password\":\"somepass\"}}");
-        client.sendData("{\"method\": \"forward\",\"to\": \"Jaak1\", \"args\" : {\"from\" : \"me\", \"message\" : \"ahoj, jak to jde?\"}}");
+        //client.sendData("{\"method\": \"login\",\"args\": {\"nick\": \"Jaak1\", \"password\":\"somepass\"}}");
+        //client.sendData("{\"method\": \"forward\",\"to\": \"Jaak1\", \"args\" : {\"from\" : \"me\", \"message\" : \"ahoj, jak to jde?\"}}");
     }
+
 
     return a.exec();
 }

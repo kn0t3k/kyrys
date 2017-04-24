@@ -31,8 +31,14 @@ namespace Kyrys {
 		const QByteArray &getPasswordHash() const;
 		QCryptographicHash::Algorithm getUsedHashAlgorithm() const;
 
+		unsigned int getID() const;
+
 		//Setters
 		void setNickname(const std::string &m_nickname);
 		void setPasswordHash(const QByteArray &m_passwordHash);
+		void setID(unsigned int m_ID);
+
+		//Printers
+		void printUser();
 	};
 }

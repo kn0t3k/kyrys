@@ -2,6 +2,7 @@
 #include <client.hpp>
 #include <QtCore/QCryptographicHash>
 #include <QtCore/QJsonDocument>
+#include <clientResolver.hpp>
 
 using Kyrys::Client;
 using Kyrys::Enums::JsonMessage::MessageType;
@@ -9,8 +10,10 @@ using Kyrys::Enums::JsonMessage::MessageType;
 typedef Kyrys::Enums::Client::Login::Status lStatus;                            //login status
 typedef Kyrys::Enums::Client::Registration::Status rStatus;                     //registration status
 typedef Kyrys::Enums::Client::Registration::PasswordSecQuality passwordQuality;
+using Kyrys::Enums::Resolver::Status;
 
-
+#define DEBUG 1
+#define CLIENT_PROMPT >
 
 Client::Client(const QString &hostName, quint16 port, QObject *parent) :
         QObject(parent),
@@ -83,24 +86,24 @@ const Client::User &Client::getUser() const { return m_user; }
 //Other methods
 int Client::loadRegistrationCredentials(std::string &nickname, std::string &password, std::istream &in) {
     std::string nicknameBuffer;
-    std::cout << "Choose nickname: ";
+    std::cout << "\nChoose nickname     :";
     std::getline(in, nicknameBuffer);
 
     std::string passwordBuffer1;
     std::string passwordBuffer2;
 
     for (int i = 0; i < 5; ++i) { //User has 5 tries to type password correctly twice in a row
-        std::cout << "\nChoose password: ";
+        std::cout << "\nChoose password     :";
         std::getline(in, passwordBuffer1);
         if (controlPasswordSecQuality(passwordBuffer1) != passwordQuality::GOOD) {
             std::cout << "\nPassword is too short\nChoose password at least 8 characters long!" << std::endl;
             passwordBuffer1.clear();
             continue;
         } else {
-            std::cout << "\nRepeat the password:";
+            std::cout << "Repeat the password :";
             std::getline(in, passwordBuffer2);
             if (passwordBuffer1 != passwordBuffer2) {
-                std::cout << "Passwords are not same!, please try it again" << std::endl;
+                std::cout << "\nPasswords are not same!, please try it again" << std::endl;
                 passwordBuffer1.clear();
                 passwordBuffer2.clear();
                 continue;
@@ -135,37 +138,55 @@ int Client::registration(std::istream &in) {
     rStatus status = rStatus::REGISTRATION_STARTED;
     QCryptographicHash::Algorithm usedHashAlgorithm = QCryptographicHash::Sha3_512;
 
-    std::cout << "Now follows registration procedure" << std::endl;
+    std::cout << "\nNow follows registration procedure" << std::endl;
 
     std::string nickname;
     std::string password;
 
+
+	//Loading nickname and password
     if (loadRegistrationCredentials(nickname, password, in) == rStatus::BAD_PASSWORD) {
-        std::cout << "Registration failed. Check help page and try it again" << std::endl;
+        std::cout << "\nRegistration failed. Check help page and try it again" << std::endl;
         return status = rStatus::BAD_PASSWORD;
     } else {
         status = rStatus::CREDENTIALS_LOADED;
     }
 
+
+	//Hashing password
     const QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), usedHashAlgorithm);
     m_user = User(nickname, hashed_password, usedHashAlgorithm);
     status = rStatus::PASSWORD_HASHED;
 
- //This part of code crushing program
+
+	//Now follows sending REGISTER_REQUEST and receiving REGISTER_RESPONSE message from server
 	m_socket->write(jsonMessageUserAuthentication(MessageType::REGISTER_REQUEST).toJson()); //REGISTER_REQUEST message was send
 	m_socket->waitForBytesWritten(300);
+	QByteArray response;
 	if(!m_socket->waitForReadyRead(300)){
 		return status = rStatus::SERVER_ERROR;
 	} else {
-		QJsonDocument response = QJsonDocument::fromJson(m_socket->readAll());
-		//todo: parse data from socket
+		response = m_socket->readAll(); //REGISTER_RESPONSE received
 	}
-//end of problematic part
 
-    //todo: call server with json message and end with 0 after server answers that registration is succesfully finished on his side
-    //I expect something like jsonMessageUserAuthentication -> Socket -> Server
-    //Server -> Socket -> jsonMessageRegisterResponse(OK / not OK)
 
+	//Parsing phase of RESPONSE message
+	ClientResolver clientResolver;
+	int returnState = clientResolver.parse(response);
+
+	if(returnState == Status::FAILED)
+		return rStatus::SERVER_ERROR;
+	else{
+		if(DEBUG)std::cout << "\ngetSuccess = " << clientResolver.getItem().getSuccess() << std::endl;
+		if(clientResolver.getItem().getSuccess()){
+			copyRegistrationItem(clientResolver.getItem());
+			std::cout << "\nNew user was succesfully registered\n" << std::endl;
+			m_user.printUser();
+		} else {
+			std::cout << "\nRegistration failed" << std::endl;
+			return rStatus::SERVER_ERROR;
+		}
+	}
     return status = rStatus::SUCCESS;
 }
 
@@ -220,9 +241,19 @@ QJsonDocument Client::jsonMessageUserAuthentication(MessageType messageType) {
 void Client::run(std::istream &in) {
     std::string command;
     do {
+        std::cout << "\n> " << std::flush;
         std::getline(in, command);
+		if(command == "register")
+			registration();
+		if(command == "login")
+			login();
 
     } while (command != "quit");
 }
 
 Client::~Client() { delete m_socket; }
+
+void Client::copyRegistrationItem(const Item& item) {
+	m_user.setID(item.getID());
+	m_user.setNickname(item.getNick().toStdString());
+}

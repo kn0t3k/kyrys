@@ -25,13 +25,16 @@ namespace Kyrys {
 		int execute();
 
 	public:
+	//Constructors
 		/**
 		 * @brief      Constructor creates a resolver object.
 		 *
 		 * @param[in]  path  The path to the directory which should contain database file.
 		 */
-		ClientResolver(const QString &path);
+		ClientResolver();
 
+	//Getters
+		const Item &getItem() const;
 		/**
 		 * @brief      Parse input string using specified mode.
 		 *
@@ -40,7 +43,7 @@ namespace Kyrys {
 		 *
 		 * @return     Return success if succeeded, fail otherwise.
 		 */
-		int parse(const QString &data, Mode m);
+		int parse(const QString &data, Mode m = Mode::USE_JSON);
 
 		/**
 		 * @brief		This metod analyze REGISTER_RESPONSE message from server and returns for client result of server's response
@@ -51,11 +54,9 @@ namespace Kyrys {
 		 *				MODIFIED_NICKNAME   - User wrote nickname which is already registered, so server changed it to similar and unique form
 		 *				SERVER_ERROR	   		//Uknown error on server's side
 		 */
-		int analyzeRegisterResponse(const Item &item);
 
-		int analyzeLoginResponse(const Item &item);
 
-		const Item &getItem() const;
+
 	};
 }
 #endif

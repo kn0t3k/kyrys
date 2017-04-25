@@ -48,9 +48,12 @@ namespace Kyrys {
             namespace Login {
                 enum Status {
                     SUCCESS = 0,        //Login process was finished succesfully
+					FAIL,
                     LOGIN_STARTED,        //Login has started
                     CREDENTIALS_LOADED, //User wrote nick and password
                     PASSWORD_HASHED,    //Password was succesfully hashed
+					REQUEST_ERROR,
+					RESPONSE_ERROR,
                     ABSENT_NICKNAME,    //User used nickname which doesn't exist in server's database
                     BAD_PASSWORD,        //User wrote bad password acording to his nickname
                     SERVER_ERROR,        //Uknown error on server's side

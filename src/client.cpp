@@ -74,7 +74,7 @@ void Client::socketEncrypted() {
 }
 
 void Client::sslErrors(const QList<QSslError> &errors) {
-            foreach (const QSslError &e, errors) {
+			foreach (const QSslError &e, errors) {
             qDebug() << "Client error:\t" << e.errorString();
         }
 }
@@ -205,21 +205,58 @@ int Client::login(std::istream &in) {
     std::string password;
     QCryptographicHash::Algorithm usedHashAlgorithm = QCryptographicHash::Sha3_512;
 
-    //cyclus begin
-    loadLoginCredentials(nickname, password, in);
-    status = lStatus::CREDENTIALS_LOADED;
 
-    QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), usedHashAlgorithm);
-    m_user = User(nickname, hashed_password, usedHashAlgorithm);
-    hashed_password.clear();
-    status = lStatus::PASSWORD_HASHED;
+	for(int i = 0; i < 5; ++i) {
+		//Loading login credentials
+		loadLoginCredentials(nickname, password, in);
+		status = lStatus::CREDENTIALS_LOADED;
 
-    QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::LOGIN_REQUEST); //this is message for server
-    //cyclus end
 
-    //TODO - contact server with JSON message obtaining hash of logging in user
+		//Hashing password
+		QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), usedHashAlgorithm);
+		m_user = User(nickname, hashed_password, usedHashAlgorithm);
+		hashed_password.clear();
+		status = lStatus::PASSWORD_HASHED;
 
-    return status = lStatus::SUCCESS;
+
+		//Sending LOGIN_REQUEST
+		QByteArray loginRequest = jsonMessageUserAuthentication(MessageType::LOGIN_REQUEST).toJson(); //this is message for server
+		if(send(loginRequest)) {
+			if(DEBUG)std::cout << "\nClient::login - LOGIN_REQUEST message send - size: " << loginRequest.length() << std::endl;
+		} else {
+			if(DEBUG)std::cout << "\nClient::registration - LOGIN_REQUEST message - FAIL" << std::endl;
+			return status = lStatus::REQUEST_ERROR;
+		}
+
+
+		//Receiving REGISTER_RESPONSE
+		QByteArray loginResponse;
+		if(receive(loginResponse)) {
+			if(DEBUG)std::cout << "\nClient::registration - LOGIN_RESPONSE message arrived - size: " << loginResponse.length() << std::endl;
+		} else {
+			if(DEBUG)std::cout << "\nClient::registration - LOGIN_RESPONSE message - FAIL" << std::endl;
+			return status = lStatus::RESPONSE_ERROR;
+		}
+
+
+		//Parsing LOGIN_RESPONSE message
+		ClientResolver clientResolver;
+		int returnState = clientResolver.parse(loginResponse);
+
+		if(returnState == Status::FAILED)
+			return lStatus::SERVER_ERROR;
+		else{
+			if(DEBUG)std::cout << "\ngetSuccess = " << clientResolver.getItem().getSuccess() << std::endl;
+			if(clientResolver.getItem().getSuccess()){
+				std::cout << "\nUser: " << m_user.getNickname() << "was succesfully logged in" << std::endl;
+				return status = lStatus::SUCCESS;
+			} else {
+				std::cout << "\nLogin failed - try it again" << std::endl;
+				continue;
+			}
+		}
+	}
+    return status = lStatus::FAIL;
 }
 
 QJsonDocument Client::jsonMessageUserAuthentication(MessageType messageType) {

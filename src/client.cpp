@@ -159,20 +159,29 @@ int Client::registration(std::istream &in) {
     status = rStatus::PASSWORD_HASHED;
 
 
-	//Now follows sending REGISTER_REQUEST and receiving REGISTER_RESPONSE message from server
-	m_socket->write(jsonMessageUserAuthentication(MessageType::REGISTER_REQUEST).toJson()); //REGISTER_REQUEST message was send
-	m_socket->waitForBytesWritten(300);
-	QByteArray response;
-	if(!m_socket->waitForReadyRead(300)){
-		return status = rStatus::SERVER_ERROR;
+	//Sending REGISTER_REQUEST
+	QByteArray registerRequest = jsonMessageUserAuthentication(MessageType::REGISTER_REQUEST).toJson();
+	if(send(registerRequest)) {
+		if(DEBUG)std::cout << "\nClient::registration - REGISTER_REQUEST message send - size: " << registerRequest.length() << std::endl;
 	} else {
-		response = m_socket->readAll(); //REGISTER_RESPONSE received
+		if(DEBUG)std::cout << "\nClient::registration - REGISTER_REQUEST message - FAIL" << std::endl;
+		return status = rStatus::REQUEST_ERROR;
 	}
 
 
-	//Parsing phase of RESPONSE message
+	//Receiving REGISTER_RESPONSE
+	QByteArray registerResponse;
+	if(receive(registerResponse)) {
+		if(DEBUG)std::cout << "\nClient::registration - REGISTER_RESPONSE message arrived - size: " << registerResponse.length() << std::endl;
+	} else {
+		if(DEBUG)std::cout << "\nClient::registration - REGISTER_RESPONSE message - FAIL" << std::endl;
+		return status = rStatus::RESPONSE_ERROR;
+	}
+
+
+	//Parsing REGISTER_RESPONSE message
 	ClientResolver clientResolver;
-	int returnState = clientResolver.parse(response);
+	int returnState = clientResolver.parse(registerResponse);
 
 	if(returnState == Status::FAILED)
 		return rStatus::SERVER_ERROR;
@@ -256,4 +265,26 @@ Client::~Client() { delete m_socket; }
 void Client::copyRegistrationItem(const Item& item) {
 	m_user.setID(item.getID());
 	m_user.setNickname(item.getNick().toStdString());
+}
+
+bool Client::send(const QString &data){
+	m_socket->write(data.toLatin1().data());
+	if (m_socket->waitForBytesWritten(300)) {
+		if(DEBUG) std::cout << "Client::send - success" << std::endl;
+		return true;
+	} else {
+		if(DEBUG) std::cout << "Client::send - fail" << std::endl;
+		return false;
+	}
+}
+
+bool Client::receive(QByteArray& response) {
+	if(m_socket->waitForReadyRead(1000)){
+		if(DEBUG) std::cout << "\nClient::receive - available bytes on Socket: " << m_socket->bytesAvailable() << std::endl;
+		response = m_socket->readAll(); //REGISTER_RESPONSE received
+		return true;
+	} else {
+		if(DEBUG) std::cout << "\nClient::receive - No data received" << std::endl;
+		return false;
+	}
 }

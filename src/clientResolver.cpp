@@ -39,9 +39,13 @@ int ClientResolver::execute() { //I will probably delete this method
 int ClientResolver::parse(const QString &data, Mode m) {
 if(DEBUG)std::cout << "\nClientResolver::parse called" << std::endl;
 	if (m == Mode::USE_JSON) {
+
 		QJsonDocument jsonDoc = QJsonDocument::fromJson(data.toUtf8());	// input data is JSON message in QString
+		if(DEBUG)std::cout << "\nClient::Resolver - JSON is empty : " << data.isEmpty() << std::endl;
+		if(DEBUG)std::cout << "\nClient::Resolver - JSON is empty : " << jsonDoc.isEmpty() << std::endl;
 		if (jsonDoc.isNull())
 			return Status::INVALID_JSON;								// fail - invalid JSON
+
 
 		// Parsing object
 		m_item.parse(jsonDoc.object());
@@ -55,6 +59,7 @@ if(DEBUG)std::cout << "\nClientResolver::parse called" << std::endl;
 	} else
 		return Status::FAILED;
 }
+
 
 
 

@@ -136,5 +136,18 @@ public:
 	 * @param in 	In is parameter for pushing fake input instead of standard input from std::cin. Use this param for testing purpose. Default value is std::cin
 	 */
 	void run(std::istream& in = std::cin);
-};
+
+
+	/**
+	 *	@brief send message to socket and control if data was send succesfully
+	 *	@return true if successfully send data, false otherwise
+	 */
+	bool send(const QString &data);
+
+	/**
+	 *	@brief receive message from socket and control if data was received succesfully
+	 *	@return true if successfully received data, false if no data arrived in set timeout 1000ms
+	 */
+	bool receive(QByteArray& response);
+	};
 }

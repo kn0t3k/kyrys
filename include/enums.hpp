@@ -35,7 +35,9 @@ namespace Kyrys {
                     BAD_PASSWORD,            //User didn't repeat password correctly
                     CREDENTIALS_LOADED,    	//User wrote nick and password correctly
                     PASSWORD_HASHED,        //Password was succesfully hashed
-                    MODIFIED_NICKNAME,        //User wrote nickname which is already registered, so server changed it to similar and unique form
+					REQUEST_ERROR,			//Registration was unable to send REGISTER_REQUEST message to server
+					RESPONSE_ERROR,			//Registration was unable to receive REGISTER_RESPONSE message from server
+                    MODIFIED_NICKNAME,      //User wrote nickname which is already registered, so server changed it to similar and unique form
                     SERVER_ERROR            //Uknown error on server's side
                 };
                 enum PasswordSecQuality {

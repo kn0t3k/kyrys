@@ -75,7 +75,9 @@ namespace Kyrys {
                 REGISTER_REQUEST,
                 REGISTER_RESPONSE,
                 LOGIN_REQUEST,
-                LOGIN_RESPONSE
+                LOGIN_RESPONSE,
+				FORWARD,
+				UNKNOWN
             };
         }
     }

@@ -33,8 +33,8 @@ bool Client::secureConnect() {
                 this, SLOT(socketError(QAbstractSocket::SocketError)));
         connect(m_socket, SIGNAL(sslErrors(QList<QSslError>)),
                 this, SLOT(sslErrors(QList<QSslError>)));
-        connect(m_socket, SIGNAL(readyRead()),
-                this, SLOT(socketReadyRead()));
+		/*connect(m_socket, SIGNAL(readyRead()),
+                this, SLOT(socketReadyRead()));*/
     }
     qDebug() << "connecting to host";
 
@@ -74,7 +74,7 @@ void Client::socketEncrypted() {
 }
 
 void Client::sslErrors(const QList<QSslError> &errors) {
-            foreach (const QSslError &e, errors) {
+			foreach (const QSslError &e, errors) {
             qDebug() << "Client error:\t" << e.errorString();
         }
 }
@@ -159,20 +159,29 @@ int Client::registration(std::istream &in) {
     status = rStatus::PASSWORD_HASHED;
 
 
-	//Now follows sending REGISTER_REQUEST and receiving REGISTER_RESPONSE message from server
-	m_socket->write(jsonMessageUserAuthentication(MessageType::REGISTER_REQUEST).toJson()); //REGISTER_REQUEST message was send
-	m_socket->waitForBytesWritten(300);
-	QByteArray response;
-	if(!m_socket->waitForReadyRead(300)){
-		return status = rStatus::SERVER_ERROR;
+	//Sending REGISTER_REQUEST
+	QByteArray registerRequest = jsonMessageUserAuthentication(MessageType::REGISTER_REQUEST).toJson();
+	if(send(registerRequest)) {
+		if(DEBUG)std::cout << "\nClient::registration - REGISTER_REQUEST message send - size: " << registerRequest.length() << std::endl;
 	} else {
-		response = m_socket->readAll(); //REGISTER_RESPONSE received
+		if(DEBUG)std::cout << "\nClient::registration - REGISTER_REQUEST message - FAIL" << std::endl;
+		return status = rStatus::REQUEST_ERROR;
 	}
 
 
-	//Parsing phase of RESPONSE message
+	//Receiving REGISTER_RESPONSE
+	QByteArray registerResponse;
+	if(receive(registerResponse)) {
+		if(DEBUG)std::cout << "\nClient::registration - REGISTER_RESPONSE message arrived - size: " << registerResponse.length() << std::endl;
+	} else {
+		if(DEBUG)std::cout << "\nClient::registration - REGISTER_RESPONSE message - FAIL" << std::endl;
+		return status = rStatus::RESPONSE_ERROR;
+	}
+
+
+	//Parsing REGISTER_RESPONSE message
 	ClientResolver clientResolver;
-	int returnState = clientResolver.parse(response);
+	int returnState = clientResolver.parse(registerResponse);
 
 	if(returnState == Status::FAILED)
 		return rStatus::SERVER_ERROR;
@@ -196,21 +205,58 @@ int Client::login(std::istream &in) {
     std::string password;
     QCryptographicHash::Algorithm usedHashAlgorithm = QCryptographicHash::Sha3_512;
 
-    //cyclus begin
-    loadLoginCredentials(nickname, password, in);
-    status = lStatus::CREDENTIALS_LOADED;
 
-    QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), usedHashAlgorithm);
-    m_user = User(nickname, hashed_password, usedHashAlgorithm);
-    hashed_password.clear();
-    status = lStatus::PASSWORD_HASHED;
+	for(int i = 0; i < 5; ++i) {
+		//Loading login credentials
+		loadLoginCredentials(nickname, password, in);
+		status = lStatus::CREDENTIALS_LOADED;
 
-    QJsonDocument jsonMessage = jsonMessageUserAuthentication(MessageType::LOGIN_REQUEST); //this is message for server
-    //cyclus end
 
-    //TODO - contact server with JSON message obtaining hash of logging in user
+		//Hashing password
+		QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), usedHashAlgorithm);
+		m_user = User(nickname, hashed_password, usedHashAlgorithm);
+		hashed_password.clear();
+		status = lStatus::PASSWORD_HASHED;
 
-    return status = lStatus::SUCCESS;
+
+		//Sending LOGIN_REQUEST
+		QByteArray loginRequest = jsonMessageUserAuthentication(MessageType::LOGIN_REQUEST).toJson(); //this is message for server
+		if(send(loginRequest)) {
+			if(DEBUG)std::cout << "\nClient::login - LOGIN_REQUEST message send - size: " << loginRequest.length() << std::endl;
+		} else {
+			if(DEBUG)std::cout << "\nClient::registration - LOGIN_REQUEST message - FAIL" << std::endl;
+			return status = lStatus::REQUEST_ERROR;
+		}
+
+
+		//Receiving REGISTER_RESPONSE
+		QByteArray loginResponse;
+		if(receive(loginResponse)) {
+			if(DEBUG)std::cout << "\nClient::registration - LOGIN_RESPONSE message arrived - size: " << loginResponse.length() << std::endl;
+		} else {
+			if(DEBUG)std::cout << "\nClient::registration - LOGIN_RESPONSE message - FAIL" << std::endl;
+			return status = lStatus::RESPONSE_ERROR;
+		}
+
+
+		//Parsing LOGIN_RESPONSE message
+		ClientResolver clientResolver;
+		int returnState = clientResolver.parse(loginResponse);
+
+		if(returnState == Status::FAILED)
+			return lStatus::SERVER_ERROR;
+		else{
+			if(DEBUG)std::cout << "\ngetSuccess = " << clientResolver.getItem().getSuccess() << std::endl;
+			if(clientResolver.getItem().getSuccess()){
+				std::cout << "\nUser: " << m_user.getNickname() << "was succesfully logged in" << std::endl;
+				return status = lStatus::SUCCESS;
+			} else {
+				std::cout << "\nLogin failed - try it again" << std::endl;
+				continue;
+			}
+		}
+	}
+    return status = lStatus::FAIL;
 }
 
 QJsonDocument Client::jsonMessageUserAuthentication(MessageType messageType) {
@@ -256,4 +302,26 @@ Client::~Client() { delete m_socket; }
 void Client::copyRegistrationItem(const Item& item) {
 	m_user.setID(item.getID());
 	m_user.setNickname(item.getNick().toStdString());
+}
+
+bool Client::send(const QString &data){
+	m_socket->write(data.toLatin1().data());
+	if (m_socket->waitForBytesWritten(300)) {
+		if(DEBUG) std::cout << "Client::send - success" << std::endl;
+		return true;
+	} else {
+		if(DEBUG) std::cout << "Client::send - fail" << std::endl;
+		return false;
+	}
+}
+
+bool Client::receive(QByteArray& response) {
+	if(m_socket->waitForReadyRead(1000)){
+		if(DEBUG) std::cout << "\nClient::receive - available bytes on Socket: " << m_socket->bytesAvailable() << std::endl;
+		response = m_socket->readAll(); //REGISTER_RESPONSE received
+		return true;
+	} else {
+		if(DEBUG) std::cout << "\nClient::receive - No data received" << std::endl;
+		return false;
+	}
 }

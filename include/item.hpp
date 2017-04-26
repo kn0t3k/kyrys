@@ -7,8 +7,10 @@ namespace Kyrys {
 
         typedef Kyrys::Enums::Item::MethodType MethodType;
         typedef Kyrys::Enums::Resolver::Mode Mode;
+		typedef Kyrys::Enums::JsonMessage::MessageType MessageType;
      private:
         MethodType m_methodType;
+		MessageType m_messageType;	//Type of message e.g. RegisterRequest, Response, ...
         QString m_name;				//todo: maybe delete this
         QString m_nick;				//modified nickname
         QString m_nickOriginal;		//origin nickname
@@ -18,7 +20,7 @@ namespace Kyrys {
         int m_extension;			//???
         int m_ID;					//ID of user assigned by server during registration process
 		bool m_nick_modified;		//flag if nickname was modified by
-		bool m_success;				//flag if process was succesfully finished on server's side
+		int m_success;				//flag if process was succesfully finished on server's side
 
 	public:
 		//Parsing system
@@ -100,6 +102,13 @@ namespace Kyrys {
          */
 		int isValid() const; //We will expand and refactor validation system with new methods covering all JSON messages
 
+		//Validating JSON messages
+		int isValidRegisterRequest() const;
+		int isValidRegisterResponse() const;
+		int isValidLoginRequest() const;
+		int isValidLoginResponse() const;
+		int isValidForward() const;
+
 
         //Other methods
         /**
@@ -116,5 +125,15 @@ namespace Kyrys {
          *             add numbers to its end so it it unique.
          */
         void increaseNick();
+
+		/**
+		 * @brief		Resets Item to default state by rewritting all member atributes to default values
+		 * 				all atributes of type:
+		 * 				bool 			-> set to false
+		 * 				integral types  -> set to zero
+		 * 				string types    -> set to empty string "" with zero length
+		 * 				1B char types   -> ASCII value is set to zero which represents first char of ASCII table
+		 */
+		void clear();
     };
 }

@@ -24,3 +24,13 @@ Build:
 	- install cppcheck and add it to PATH
 	- copy file 'pre-commit' from scripts/ to .git/hooks
 	- after running 'git commit ...' a script will check if your changes will compile and if the tests will pass
+
+How to start:
+1. Build project
+2. Create folder C:\__TEMP__
+2.1. Create database files db.txt and dbTEST.txt in this folder. On windows, be careful to don't create file with double postfix *.txt.txt. This will not work.
+3. Open commandline terminal and switch working directory to .../GIT/kyrys/bin and start server by starting binary file kyrysServer.exe
+4. When server is online, open second terminal and start kyrysClient.exe from same directory as server.
+5. Now you have online client and server and you can start using Kyrys project.
+
+More info about using client or server you will get from documentation or by executing command "help" in client. 

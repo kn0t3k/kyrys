@@ -33,8 +33,8 @@ bool Client::secureConnect() {
                 this, SLOT(socketError(QAbstractSocket::SocketError)));
         connect(m_socket, SIGNAL(sslErrors(QList<QSslError>)),
                 this, SLOT(sslErrors(QList<QSslError>)));
-        connect(m_socket, SIGNAL(readyRead()),
-                this, SLOT(socketReadyRead()));
+		/*connect(m_socket, SIGNAL(readyRead()),
+                this, SLOT(socketReadyRead()));*/
     }
     qDebug() << "connecting to host";
 

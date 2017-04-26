@@ -18,7 +18,7 @@ namespace Kyrys {
         int m_extension;			//???
         int m_ID;					//ID of user assigned by server during registration process
 		bool m_nick_modified;		//flag if nickname was modified by
-		bool m_success;				//flag if process was succesfully finished on server's side
+		int m_success;				//flag if process was succesfully finished on server's side
 
 	public:
 		//Parsing system

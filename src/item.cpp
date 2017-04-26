@@ -28,7 +28,7 @@ Item::Item(const QJsonObject &json)
     m_extension = 0;
     m_ID = 0;
 	m_nick_modified = false;
-	m_success = false;
+	m_success = 0;
 
 	if(DEBUG)std::cout << "\nItem::parametric_constructor called" << std::endl;
 
@@ -46,7 +46,7 @@ Item::Item()
     m_extension = 0;
     m_ID = 0;
 	m_nick_modified = false;
-	m_success = false;
+	m_success = 0;
 
 	if(DEBUG)std::cout << "\nItem::empty_constructor called" << std::endl;
 }
@@ -91,7 +91,7 @@ int Item::isValid() const {
         return Status::UNKNOWN_METHOD;
 
     if (m_methodType == MethodType::REGISTER) {
-        if (m_name.isEmpty() || m_nick.isEmpty() || m_passwordHash.isEmpty()) {
+        if (m_nick.isEmpty() || m_passwordHash.isEmpty()) {
             return Status::INVALID_CMND;
         }
     }
@@ -190,7 +190,7 @@ void Item::parseRegisterResponse(const QJsonObject &json){
 	m_nick = args["nickname"].toString();
 	m_ID = args["ID"].toInt();
 	//m_nick_modified = args["modified_nickname"].toBool(); //repair message first
-	m_success = args["success"].toBool();
+	m_success = args["success"].toInt();
 
 }
 
@@ -214,7 +214,7 @@ void Item::parseLoginResponse(const QJsonObject &json){
 	}
 	std::cout << "parsing success flag" << args["success"].toInt() << std::endl; //debug
 	std::cout << "parsing success flag" << args["success"].toBool() << std::endl; //debug
-	m_success = args["success"].toBool();
+	m_success = args["success"].toInt();
 }
 
 

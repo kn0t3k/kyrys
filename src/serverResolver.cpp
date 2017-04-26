@@ -35,11 +35,14 @@ int ServerResolver::execute() {
     m_stateIsForward = false;
     m_stateIsLogin = false;
 
+	qDebug() << "ahoj";
+
     int s = m_item.isValid();
     if (s != Status::SUCCESS) {
         return s;
     }
 
+	qDebug() << "\n" << m_item.getMethodType() << ": method type";
     switch (m_item.getMethodType()) {
         case MethodType::REGISTER : {
             return registerUser();
@@ -60,6 +63,7 @@ int ServerResolver::execute() {
             }
         }
         default: {
+			qDebug() << "invalid cmnd default";
             return Status::INVALID_CMND;
         }
     }
@@ -67,7 +71,9 @@ int ServerResolver::execute() {
 
 int ServerResolver::parse(const QString &data, Mode m) {
     clear();
+	qDebug() << "ServerResolver::parse" << data;
     if (m == Mode::USE_JSON) {
+		qDebug() << "parse if true";
         QJsonDocument d = QJsonDocument::fromJson(data.toUtf8());
 
         if (d.isNull())    // fail - invalid JSON
@@ -115,7 +121,7 @@ int ServerResolver::registerUser() {
             status = Status::FAILED;
         }
     } else {
-        qDebug() << "Failed to open database file";
+        qDebug() << "Failed to open database file" << filePath.fileName();
     }
 
     if (m_mutexFile != nullptr) {

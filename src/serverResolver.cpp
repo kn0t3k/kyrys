@@ -9,17 +9,52 @@ using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Item;
 
 //Constructors
-ServerResolver::ServerResolver(const QString &path,
-                               const QString &file,
-                               QMutex *const mutexFile)
-        : m_path(path),
-          m_item(),
+ServerResolver::ServerResolver(QMutex *const mutexFile)
+        : m_item(),
           m_user("", "",
                  QCryptographicHash::Sha3_512),
-          m_mutexFile(
-                  mutexFile),
-          m_fileName(file) {
+          m_mutexFile(mutexFile) {
     clear();
+
+    QString databasePath = QString(DATABASE_DIRECTORY) + "/" + QString(DATABASE_FILENAME);
+
+    if (!QDir(DATABASE_DIRECTORY).exists()) {
+        QDir().mkdir(DATABASE_DIRECTORY);
+    }
+
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName(databasePath);
+    if (db.open()) {
+        qDebug() << "db opened successfully";
+    } else {
+        qDebug() << "db failed to open at " + databasePath;
+        return;
+    }
+
+    if (!db.tables().contains(QLatin1String("users"))) {
+        qDebug() << "need to create a table";
+        QSqlQuery query;
+        query.prepare("CREATE TABLE users(ids integer primary key, nickname text)");
+        if (!query.exec()) {
+            qDebug() << "craete table error:  " << query.lastError();
+            return;
+        }
+    } else {
+        qDebug() << "table users already created";
+    }
+
+    if (!db.tables().contains(QLatin1String("passwords"))) {
+        qDebug() << "need to create a table";
+        QSqlQuery query;
+        query.prepare("CREATE TABLE passwords(ids integer primary key, password text)");
+        if (!query.exec()) {
+            qDebug() << "craete table error:  " << query.lastError();
+            return;
+        }
+    } else {
+        qDebug() << "table passwords already created";
+    }
+
 }
 
 //Getters
@@ -29,20 +64,16 @@ bool ServerResolver::isLogin() { return m_stateIsLogin; }
 
 const Item &ServerResolver::getItem() const { return m_item; }
 
-
 //Other methods
 int ServerResolver::execute() {
     m_stateIsForward = false;
     m_stateIsLogin = false;
-
-	qDebug() << "ahoj";
 
     int s = m_item.isValid();
     if (s != Status::SUCCESS) {
         return s;
     }
 
-	qDebug() << "\n" << m_item.getMethodType() << ": method type";
     switch (m_item.getMethodType()) {
         case MethodType::REGISTER : {
             return registerUser();
@@ -63,7 +94,6 @@ int ServerResolver::execute() {
             }
         }
         default: {
-			qDebug() << "invalid cmnd default";
             return Status::INVALID_CMND;
         }
     }
@@ -71,9 +101,7 @@ int ServerResolver::execute() {
 
 int ServerResolver::parse(const QString &data, Mode m) {
     clear();
-	qDebug() << "ServerResolver::parse" << data;
     if (m == Mode::USE_JSON) {
-		qDebug() << "parse if true";
         QJsonDocument d = QJsonDocument::fromJson(data.toUtf8());
 
         if (d.isNull())    // fail - invalid JSON
@@ -81,7 +109,8 @@ int ServerResolver::parse(const QString &data, Mode m) {
 
         QJsonObject object = d.object();
 
-        m_item = Item(object);
+        m_item.clear();
+        m_item.parse(object);
 
         m_result = execute();
 
@@ -92,42 +121,42 @@ int ServerResolver::parse(const QString &data, Mode m) {
 }
 
 int ServerResolver::registerUser() {
-    if (m_mutexFile != nullptr) {
-        m_mutexFile->lock();
-    }
+    QSqlQuery query;
 
-    int status = Status::FAILED;
-
-    QFile filePath(m_path + m_fileName);
-    if (filePath.open(QIODevice::ReadOnly)) {
-        QTextStream fileStream(&filePath);
-        int ID = 0;
-        while (!fileStream.atEnd()) {
-            auto line = fileStream.readLine();
-            while (line.contains(m_item.getNick())) {
-                m_item.increaseNick();
-            }
-            ID++;
-        }
-        m_item.setID(ID);
-
-        filePath.close();
-
-        if (filePath.open(QIODevice::WriteOnly | QIODevice::Append)) {
-            filePath.write(m_item.serialize(ID).c_str());
-            filePath.close();
-            status = Status::SUCCESS;
+    //check if nick already in database
+    //if it does, make it unique
+    query.prepare("SELECT ids FROM users WHERE nickname = (:nickname)");
+    while (true) {
+        query.bindValue(":nickname", m_item.getNick());
+        if (!query.exec()) {
+            qDebug() << "select error:  " << query.lastError();
+            return Status::FAILED;
         } else {
-            status = Status::FAILED;
+            if (query.next()) {
+                m_item.increaseNick();
+            } else {
+                break;
+            }
         }
-    } else {
-        qDebug() << "Failed to open database file" << filePath.fileName();
     }
 
-    if (m_mutexFile != nullptr) {
-        m_mutexFile->unlock();
+    //insert the user into database
+    query.prepare("INSERT INTO users (nickname) VALUES (:nickname)");
+    query.bindValue(":nickname", m_item.getNick());
+    if (!query.exec()) {
+        qDebug() << "insert error:  " << query.lastError();
+        return Status::FAILED;
     }
-    return status;
+
+    //insert the user's password into database
+    query.prepare("INSERT INTO passwords (password) VALUES (:password)");
+    query.bindValue(":password", m_item.getPasswordHash());
+    if (!query.exec()) {
+        qDebug() << "insert error:  " << query.lastError();
+        return Status::FAILED;
+    }
+
+    return Status::SUCCESS;
 }
 
 QByteArray ServerResolver::prepareResponse() {
@@ -167,47 +196,24 @@ QByteArray ServerResolver::prepareResponse() {
         }
     }
 
-    qDebug() << QJsonDocument(root_obj).toJson();
     return QJsonDocument(root_obj).toJson();
 }
 
 int ServerResolver::getUserID(const QString &nickName) {
-    if (m_mutexFile != nullptr) {
-        m_mutexFile->lock();
-    }
+    int userID = -1;
 
-    int ID = -1;
-
-    QFile filePath(m_path + m_fileName);
-    if (filePath.open(QIODevice::ReadOnly)) {
-        QTextStream fileStream(&filePath);
-
-        while (!fileStream.atEnd()) {
-            auto line = fileStream.readLine();
-            if (line.contains(QString(";") + nickName + ";")) {
-                QStringList args = line.split(";");
-                bool isInt;
-                ID = args.value(0).toInt(&isInt);
-
-                if (!isInt) {
-                    ID = -1;
-                }
-
-                m_user.setPasswordHash(args.value(3).toLatin1());
-
-                break;
-            }
-        }
-
-        filePath.close();
+    QSqlQuery query;
+    query.prepare("SELECT ids FROM users WHERE nickname = (:nickname)");
+    query.bindValue(":nickname", nickName);
+    if (!query.exec()) {
+        qDebug() << "select error:  " << query.lastError();
     } else {
-        qDebug() << "Failed to open database file: " << filePath.fileName();
+        if (query.next()) {
+            userID = query.value(0).toInt();
+        }
     }
 
-    if (m_mutexFile != nullptr) {
-        m_mutexFile->unlock();
-    }
-    return ID;
+    return userID;
 }
 
 void ServerResolver::clear() {
@@ -225,6 +231,7 @@ int ServerResolver::loginUser() {
     if (ID == -1) {
         return Status::INVALID_CRED;
     } else {
+        getUserPassword(ID);
         // compare received hash with the one from database
         if (m_item.getPasswordHash() == QString(m_user.getPasswordHash())) {
             m_item.setID(ID);
@@ -239,4 +246,18 @@ int ServerResolver::loginUser() {
 
 int ServerResolver::getRecipientID() const {
     return m_IDofRecipient;
+}
+
+void ServerResolver::getUserPassword(int userID) {
+    QSqlQuery query;
+    query.prepare("SELECT password FROM passwords WHERE ids = (:id)");
+    query.bindValue(":id", userID);
+    if (!query.exec()) {
+        qDebug() << "select error:  " << query.lastError();
+    } else {
+        if (query.next()) {
+            QString pass = query.value(0).toString();
+            m_user.setPasswordHash(pass.toLocal8Bit());
+        }
+    }
 }

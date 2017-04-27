@@ -4,7 +4,7 @@
 #include <iostream>
 
 int main(int argc, char **argv) {
-	int portNo = Kyrys::Enums::Defaults::DefaultPortNumber::DEFAULT;
+	int portNo = Kyrys::Enums::Defaults::DefaultPortNumber::DEFAULT_PORT;
 	QCoreApplication a(argc, argv);
 
 	QCommandLineParser parser;

@@ -6,108 +6,103 @@ namespace Kyrys {
     class Item {
 
         typedef Kyrys::Enums::Item::MethodType MethodType;
-        typedef Kyrys::Enums::Resolver::Mode Mode;
-		typedef Kyrys::Enums::JsonMessage::MessageType MessageType;
-     private:
+        typedef Kyrys::Enums::JsonMessage::MessageType MessageType;
+    private:
         MethodType m_methodType;
-		MessageType m_messageType;	//Type of message e.g. RegisterRequest, Response, ...
-        QString m_name;				//todo: maybe delete this
-        QString m_nick;				//modified nickname
-        QString m_nickOriginal;		//origin nickname
-        QString m_passwordHash;		//hash of user's password
-        QString m_forwardTo;    	//to whom the message shall be forwarded
-        QString m_args; 			//the args of the message, only the receiving user will be able to de-crypt this
-        int m_extension;			//???
-        int m_ID;					//ID of user assigned by server during registration process
-		bool m_nick_modified;		//flag if nickname was modified by
-		int m_success;				//flag if process was succesfully finished on server's side
+        MessageType m_messageType;    //Type of message e.g. RegisterRequest, Response, ...
+        QString m_nick;                //modified nickname
+        QString m_nickOriginal;        //origin nickname
+        QString m_passwordHash;        //hash of user's password
+        QString m_forwardTo;        //to whom the message shall be forwarded
+        QString m_args;            //the args of the message, only the receiving user will be able to de-crypt this
+        int m_extension;            //???
+        int m_ID;                    //ID of user assigned by server during registration process
+        bool m_nick_modified;        //flag if nickname was modified by
+        bool m_success;                //flag if process was succesfully finished on server's side
 
-	public:
-		//Parsing system
-	    /**
-	     * @brief			This is main parsing method covering system of smaller parsing methods with prefix parse.
-	     * 					You can see them bellow.
-	     *
-	     * @param[in]json	json message which will be parsed into class members atributes called same as keynames in message
-	     * 					For example key "nick" has member atribute "m_nick"
-	     *
-	     * @note			If you want to add new parsing method, add it between
-	 	 *       			last parsing method FORWARD and statement UNKOWN in this format example
-	     *       			It is more clear code than hundredts of else branches with same code UNKNOWN
-	     *
-	     * "BEGIN OF EXAMPLE"
-	 	 * if (json["method"].toString() == "name of method") {
-	 	 * 		parseMessageXYZ(json)
-	 	 * 		return;  //Don't forget on return!
-	 	 * }
-	     * "END OF EXAMPLE"
-	     *
-	 	 */
+    public:
+        //Parsing system
+        /**
+         * @brief			This is main parsing method covering system of smaller parsing methods with prefix parse.
+         * 					You can see them bellow.
+         *
+         * @param[in]json	json message which will be parsed into class members atributes called same as keynames in message
+         * 					For example key "nick" has member atribute "m_nick"
+         *
+         * @note			If you want to add new parsing method, add it between
+          *       			last parsing method FORWARD and statement UNKOWN in this format example
+         *       			It is more clear code than hundredts of else branches with same code UNKNOWN
+         *
+         * "BEGIN OF EXAMPLE"
+          * if (json["method"].toString() == "name of method") {
+          * 		parseMessageXYZ(json)
+          * 		return;  //Don't forget on return!
+          * }
+         * "END OF EXAMPLE"
+         *
+          */
         void parse(const QJsonObject &json);
 
-	//private: //Because we need to test these methods
-		//Parsing JSON messages
-		void parseRegisterRequest(const QJsonObject &json);
-		void parseLoginRequest(const QJsonObject &json);
-		void parseRegisterResponse(const QJsonObject &json);
-		void parseLoginResponse(const QJsonObject &json);
-		void parseForward(const QJsonObject &json);
+        //private: //Because we need to test these methods
+        //Parsing JSON messages
+        void parseRegisterRequest(const QJsonObject &json);
 
-	public:
+        void parseLoginRequest(const QJsonObject &json);
+
+        void parseRegisterResponse(const QJsonObject &json);
+
+        void parseLoginResponse(const QJsonObject &json);
+
+        void parseForward(const QJsonObject &json);
+
+    public:
         //Constructors
         /**
          * Default constructor, its purpose is mainly to reset item values.
          */
         Item();
 
-        /**
-         * @brief      Parametric constructor of item, construct abstract item which holds info
-         *             about what should execute etc.
-         *
-         * @param[in]  json  The json is input json object containing data to populate item with.
-         */
-        Item(const QJsonObject &json);
-
-
         //Getters
         const MethodType &getMethodType() const;
 
-		const QString &getName() const;
+        const QString &getNick() const;
 
-		const QString &getNick() const;
+        const QString &getPasswordHash() const;
 
-		const QString &getPasswordHash() const;
-
-		const QString &getRecepient() const;
+        const QString &getRecepient() const;
 
         const QString &getArgs() const;
 
         int getID() const;
 
-		bool getNick_modified() const;
+        bool getNick_modified() const;
 
-		bool getSuccess() const;
+        bool getSuccess() const;
 
 
-		//Setters
+        //Setters
         void setID(int ID);
 
 
-		//Validation system
-		/**
+        //Validation system
+        /**
          * @brief      Checks whether an item is valid, ie. contains invalid method name, empty nick or name
          *             or any other invalid data. Can vary depending on which method is to be used.
          *
          * @return     True if valid, False otherwise.
          */
-		int isValid() const; //We will expand and refactor validation system with new methods covering all JSON messages
+        int isValid() const; //We will expand and refactor validation system with new methods covering all JSON messages
 
-		//Validating JSON messages
-		int isValidRegisterRequest() const;
-		int isValidRegisterResponse() const;
-		int isValidLoginRequest() const;
-		int isValidLoginResponse() const;
-		int isValidForward() const;
+        //Validating JSON messages
+        int isValidRegisterRequest() const;
+
+        int isValidRegisterResponse() const;
+
+        int isValidLoginRequest() const;
+
+        int isValidLoginResponse() const;
+
+        int isValidForward() const;
 
 
         //Other methods
@@ -126,14 +121,14 @@ namespace Kyrys {
          */
         void increaseNick();
 
-		/**
-		 * @brief		Resets Item to default state by rewritting all member atributes to default values
-		 * 				all atributes of type:
-		 * 				bool 			-> set to false
-		 * 				integral types  -> set to zero
-		 * 				string types    -> set to empty string "" with zero length
-		 * 				1B char types   -> ASCII value is set to zero which represents first char of ASCII table
-		 */
-		void clear();
+        /**
+         * @brief		Resets Item to default state by rewritting all member atributes to default values
+         * 				all atributes of type:
+         * 				bool 			-> set to false
+         * 				integral types  -> set to zero
+         * 				string types    -> set to empty string "" with zero length
+         * 				1B char types   -> ASCII value is set to zero which represents first char of ASCII table
+         */
+        void clear();
     };
 }

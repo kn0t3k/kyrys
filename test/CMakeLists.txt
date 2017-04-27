@@ -12,4 +12,4 @@ add_executable(${TEST_NAME} ${TEST_SOURCES})
 target_include_directories(Catch INTERFACE ${CATCH_DIR})
 target_link_libraries(${TEST_NAME} Catch src_library)
 
-qt5_use_modules(${TEST_NAME} Network WebSockets)
+qt5_use_modules(${TEST_NAME} ${QT_USED_MODULES})

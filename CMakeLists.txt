@@ -15,6 +15,8 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Network REQUIRED)
 
+set(QT_USED_MODULES Network Sql)
+
 set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wextra -pedantic")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
@@ -37,8 +39,8 @@ add_executable(${SERVER_NAME} "src/serverMain.cpp")
 add_executable(${CLIENT_NAME} "src/clientMain.cpp")
 target_link_libraries(${SERVER_NAME} src_library) 	# not linking mbedTLS
 target_link_libraries(${CLIENT_NAME} src_library)	# not linking mbedTLS
-qt5_use_modules(${SERVER_NAME} Network)
-qt5_use_modules(${CLIENT_NAME} Network)
+qt5_use_modules(${SERVER_NAME} ${QT_USED_MODULES})
+qt5_use_modules(${CLIENT_NAME} ${QT_USED_MODULES})
 
 
 ################################################

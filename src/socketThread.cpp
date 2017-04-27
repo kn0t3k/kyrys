@@ -9,7 +9,7 @@ SocketThread::SocketThread(int socketID, const QString &resolverPath, QMutex *co
         :
         QThread(dynamic_cast<QObject *>(parent)),
         m_socketID(socketID),
-        m_resolver(resolverPath, "db.txt", mutexFile),
+        m_resolver(mutexFile),
         m_server(parent) {
 
 }
@@ -34,6 +34,7 @@ void SocketThread::run() {
         file_key.close();
     } else {
         qDebug() << file_key.errorString();
+        return;
     }
 
     QFile file_cert("ia.crt");
@@ -42,6 +43,7 @@ void SocketThread::run() {
         file_cert.close();
     } else {
         qDebug() << file_cert.errorString();
+        return;
     }
 
     QSslKey ssl_key(key, QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey, "server");
@@ -69,7 +71,6 @@ void SocketThread::run() {
 }
 
 void SocketThread::readData() {
-    qDebug() << "availible: " << m_socket->bytesAvailable();
     QString incomingData = QString::fromUtf8(m_socket->readAll());
     int result = m_resolver.parse(incomingData, Mode::USE_JSON);
     qDebug() << "parse result: " << result;

@@ -13,9 +13,7 @@ namespace Kyrys {
         typedef Kyrys::Item Item;
         typedef Kyrys::User User;
 
-     private:
-        //todo: add comments what's purpose of these atributes
-        QString m_path;                 //path to folder where are saved all databases ?
+    private:
         int m_result;   // general result value to hold return values of various functions
         int m_IDofRecipient;    // id of user that the message shall be forwarded to
         Item m_item;                 // incoming request from client
@@ -23,7 +21,7 @@ namespace Kyrys {
         bool m_stateIsForward;  // if resolver is in state of forwarding a message
         User m_user;                 // info about user, from database
         QMutex *const m_mutexFile;      // mutex to protect file from data race
-        QString m_fileName;             //filename of what?
+        QSqlDatabase db;
 
         //Getters
         int getUserID(const QString &nickName);
@@ -40,7 +38,9 @@ namespace Kyrys {
 
         int loginUser();
 
-     public:
+        void getUserPassword(int userID);
+
+    public:
         //Constructors
         /**
          * Construct a resolver object.
@@ -48,7 +48,7 @@ namespace Kyrys {
          * @param file The file name which shall contain the DB.
          * @param mutexFile Lock of the file to prevent data race.
          */
-        ServerResolver(const QString &path, const QString &file, QMutex *const mutexFile = nullptr);
+        ServerResolver(QMutex *const mutexFile = nullptr);
 
 
         //Getters
@@ -66,7 +66,7 @@ namespace Kyrys {
 
         const Item &getItem() const;
 
-        int getRecipientID() const ;
+        int getRecipientID() const;
 
 
         //Other methods

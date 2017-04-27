@@ -24,6 +24,13 @@
 #include <QtCore/QTime>
 #include <QtCore/QThread>
 #include <QtCore/QList>
+#include <QtCore/QDir>
+
+//Qt SQL
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
+#include <QtSql/QSqlRecord>
 
 //STD library
 #include <iostream>

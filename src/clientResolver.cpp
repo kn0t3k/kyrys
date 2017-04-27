@@ -1,10 +1,6 @@
 #include <reference.hpp>
 #include <clientResolver.hpp>
 
-#define DEBUG 1
-
-#ifdef DEBUGGING_CLIENT_RESOLVER
-
 using Kyrys::ClientResolver;
 
 using Kyrys::Enums::Resolver::Status;
@@ -60,7 +56,3 @@ if(DEBUG)std::cout << "\nClientResolver::parse called" << std::endl;
 		return Status::FAILED;
 }
 
-
-
-
-#endif

@@ -12,7 +12,6 @@ typedef Kyrys::Enums::Client::Registration::Status rStatus;                     
 typedef Kyrys::Enums::Client::Registration::PasswordSecQuality passwordQuality;
 using Kyrys::Enums::Resolver::Status;
 
-#define DEBUG 1
 #define CLIENT_PROMPT >
 
 Client::Client(const QString &hostName, quint16 port, QObject *parent) :
@@ -33,8 +32,6 @@ bool Client::secureConnect() {
                 this, SLOT(socketError(QAbstractSocket::SocketError)));
         connect(m_socket, SIGNAL(sslErrors(QList<QSslError>)),
                 this, SLOT(sslErrors(QList<QSslError>)));
-		/*connect(m_socket, SIGNAL(readyRead()),
-                this, SLOT(socketReadyRead()));*/
     }
     qDebug() << "connecting to host";
 

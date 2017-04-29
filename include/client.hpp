@@ -4,6 +4,7 @@
 #include <user.hpp>
 #include <istream>
 #include <item.hpp>
+#include <chat.hpp>
 
 namespace Kyrys {
     class Client : public QObject {
@@ -12,12 +13,14 @@ namespace Kyrys {
         typedef Kyrys::User User;
         typedef std::string string;
         typedef Kyrys::Enums::JsonMessage::MessageType MessageType;
+		typedef Kyrys::Chat Chat;
 
     private:
         QSslSocket *m_socket = nullptr;
         User m_user;
         QString m_hostname;
         quint16 m_port;
+		//Chat m_chat;
 
     private slots:
 
@@ -177,5 +180,20 @@ namespace Kyrys {
          *	@note	expecting that socket is already connected to server, if not method will fail
          */
         bool receive(QByteArray &response);
+
+
+		/**
+		 * @brief This method will iniciate chat with some another user
+		 * @param in
+		 * @return
+		 */
+		int chat(std::istream &in = std::cin); //todo
+
+
+		/**
+		 * @brief Adds new user into friend list in user
+		 * @return
+		 */
+		int addFriend(); //todo
     };
 }

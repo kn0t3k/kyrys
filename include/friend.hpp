@@ -4,7 +4,7 @@
 
 namespace Kyrys {
 	/**
-	 * @brief	class Friend represents one user in user's friend list. This class obtain informations about friend as ID, IP adress, history of communication
+	 * @brief	class Friend represents one user in user's friend list. This class obtain informations about friend as ID, IP adress(not neccesary), history of communication etc.
 	 *
 	 */
 	class Friend {
@@ -15,7 +15,17 @@ namespace Kyrys {
 		std::string		m_history_path;	//Holds path to file with encrypted history of communication with friend
 
 	public:
+		//Constructors
+		Friend();
 
+		//Friend(unsigned int ID, const string &nickname, const string &history_path);
+
+
+		//Setters
+		void clear();
+
+
+		//Getters
 
 	};
 }

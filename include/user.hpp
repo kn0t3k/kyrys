@@ -19,6 +19,7 @@ namespace Kyrys {
 		UserNetworkOptions				m_userNetworkOptions;
 
 		//TODO: Add list of friends(HASH TABLE) and maybe more member atributes
+		//add userHistory
 
 	public:
 		//Constructors

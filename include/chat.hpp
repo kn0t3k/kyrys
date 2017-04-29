@@ -16,6 +16,7 @@ namespace Kyrys {
 	typedef Kyrys::Enums::JsonMessage::MessageType 	MessageType;
 	typedef Kyrys::Enums::Chat::Accessibility 		Accessibility;
 	typedef Kyrys::Enums::Chat::DataEncryption 		Encryption;
+	typedef Kyrys::Friend Friend;
 
 	private:
 		Friend m_ChatSender;   			//Is user which is initiating chat
@@ -23,11 +24,17 @@ namespace Kyrys {
 		//todo: create sharedkey for encryption by symetric cipher
 		Accessibility m_Accessibility;	//Holds flag if user is ready for chat means online or is chatting or is offline/"dont want to be disturbed"
 		Encryption	  m_Encryption;		//Holds flag if chat will be encrypted against the server or not.
-
+		//reference vector callHistory	//SK: List uzivatelov s ktorymi som si chatoval aj takych, ktory niesu priatelia
+		//reference vector friendList   //List of my friends
 
 
 
 	public:
+
+		Chat();
+
+		//Chat(const Friend &m_ChatSender, const Friend &m_ChatReceiver, Accessibility m_Accessibility, Encryption m_Encryption);
+
 
 		/**
 		 * @brief	Sets all atributes of class to default values;
@@ -47,17 +54,19 @@ namespace Kyrys {
 		 * @return					Returns created message
 		 * @note	EXAMPLE of CHAT_REQUEST message
 		 * 		   {
-         * 		   		"messageType": "CHAT_REQUEST",								//String
-                        "method": "chat",											//string
+         * 		   		"messageType": "CHAT_REQUEST",									//String
+                        "method": "chat",												//string
                         "args" : {
-                        	"fromID": "ID of user which is sending this message"	//unsigned int
-                            "toID": "ID of user to whom is addressed this message", //Unsigned int
-                        	"dataEncryption": PLAIN_TEXT / SHARED_KEY,				//Enum integer - this parameter saying if chat will have data encrypted by shared-key or not
+                        	"fromID": "ID of user which is sending this message"		//unsigned int
+                            "toID": "ID of user to whom is addressed this message", 	//Unsigned int
+                            "toNick": "Nick of user to whom is adressed this message", 	//string
+                        	"dataEncryption": PLAIN_TEXT / SHARED_KEY,					//Enum integer - this parameter saying if chat will have data encrypted by shared-key or not
                         }
                    }
          * @warning  Keep strictly format of message in validation and parsing methods, especcialy format of keys and type of values!
+         * @note	 Valid message need just one of parameters toID or toNick
 		 */
-		QJsonDocument jsonCreateChatRequest(const Friend& recipient = m_ChatReceiver) const; //todo: implement
+		QJsonDocument jsonCreateChatRequest(const Friend& recipient) const; //todo: implement
 
 
 		/**
@@ -78,7 +87,7 @@ namespace Kyrys {
                    }
          * @warning  Keep strictly format of message in validation and parsing methods, especcialy format of keys and type of values!
 		 */
-		QJsonDocument jsonCreateChatResponse(const Friend& recipient = m_ChatSender, bool answer = true) const; //todo: implement
+		QJsonDocument jsonCreateChatResponse(const Friend& recipient, bool answer = true) const; //todo: implement
 
 
 		//todo: rewrite not so clear brief of this comment

@@ -17,13 +17,15 @@ unsigned int User::getID() const { return m_ID; }
 void User::setNickname(const std::string &m_nickname) { User::m_nickname = m_nickname; }
 void User::setPasswordHash(const QByteArray &m_passwordHash) { User::m_passwordHash = m_passwordHash; }
 void User::setID(unsigned int m_ID) { User::m_ID = m_ID; }
-void User::clear() {
+
+void User::clear(){
 	m_ID = 0;
 	m_nickname = "";
 	m_passwordHash = "";
 	m_userNetworkOptions = UserNetworkOptions();
 }
 
+//Other methods
 void User::printUser(){
 	std::cout << "Informations about new user"
 			     "\nNickname: " << getNickname() <<

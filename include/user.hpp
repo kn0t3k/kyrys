@@ -16,27 +16,25 @@ namespace Kyrys {
 		unsigned int 					m_ID;
 		std::string 					m_nickname;
 		QByteArray  					m_passwordHash;
-		QCryptographicHash::Algorithm 	m_usedHashAlgorithm;
 		UserNetworkOptions				m_userNetworkOptions;
 
-		//TODO: Add list of friends and maybe more member atributes
+		//TODO: Add list of friends(HASH TABLE) and maybe more member atributes
 
 	public:
 		//Constructors
 		User() = default;
-		User(const std::string &nickname, const QByteArray &passwordHash, QCryptographicHash::Algorithm usedHashAlgorithm);
+		User(const std::string &nickname, const QByteArray &passwordHash);
 
 		//Getters
 		const std::string &getNickname() const;
 		const QByteArray &getPasswordHash() const;
-		QCryptographicHash::Algorithm getUsedHashAlgorithm() const;
-
 		unsigned int getID() const;
 
 		//Setters
 		void setNickname(const std::string &m_nickname);
 		void setPasswordHash(const QByteArray &m_passwordHash);
 		void setID(unsigned int m_ID);
+		void clear();
 
 		//Printers
 		void printUser();

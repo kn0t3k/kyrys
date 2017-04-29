@@ -11,8 +11,7 @@ using Kyrys::Item;
 //Constructors
 ServerResolver::ServerResolver(QMutex *const mutexFile)
         : m_item(),
-          m_user("", "",
-                 QCryptographicHash::Sha3_512),
+          m_user("", ""),
           m_mutexFile(mutexFile) {
     clear();
 
@@ -221,7 +220,7 @@ void ServerResolver::clear() {
     m_item = Item();
     m_stateIsForward = false;
     m_stateIsLogin = false;
-    m_user = User("", "", QCryptographicHash::Sha3_512);
+    m_user = User("", "");
     m_IDofRecipient = -1;
 }
 

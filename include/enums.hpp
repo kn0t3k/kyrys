@@ -82,7 +82,20 @@ namespace Kyrys {
                 LOGIN_REQUEST,
                 LOGIN_RESPONSE,
                 FORWARD,
+                CHAT_REQUEST,
+                CHAT_RESPONSE,
                 UNKNOWN
+            };
+        }
+        namespace Chat {
+            enum Accessibility {
+                ONLINE,         //User will get notice about incoming chat
+                OFFLINE,        //User's chat will automatically send back refusing CHAT_RESPONSE message
+                CHATING,        //This status is active during some chat and inform sender about this status, also program will create history of tries and inform receiver about missed CHAT_REQUESTs
+            };
+            enum DataEncryption {
+                PLAIN_TEXT,         //Data part of message between 2 users will be plaintext
+                SHARED_KEY          //                                        -||- encrypted by symetric cipher by sharedkey
             };
         }
     }

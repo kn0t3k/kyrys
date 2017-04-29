@@ -32,6 +32,7 @@ namespace Kyrys {
         void copyRegistrationItem(const Item &item); //copy informations from Item to client and user
 
     public:
+        //Constructors
         /**
         * @brief Client constructor.
         * @details Constructs a new client and prepares it to connect to a server.
@@ -42,18 +43,23 @@ namespace Kyrys {
         */
         explicit Client(const QString &hostName, quint16 port, QObject *parent = 0);
 
+        //Destructors
         /**
          * @brief Client destructor.
          * @details De-allocates the used memory.
          */
         ~Client();
 
+
+        //Getters
+        const User &getUser() const;
+
         /**
-     * @brief Connect to the specified server.
-     * @details Sets up a connection between a client and server, compares the server-supplied
-     * certificate to the one distributed with the client to check server authority.
-     * @return Return true if connection was succesfull.
-     */
+         * @brief Connect to the specified server.
+         * @details Sets up a connection between a client and server, compares the server-supplied
+         * certificate to the one distributed with the client to check server authority.
+         * @return Return true if connection was succesfull.
+         */
         bool secureConnect();
 
         /**
@@ -64,8 +70,8 @@ namespace Kyrys {
          */
         bool sendData(const QString &data);
 
-        const User &getUser() const;
 
+        //Loading Credentials for Login/Registration
         int loadRegistrationCredentials(string &nickname, string &password, std::istream &in = std::cin);
 
         int loadLoginCredentials(string &nickname, string &password, std::istream &in = std::cin);
@@ -123,6 +129,20 @@ namespace Kyrys {
         QJsonDocument jsonMessageUserAuthentication(MessageType messageType);
 
 
+
+        //QJsonDocument jsonCreateCallRequest(Friend recipient)
+
+        //void createSharedKey();
+
+        /**
+         * @brief This method covers whole chat with friend. It covers whole process of chating with one friend defined by receiversID and it will keep
+         *        encrypted end-to-end tunnel trough server until one of the participants finish communication.
+         * @param receiverID[in]
+         */
+        //void callFriend(int recipientID);
+
+
+
         /**
          EXAMPLE:
         {
@@ -144,14 +164,17 @@ namespace Kyrys {
 
 
         /**
-         *	@brief send message to socket and control if data was send succesfully
+         *	@brief send message to socket m_socket and control if data was send succesfully
+         *	@note	expecting that socket is already connected to server, if not method will fail
          *	@return true if successfully send data, false otherwise
          */
         bool send(const QString &data);
 
         /**
-         *	@brief receive message from socket and control if data was received succesfully
+         *	@brief receive message from socket m_socket and control if data was received succesfully
+         *	@param [out]response	reference to buffer response where will be written data from socket
          *	@return true if successfully received data, false if no data arrived in set timeout 1000ms
+         *	@note	expecting that socket is already connected to server, if not method will fail
          */
         bool receive(QByteArray &response);
     };

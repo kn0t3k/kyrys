@@ -4,6 +4,8 @@
 #include <QtCore/QJsonDocument>
 #include <clientResolver.hpp>
 
+#define CLIENT_PROMPT >
+
 using Kyrys::Client;
 using Kyrys::Enums::JsonMessage::MessageType;
 
@@ -12,8 +14,8 @@ typedef Kyrys::Enums::Client::Registration::Status rStatus;                     
 typedef Kyrys::Enums::Client::Registration::PasswordSecQuality passwordQuality;
 using Kyrys::Enums::Resolver::Status;
 
-#define CLIENT_PROMPT >
 
+//Constructors
 Client::Client(const QString &hostName, quint16 port, QObject *parent) :
         QObject(parent),
         m_socket(0),
@@ -21,6 +23,12 @@ Client::Client(const QString &hostName, quint16 port, QObject *parent) :
         m_hostname(hostName),
         m_port(port) {}
 
+
+//Destructors
+Client::~Client() { delete m_socket; }
+
+
+//Network connectivity methods
 bool Client::secureConnect() {
     if (!m_socket) {
         qDebug() << "new socket";
@@ -75,6 +83,29 @@ void Client::sslErrors(const QList<QSslError> &errors) {
             qDebug() << "Client error:\t" << e.errorString();
         }
 }
+
+bool Client::send(const QString &data){
+	m_socket->write(data.toLatin1().data());
+	if (m_socket->waitForBytesWritten(300)) {
+		if(DEBUG) std::cout << "Client::send - success" << std::endl;
+		return true;
+	} else {
+		if(DEBUG) std::cout << "Client::send - fail" << std::endl;
+		return false;
+	}
+}
+
+bool Client::receive(QByteArray& response) {
+	if(m_socket->waitForReadyRead(1000)){
+		if(DEBUG) std::cout << "\nClient::receive - available bytes on Socket: " << m_socket->bytesAvailable() << std::endl;
+		response = m_socket->readAll(); //REGISTER_RESPONSE received
+		return true;
+	} else {
+		if(DEBUG) std::cout << "\nClient::receive - No data received" << std::endl;
+		return false;
+	}
+}
+
 
 //Getters
 const Client::User &Client::getUser() const { return m_user; }
@@ -133,7 +164,6 @@ int Client::controlPasswordSecQuality(const std::string &password) const {
 
 int Client::registration(std::istream &in) {
     rStatus status = rStatus::REGISTRATION_STARTED;
-    QCryptographicHash::Algorithm usedHashAlgorithm = QCryptographicHash::Sha3_512;
 
     std::cout << "\nNow follows registration procedure" << std::endl;
 
@@ -151,8 +181,8 @@ int Client::registration(std::istream &in) {
 
 
 	//Hashing password
-    const QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), usedHashAlgorithm);
-    m_user = User(nickname, hashed_password, usedHashAlgorithm);
+    const QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), HASH);
+    m_user = User(nickname, hashed_password);
     status = rStatus::PASSWORD_HASHED;
 
 
@@ -200,7 +230,6 @@ int Client::login(std::istream &in) {
     lStatus status = lStatus::LOGIN_STARTED;
     std::string nickname;
     std::string password;
-    QCryptographicHash::Algorithm usedHashAlgorithm = QCryptographicHash::Sha3_512;
 
 
 	for(int i = 0; i < 5; ++i) {
@@ -210,8 +239,8 @@ int Client::login(std::istream &in) {
 
 
 		//Hashing password
-		QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), usedHashAlgorithm);
-		m_user = User(nickname, hashed_password, usedHashAlgorithm);
+		QByteArray hashed_password = QCryptographicHash::hash(QByteArray::fromStdString(password), HASH);
+		m_user = User(nickname, hashed_password);
 		hashed_password.clear();
 		status = lStatus::PASSWORD_HASHED;
 
@@ -271,7 +300,7 @@ QJsonDocument Client::jsonMessageUserAuthentication(MessageType messageType) {
 
     args_obj["nickname"] = QString::fromStdString(m_user.getNickname());
     args_obj["password"] = m_user.getPasswordHash().toStdString().c_str();
-    args_obj["hash algorithm"] = m_user.getUsedHashAlgorithm();
+    args_obj["hash algorithm"] = HASH;
 
     root_obj.insert("args", args_obj);
 
@@ -286,39 +315,24 @@ void Client::run(std::istream &in) {
     do {
         std::cout << "\n> " << std::flush;
         std::getline(in, command);
-		if(command == "register")
+		if(command == "register") {
 			registration();
-		if(command == "login")
+			continue;
+		}
+		if(command == "login") {
 			login();
-
+			continue;
+		}
+		if(command == "help") {
+			//todo: writes some man page on stdout, use welcomepages.hpp
+			continue;
+		}
+		std::cout << "\nUNKNOWN COMMAND\n" << std::endl;
     } while (command != "quit");
 }
-
-Client::~Client() { delete m_socket; }
 
 void Client::copyRegistrationItem(const Item& item) {
 	m_user.setID(item.getID());
 	m_user.setNickname(item.getNick().toStdString());
 }
 
-bool Client::send(const QString &data){
-	m_socket->write(data.toLatin1().data());
-	if (m_socket->waitForBytesWritten(300)) {
-		if(DEBUG) std::cout << "Client::send - success" << std::endl;
-		return true;
-	} else {
-		if(DEBUG) std::cout << "Client::send - fail" << std::endl;
-		return false;
-	}
-}
-
-bool Client::receive(QByteArray& response) {
-	if(m_socket->waitForReadyRead(1000)){
-		if(DEBUG) std::cout << "\nClient::receive - available bytes on Socket: " << m_socket->bytesAvailable() << std::endl;
-		response = m_socket->readAll(); //REGISTER_RESPONSE received
-		return true;
-	} else {
-		if(DEBUG) std::cout << "\nClient::receive - No data received" << std::endl;
-		return false;
-	}
-}

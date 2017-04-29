@@ -12,7 +12,6 @@ namespace Kyrys {
 		QHostAddress 		m_userIPAddress;
 		QHostAddress		m_serverIPAddress;
 		quint16 			m_port; 			//server m_port
-		//QSslSocket 			m_socket;
 
 	public:
 

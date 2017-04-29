@@ -35,6 +35,7 @@
 //STD library
 #include <iostream>
 #include <fstream>
+#include <limits>
 
 //Our own *.hpp files from include directory
 #include <enums.hpp>

@@ -53,8 +53,9 @@ void Item::clear() {
     m_nick_modified = false;
     m_success = 0;
 
-	m_fromID = 0;
-	m_toID = 0;
+	//Chatting params
+	m_fromID = std::numeric_limits<unsigned int>::max();
+	m_toID = std::numeric_limits<unsigned int>::max();
 	m_toNick = "";
 	m_accessibility = Accessibility::OFFLINE;
 	m_encryption = Encryption::PLAIN_TEXT;
@@ -122,7 +123,7 @@ int Item::isValidRegisterRequest() const {
     return Status::SUCCESS;
 }
 
-int Item::isValidRegisterResponse() const { //todo
+int Item::isValidRegisterResponse() const {//todo
     if (m_ID < 0)
         return Status::INVALID_CMND;
     return Status::SUCCESS;
@@ -134,7 +135,7 @@ int Item::isValidLoginRequest() const {
     return Status::SUCCESS;
 }
 
-int Item::isValidLoginResponse() const { //todo
+int Item::isValidLoginResponse() const {
     return Status::SUCCESS;
 }
 
@@ -145,23 +146,27 @@ int Item::isValidForward() const {
 }
 
 int Item::isValidChatSourceDest() const{
-    //todo
-    return 0;
+    if(m_fromID != std::numeric_limits<unsigned int>::max() && (m_toID != std::numeric_limits<unsigned int>::max() || !m_toNick.isEmpty()))
+		return Status::SUCCESS;
+	else
+		return Status::INVALID_CMND;
 }
 
 int Item::isValidChatRequest() const{
-    //todo
-    return 0;
+	if(m_encryption != Encryption::PLAIN_TEXT || m_encryption != Encryption::SHARED_KEY)
+		return Status::INVALID_JSON;
+	else
+		return isValidChatSourceDest();
 }
 
 int Item::isValidChatResponse() const{
-    //todo
-    return 0;
+    if(m_accessibility > Accessibility::CHATTING)
+		return Status::INVALID_JSON;
+    else return isValidChatSourceDest();
 }
 
 int Item::isValidChatData() const{
-    //todo
-    return 0;
+    return isValidChatSourceDest();
 }
 
 

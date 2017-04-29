@@ -11,6 +11,7 @@ using Kyrys::Item;
 using Kyrys::ServerResolver;
 using Kyrys::Enums::Resolver::Status;
 using Kyrys::Enums::Item::MethodType;
+using Kyrys::Enums::JsonMessage::MessageType;
 using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Utils::Random;
 
@@ -23,6 +24,8 @@ Item::Item() {
 //Getters
 const MethodType &Kyrys::Item::getMethodType() const { return m_methodType; }
 
+const MessageType &Kyrys::Item::getMessageType() const { return m_messageType; }
+
 const QString &Kyrys::Item::getNick() const { return m_nick; }
 
 int Item::getID() const { return m_ID; }
@@ -32,8 +35,6 @@ const QString &Item::getPasswordHash() const { return m_passwordHash; }
 bool Item::getNick_modified() const { return m_nick_modified; }
 
 bool Item::getSuccess() const { return m_success; }
-
-const QString &Item::getRecepient() const { return m_forwardTo; }
 
 const QString &Item::getArgs() const { return m_args; }
 
@@ -46,7 +47,6 @@ void Item::clear() {
     m_nick = "";
     m_nickOriginal = "";
     m_passwordHash = "";
-    m_forwardTo = "";
     m_args = "";
     m_extension = 0;
     m_ID = 0;
@@ -108,9 +108,6 @@ int Item::isValid() const {
             return isValidChatData();
     }
 
-    if (m_methodType == MethodType::FORWARD)
-        return isValidForward();
-
     return Status::UNKNOWN_METHOD;
 }
 
@@ -135,12 +132,6 @@ int Item::isValidLoginRequest() const {
 }
 
 int Item::isValidLoginResponse() const { //todo
-    return Status::SUCCESS;
-}
-
-int Item::isValidForward() const {
-    if (m_args.isEmpty())
-        return Status::INVALID_CMND;
     return Status::SUCCESS;
 }
 
@@ -201,12 +192,6 @@ void Item::parse(const QJsonObject &json) {
             parseLoginResponse(json);
             return;
         }
-    }
-
-    //Checking if method = forward
-    if (json["method"].toString() == "forward") {
-        parseForward(json);
-        return;
     }
 
     //Checking if method = chat
@@ -295,21 +280,9 @@ void Item::parseLoginResponse(const QJsonObject &json) {
     m_success = args["success"].toInt();
 }
 
-void Item::parseForward(const QJsonObject &json) {
-    m_messageType = MessageType::FORWARD;
-
-    m_forwardTo = json["to"].toString();
-    if (m_forwardTo.isEmpty()) {
-        m_methodType = MethodType::INVALID_CMND;
-    } else {
-        m_args = QString(QJsonDocument(json["args"].toObject()).toJson());
-        m_methodType = MethodType::FORWARD;
-        qDebug() << m_args << "::" << m_forwardTo;
-    }
-}
-
 void Item::parseChatSourceDest(const QJsonObject &json){
 	QJsonObject args = json["args"].toObject();
+    m_args = QString(QJsonDocument(args).toJson());
 	if (args.empty()) {
 		m_methodType = MethodType::INVALID_CMND;
 	} else {
@@ -357,6 +330,14 @@ void Item::parseChatData(const QJsonObject &json){
 		parseChatSourceDest(json);
 		m_data = args["data"].toString();
 	}
+}
+
+unsigned int Item::getToID() const {
+    return m_toID;
+}
+
+const QString &Item::getToNick() const {
+    return m_toNick;
 }
 
 

@@ -38,6 +38,8 @@ namespace Kyrys {
 
         int loginUser();
 
+        int forwardChat();
+
         void getUserPassword(int userID);
 
     public:

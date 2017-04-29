@@ -16,7 +16,6 @@ namespace Kyrys {
         QString m_nick;                //modified nickname
         QString m_nickOriginal;        //origin nickname
         QString m_passwordHash;        //hash of user's password
-        QString m_forwardTo;        //to whom the message shall be forwarded
         QString m_args;            //the args of the message, only the receiving user will be able to de-crypt this
         int m_extension;            //???
         int m_ID;                    //ID of user assigned by server during registration process
@@ -86,13 +85,17 @@ namespace Kyrys {
         //Getters
         const MethodType &getMethodType() const;
 
+        const MessageType &getMessageType() const;
+
         const QString &getNick() const;
 
         const QString &getPasswordHash() const;
 
-        const QString &getRecepient() const;
-
         const QString &getArgs() const;
+
+        unsigned int getToID() const;
+
+        const QString &getToNick() const;
 
         int getID() const;
 

@@ -83,18 +83,27 @@ int ServerResolver::execute() {
         case MethodType::UNKNOWN : {
             return Status::UNKNOWN_METHOD;
         }
-        case MethodType::FORWARD : {
-            m_IDofRecipient = getUserID(m_item.getRecepient());
-            if (m_IDofRecipient != -1) {
-                m_stateIsForward = true;
-                return Status::SUCCESS;
-            } else {
-                return Status::INVALID_CMND;
-            }
+        case MethodType::CHAT : {
+            return forwardChat();
         }
         default: {
             return Status::INVALID_CMND;
         }
+    }
+}
+
+int ServerResolver::forwardChat(){
+    QString toNick = m_item.getToNick();
+    if(toNick.isEmpty()){
+        m_IDofRecipient = m_item.getToID();
+    } else {
+        m_IDofRecipient = getUserID(toNick);
+    }
+    if (m_IDofRecipient != -1) {
+        m_stateIsForward = true;
+        return Status::SUCCESS;
+    } else {
+        return Status::INVALID_CMND;
     }
 }
 
@@ -185,8 +194,9 @@ QByteArray ServerResolver::prepareResponse() {
             root_obj.insert("args", args_obj);
             break;
         }
-        case MethodType::FORWARD : {
-            root_obj["method"] = "forward";
+        case MethodType::CHAT : {
+            root_obj["method"] = "chat";
+            root_obj["messageType"] = m_item.getMessageType();
             root_obj["args"] = m_item.getArgs();
             break;
         }

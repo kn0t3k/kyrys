@@ -164,9 +164,9 @@ void Item::parse(const QJsonObject &json) {
 
     //Checking if method is invalid
     if (json["method"].toString().isEmpty()) {
-        m_methodType = MethodType::INVALID_CMND;
-        return;
-    }
+		m_methodType = MethodType::INVALID_CMND;
+		return;
+	}
 
     //Checking if method = register
     if (json["method"].toString() == "register") {
@@ -282,11 +282,10 @@ void Item::parseLoginResponse(const QJsonObject &json) {
     } else {
         m_methodType = MethodType::LOGIN;
     }
-    std::cout << "parsing success flag" << args["success"].toInt() << std::endl; //debug
-    std::cout << "parsing success flag" << args["success"].toBool() << std::endl; //debug
+    if(DEBUG)std::cout << "parsing success flag" << args["success"].toInt() << std::endl; //debug
+    if(DEBUG)std::cout << "parsing success flag" << args["success"].toBool() << std::endl; //debug
     m_success = args["success"].toInt();
 }
-
 
 void Item::parseForward(const QJsonObject &json) {
     m_messageType = MessageType::FORWARD;
@@ -301,16 +300,55 @@ void Item::parseForward(const QJsonObject &json) {
     }
 }
 
+void Item::parseChatSourceDest(const QJsonObject &json){
+	QJsonObject args = json["args"].toObject();
+	if (args.empty()) {
+		m_methodType = MethodType::INVALID_CMND;
+	} else {
+		m_fromID = static_cast<unsigned int>(args["fromID"].toInt());
+		m_toID = static_cast<unsigned int>(args["toID"].toInt());
+	}
+}
+
 void Item::parseChatRequest(const QJsonObject &json){
-	//todo
+	m_messageType = MessageType::CHAT_REQUEST;
+
+	QJsonObject args = json["args"].toObject();
+	if (args.empty()) {
+		m_methodType = MethodType::INVALID_CMND;
+	} else {
+		m_methodType = MethodType::CHAT;
+		parseChatSourceDest(json);
+		m_toNick = args["toNick"].toString();
+		m_encryption = static_cast<Encryption>(args["dataEncryption"].toInt());
+	}
 }
 
 void Item::parseChatResponse(const QJsonObject &json){
-	//todo
+	m_messageType = MessageType::CHAT_RESPONSE;
+
+	QJsonObject args = json["args"].toObject();
+	if (args.empty()) {
+		m_methodType = MethodType::INVALID_CMND;
+	} else {
+		m_methodType = MethodType::CHAT;
+		parseChatSourceDest(json);
+		m_accessibility = static_cast<Accessibility>(args["accessibility"].toInt());
+		m_answer = args["answer"].toBool();
+	}
 }
 
 void Item::parseChatData(const QJsonObject &json){
-	//todo
+	m_messageType = MessageType::CHAT_DATA;
+
+	QJsonObject args = json["args"].toObject();
+	if (args.empty()) {
+		m_methodType = MethodType::INVALID_CMND;
+	} else {
+		m_methodType = MethodType::CHAT;
+		parseChatSourceDest(json);
+		m_data = args["data"].toString();
+	}
 }
 
 

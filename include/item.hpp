@@ -23,12 +23,14 @@ namespace Kyrys {
         bool m_nick_modified;        //flag if nickname was modified by
         bool m_success;                //flag if process was succesfully finished on server's side
 
-		//WARNING new atributes added: check their meaning in chat.hpp JSON messages EXAMPLES
-		unsigned int m_fromID;
-		unsigned int m_toID;
-		unsigned int m_toNick;
-		Accessibility m_Accessibility;	//Holds flag if user is ready for chat means online or is chatting or is offline/"dont want to be disturbed"
-		Encryption	  m_Encryption;		//Holds flag if chat will be encrypted against the server or not.
+		//Atributes coresponding to Chat messages
+		unsigned int  m_fromID;
+		unsigned int  m_toID;
+		QString 	  m_toNick;
+		Accessibility m_accessibility;	//Holds flag if user is ready for chat means online or is chatting or is offline/"dont want to be disturbed"
+		Encryption	  m_encryption;		//Holds flag if chat will be encrypted against the server or not.
+		bool 		  m_answer;			//Flag if second client accepted CHAT_REQUEST
+		QString		  m_data;			//Holds content of message send in chat between 2 clients
 
 
     public:
@@ -71,6 +73,8 @@ namespace Kyrys {
         void parseChatResponse(const QJsonObject &json); //todo
 
         void parseChatData(const QJsonObject &json); //todo
+
+		void parseChatSourceDest(const QJsonObject &json); //todo
 
     public:
         //Constructors

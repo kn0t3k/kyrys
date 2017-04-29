@@ -2,7 +2,7 @@
 #include <friend.hpp>
 
 
-using Kyrys::Friend
+using Kyrys::Friend;
 
 
 //Constructors
@@ -15,7 +15,6 @@ Friend::Friend(){ clear(); }
 void Friend::clear(){
 	m_ID = 0;
 	m_nickname = "";
-	m_history_path = "";
 }
 
 

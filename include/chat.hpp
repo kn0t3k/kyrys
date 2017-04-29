@@ -62,7 +62,7 @@ namespace Kyrys {
          * @warning  Keep strictly format of message in validation and parsing methods, especcialy format of keys and type of values!
          * @note	 Valid message need just one of parameters toID or toNick
 		 */
-		QJsonDocument jsonCreateChatRequest(const Friend& recipient) const; //todo
+		QJsonDocument jsonCreateChatRequest(const Friend& recipient) const; //added
 
 
 		/**
@@ -102,6 +102,6 @@ namespace Kyrys {
                         }
                    }
 		 */
-		QJsonDocument jsonCreateChatData(const Friend& recipient) const; //todo
+		QJsonDocument jsonCreateChatData(const Friend& recipient) const;
 	};
 }

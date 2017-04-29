@@ -52,6 +52,14 @@ void Item::clear() {
     m_ID = 0;
     m_nick_modified = false;
     m_success = 0;
+
+	m_fromID = 0;
+	m_toID = 0;
+	m_toNick = "";
+	m_accessibility = Accessibility::OFFLINE;
+	m_encryption = Encryption::PLAIN_TEXT;
+	m_answer = false;
+	m_data = "";
 }
 
 //Other methods

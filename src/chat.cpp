@@ -38,7 +38,7 @@ QJsonDocument Chat::jsonCreateChatRequest(const Friend& recipient) const{
 	return QJsonDocument();
 }
 
-QJsonDocument Chat::jsonCreateChatResponse(const Friend& recipient, bool answer = true) const{
+QJsonDocument Chat::jsonCreateChatResponse(const Friend& recipient, bool answer) const{
 	//todo
 	return QJsonDocument();
 }

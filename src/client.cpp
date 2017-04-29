@@ -343,7 +343,15 @@ void Client::copyRegistrationItem(const Item& item) {
 	m_user.setNickname(item.getNick().toStdString());
 }
 
+void Client::Foo(){
+	m_socket->readAll();
+}
+
 int Client::chat(std::istream &in) {
+
+
+	connect(m_socket, SIGNAL(readyRead()),
+			this, SLOT(Foo()));
 
 	/*
 	 *  Pseudo algorithm:

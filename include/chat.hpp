@@ -19,7 +19,7 @@ namespace Kyrys {
 	typedef Kyrys::Friend Friend;
 
 	private:
-		Friend m_ChatSender;   			//Is user which is initiating chat
+		Friend m_ChatSender;   			//Is ALWAYS user which is INITIATING chat !!!
 		Friend m_ChatReceiver; 			//Is user which received chat request
 		//todo: create sharedkey for encryption by symetric cipher
 		Accessibility m_Accessibility;	//Holds flag if user is ready for chat means online or is chatting or is offline/"dont want to be disturbed"
@@ -41,11 +41,7 @@ namespace Kyrys {
 		 */
 		void clear();
 
-
-
-
-		int createNewChat(); //todo: implement
-
+		int createNewChat(); //todo: this method will be probably deleted, I am not sure yet
 
 
 		/**
@@ -66,7 +62,7 @@ namespace Kyrys {
          * @warning  Keep strictly format of message in validation and parsing methods, especcialy format of keys and type of values!
          * @note	 Valid message need just one of parameters toID or toNick
 		 */
-		QJsonDocument jsonCreateChatRequest(const Friend& recipient) const; //todo: implement
+		QJsonDocument jsonCreateChatRequest(const Friend& recipient) const; //todo
 
 
 		/**
@@ -81,13 +77,13 @@ namespace Kyrys {
                         "args" : {
                             "fromID": "ID of user which is sending this message"	//unsigned int
                             "toID": "ID of user to whom is addressed this message", //Unsigned int
-							"Accessibility": "ONLINE / OFFLINE / CHATING",			//Enum integer
+							"accessibility": "ONLINE / OFFLINE / CHATING",			//Enum integer
                             "answer": true/false									//bool
                         }
                    }
          * @warning  Keep strictly format of message in validation and parsing methods, especcialy format of keys and type of values!
 		 */
-		QJsonDocument jsonCreateChatResponse(const Friend& recipient, bool answer = true) const; //todo: implement
+		QJsonDocument jsonCreateChatResponse(const Friend& recipient, bool answer = true) const; //todo
 
 
 		//todo: rewrite not so clear brief of this comment
@@ -95,9 +91,9 @@ namespace Kyrys {
 		 * @brief			This message is transporting user's chat in data part of message
 		 * @param recipient
 		 * @return
-		 * @note	EXAMPLE of CHAT_MESSAGE message:
+		 * @note	EXAMPLE of CHAT_DATA message:
 		 * 		   {
-         * 		   		"messageType": "CHAT_MESSAGE",								//String
+         * 		   		"messageType": "CHAT_DATA",									//String
                         "method": "chat",											//string
                         "args" : {
                             "fromID": "ID of user which is sending this message"	//unsigned int
@@ -106,6 +102,6 @@ namespace Kyrys {
                         }
                    }
 		 */
-		QJsonDocument jsonCreateChatMessage(const Friend& recipient) const; //todo: implement
+		QJsonDocument jsonCreateChatData(const Friend& recipient) const; //todo
 	};
 }

@@ -90,6 +90,16 @@ int Item::isValid() const {
             return isValidLoginResponse();
     }
 
+    //Validation of Chat messages
+    if (m_methodType == MethodType::CHAT){
+        if(m_messageType == MessageType::CHAT_REQUEST)
+            return isValidChatRequest();
+        if(m_messageType == MessageType::CHAT_RESPONSE)
+            return isValidChatResponse();
+        if(m_messageType == MessageType::CHAT_DATA)
+            return isValidChatData();
+    }
+
     if (m_methodType == MethodType::FORWARD)
         return isValidForward();
 
@@ -124,6 +134,26 @@ int Item::isValidForward() const {
     if (m_args.isEmpty())
         return Status::INVALID_CMND;
     return Status::SUCCESS;
+}
+
+int Item::isValidChatSourceDest() const{
+    //todo
+    return 0;
+}
+
+int Item::isValidChatRequest() const{
+    //todo
+    return 0;
+}
+
+int Item::isValidChatResponse() const{
+    //todo
+    return 0;
+}
+
+int Item::isValidChatData() const{
+    //todo
+    return 0;
 }
 
 
@@ -171,6 +201,22 @@ void Item::parse(const QJsonObject &json) {
         return;
     }
 
+    //Checking if method = chat
+    if(json["method"].toString() == "chat"){
+        if(json["messageType"].toString() == "CHAT_REQUEST"){
+            parseChatRequest(json);
+            return;
+        }
+        if(json["messageType"].toString() == "CHAT_RESPONSE"){
+            parseChatResponse(json);
+            return;
+        }
+        if(json["messageType"].toString() == "CHAT_DATA"){
+            parseChatData(json);
+            return;
+        }
+    }
+
     /*
      * +-----------------------------------------------------------------------------------+
      * |  Add new parsing method here like it is described in doxygen comment in Item.hpp  |
@@ -179,6 +225,7 @@ void Item::parse(const QJsonObject &json) {
 
     m_methodType = MethodType::UNKNOWN;
 }
+
 
 void Item::parseRegisterRequest(const QJsonObject &json) {
     m_messageType = MessageType::REGISTER_REQUEST;
@@ -252,6 +299,18 @@ void Item::parseForward(const QJsonObject &json) {
         m_methodType = MethodType::FORWARD;
         qDebug() << m_args << "::" << m_forwardTo;
     }
+}
+
+void Item::parseChatRequest(const QJsonObject &json){
+	//todo
+}
+
+void Item::parseChatResponse(const QJsonObject &json){
+	//todo
+}
+
+void Item::parseChatData(const QJsonObject &json){
+	//todo
 }
 
 

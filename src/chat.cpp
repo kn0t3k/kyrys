@@ -26,3 +26,24 @@ void Chat::clear(){
 	m_Accessibility = Accessibility::ONLINE;
 	m_Encryption = Encryption::PLAIN_TEXT;
 }
+
+int Chat::createNewChat(){
+	//todo
+	return 0;
+}
+
+//Methods creating JSON messages for chat
+QJsonDocument Chat::jsonCreateChatRequest(const Friend& recipient) const{
+	//todo
+	return QJsonDocument();
+}
+
+QJsonDocument Chat::jsonCreateChatResponse(const Friend& recipient, bool answer = true) const{
+	//todo
+	return QJsonDocument();
+}
+
+QJsonDocument Chat::jsonCreateChatData(const Friend& recipient) const{
+	//todo
+	return QJsonDocument();
+}

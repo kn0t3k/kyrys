@@ -194,6 +194,8 @@ namespace Kyrys {
 		 * @brief Adds new user into friend list in user
 		 * @return
 		 */
-		int addFriend(); //todo
+		//int addFriend(); //todo
+
+		void Foo();
     };
 }

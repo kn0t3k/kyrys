@@ -7,6 +7,9 @@ namespace Kyrys {
 
         typedef Kyrys::Enums::Item::MethodType MethodType;
         typedef Kyrys::Enums::JsonMessage::MessageType MessageType;
+		typedef Kyrys::Enums::Chat::Accessibility 		Accessibility;
+		typedef Kyrys::Enums::Chat::DataEncryption 		Encryption;
+
     private:
         MethodType m_methodType;
         MessageType m_messageType;    //Type of message e.g. RegisterRequest, Response, ...
@@ -19,6 +22,14 @@ namespace Kyrys {
         int m_ID;                    //ID of user assigned by server during registration process
         bool m_nick_modified;        //flag if nickname was modified by
         bool m_success;                //flag if process was succesfully finished on server's side
+
+		//WARNING new atributes added: check their meaning in chat.hpp JSON messages EXAMPLES
+		unsigned int m_fromID;
+		unsigned int m_toID;
+		unsigned int m_toNick;
+		Accessibility m_Accessibility;	//Holds flag if user is ready for chat means online or is chatting or is offline/"dont want to be disturbed"
+		Encryption	  m_Encryption;		//Holds flag if chat will be encrypted against the server or not.
+
 
     public:
         //Parsing system
@@ -54,6 +65,12 @@ namespace Kyrys {
         void parseLoginResponse(const QJsonObject &json);
 
         void parseForward(const QJsonObject &json);
+
+        void parseChatRequest(const QJsonObject &json); //todo
+
+        void parseChatResponse(const QJsonObject &json); //todo
+
+        void parseChatData(const QJsonObject &json); //todo
 
     public:
         //Constructors
@@ -103,6 +120,14 @@ namespace Kyrys {
         int isValidLoginResponse() const;
 
         int isValidForward() const;
+
+        int isValidChatSourceDest() const; //Controls if chat message has FROM and TO params
+
+        int isValidChatRequest() const; //todo
+
+        int isValidChatResponse() const; //todo
+
+        int isValidChatData() const; //todo
 
 
         //Other methods

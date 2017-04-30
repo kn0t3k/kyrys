@@ -17,6 +17,14 @@ void Friend::clear(){
 	m_nickname = "";
 }
 
+unsigned int Friend::getID() const {
+	return m_ID;
+}
+
+const string &Friend::getNickname() const {
+	return m_nickname;
+}
+
 
 //Getters
 //none yet

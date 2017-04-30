@@ -290,8 +290,7 @@ int Client::login(std::istream &in) {
 QJsonDocument Client::jsonMessageUserAuthentication(MessageType messageType) {
     QJsonObject args_obj;
     QJsonObject root_obj;
-    QString key;
-    QString value;
+
     if (messageType == MessageType::REGISTER_REQUEST) {
         root_obj["messageType"] = "REGISTER_REQUEST";
         root_obj["method"] = "register";

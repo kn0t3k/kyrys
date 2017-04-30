@@ -20,7 +20,7 @@ namespace Kyrys {
         int m_extension;            //???
         int m_ID;                    //ID of user assigned by server during registration process
         bool m_nick_modified;        //flag if nickname was modified by
-        bool m_success;                //flag if process was succesfully finished on server's side
+        bool m_success;                //flag if server successfully registered new user
 
 		//Atributes coresponding to Chat messages
 		unsigned int  m_fromID;
@@ -33,6 +33,58 @@ namespace Kyrys {
 
 
     public:
+		//Constructors
+		/**
+		 * Default constructor, its purpose is mainly to reset item values.
+		 */
+		Item();
+
+
+		//Getters
+		const MethodType &getMethodType() const;
+
+		const MessageType &getMessageType() const;
+
+		const QString &getNick() const;
+
+		const QString &getPasswordHash() const;
+
+		const QString &getArgs() const;
+
+		int getID() const;
+
+		bool getNick_modified() const;
+
+		bool getSuccess() const;
+
+		unsigned int getFromID() const;
+
+		unsigned int getToID() const;
+
+		const QString &getToNick() const;
+
+		Accessibility getAccessibility() const;
+
+		Encryption getEncryption() const;
+
+		bool getAnswer() const;
+
+		const QString &getData() const;
+
+		//Setters
+		void setID(int ID);
+
+		/**
+         * @brief		Resets Item to default state by rewritting all member atributes to default values
+         * 				all atributes of type:
+         * 				bool 			-> set to false
+         * 				integral types  -> set to zero
+         * 				string types    -> set to empty string "" with zero length
+         * 				1B char types   -> ASCII value is set to zero which represents first char of ASCII table
+         */
+		void clear();
+
+
         //Parsing system
         /**
          * @brief			This is main parsing method covering system of smaller parsing methods with prefix parse.
@@ -42,21 +94,39 @@ namespace Kyrys {
          * 					For example key "nick" has member atribute "m_nick"
          *
          * @note			If you want to add new parsing method, add it between
-          *       			last parsing method FORWARD and statement UNKOWN in this format example
+         *       			last parsing method FORWARD and statement UNKOWN in this format example
          *       			It is more clear code than hundredts of else branches with same code UNKNOWN
          *
          * "BEGIN OF EXAMPLE"
-          * if (json["method"].toString() == "name of method") {
-          * 		parseMessageXYZ(json)
-          * 		return;  //Don't forget on return!
-          * }
+         * if (json["method"].toString() == "name of method") {
+         * 		parseMessageXYZ(json)
+         * 		return;  //Don't forget on return!
+         * }
          * "END OF EXAMPLE"
          *
-          */
+         */
         void parse(const QJsonObject &json);
 
-        //private: //Because we need to test these methods
-        //Parsing JSON messages
+
+		//Validation system
+		/**
+		 * @brief      Checks whether an item is valid, ie. contains invalid method name, empty nick or name
+		 *             or any other invalid data. Can vary depending on which method is to be used.
+		 *
+		 * @return     True if valid, False otherwise.
+		 */
+		int isValid() const;
+
+
+		//Other methods
+		/**
+		 * @brief      If nick of the user has already been found in the DB,
+		 *             add numbers to its end so it it unique.
+		 */
+		void increaseNick();
+
+    private:
+        //Parsing JSON messages for parse system
         void parseRegisterRequest(const QJsonObject &json);
 
         void parseLoginRequest(const QJsonObject &json);
@@ -65,57 +135,14 @@ namespace Kyrys {
 
         void parseLoginResponse(const QJsonObject &json);
 
-        void parseForward(const QJsonObject &json);
+        void parseChatRequest(const QJsonObject &json);
 
-        void parseChatRequest(const QJsonObject &json); //todo
+        void parseChatResponse(const QJsonObject &json);
 
-        void parseChatResponse(const QJsonObject &json); //todo
+        void parseChatData(const QJsonObject &json);
 
-        void parseChatData(const QJsonObject &json); //todo
+		void parseChatSourceDest(const QJsonObject &json);
 
-		void parseChatSourceDest(const QJsonObject &json); //todo
-
-    public:
-        //Constructors
-        /**
-         * Default constructor, its purpose is mainly to reset item values.
-         */
-        Item();
-
-        //Getters
-        const MethodType &getMethodType() const;
-
-        const MessageType &getMessageType() const;
-
-        const QString &getNick() const;
-
-        const QString &getPasswordHash() const;
-
-        const QString &getArgs() const;
-
-        unsigned int getToID() const;
-
-        const QString &getToNick() const;
-
-        int getID() const;
-
-        bool getNick_modified() const;
-
-        bool getSuccess() const;
-
-
-        //Setters
-        void setID(int ID);
-
-
-        //Validation system
-        /**
-         * @brief      Checks whether an item is valid, ie. contains invalid method name, empty nick or name
-         *             or any other invalid data. Can vary depending on which method is to be used.
-         *
-         * @return     True if valid, False otherwise.
-         */
-        int isValid() const; //We will expand and refactor validation system with new methods covering all JSON messages
 
         //Validating JSON messages
         int isValidRegisterRequest() const;
@@ -126,41 +153,12 @@ namespace Kyrys {
 
         int isValidLoginResponse() const;
 
-        int isValidForward() const;
-
         int isValidChatSourceDest() const; //Controls if chat message has FROM and TO params
 
-        int isValidChatRequest() const; //todo
+        int isValidChatRequest() const;
 
-        int isValidChatResponse() const; //todo
+        int isValidChatResponse() const;
 
-        int isValidChatData() const; //todo
-
-
-        //Other methods
-        /**
-         * @brief      Serializes item content to string. Good for saving to file.
-         *
-         * @param[in]  ID    ID of new entry in DB.
-         *
-         * @return     Returns serialized string.
-         */
-        std::string serialize(int ID) const;
-
-        /**
-         * @brief      If nick of the user has already been found in the DB,
-         *             add numbers to its end so it it unique.
-         */
-        void increaseNick();
-
-        /**
-         * @brief		Resets Item to default state by rewritting all member atributes to default values
-         * 				all atributes of type:
-         * 				bool 			-> set to false
-         * 				integral types  -> set to zero
-         * 				string types    -> set to empty string "" with zero length
-         * 				1B char types   -> ASCII value is set to zero which represents first char of ASCII table
-         */
-        void clear();
+        int isValidChatData() const;
     };
 }

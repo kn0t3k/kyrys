@@ -4,6 +4,8 @@
 
 #define DEBUG 0
 
+#define DEBUG_BIN 0		//Debugging binary files kyrysClient.exe and kyrysServer.exe, don't turn on this macro for kyrys_test.exe
+
 #define DATABASE_FILENAME "users.db"
 #define PASSWORDS_FILENAME "passwords"
 #define DATABASE_DIRECTORY "database"

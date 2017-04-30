@@ -26,6 +26,8 @@ namespace Kyrys {
 
 
 		//Getters
+		unsigned int getID() const;
 
+		const string &getNickname() const;
 	};
 }

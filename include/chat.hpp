@@ -102,6 +102,6 @@ namespace Kyrys {
                         }
                    }
 		 */
-		QJsonDocument jsonCreateChatData(const Friend& recipient) const;
+		QJsonDocument jsonCreateChatData(const Friend &from, const Friend &recipient, const QString &data) const;
 	};
 }

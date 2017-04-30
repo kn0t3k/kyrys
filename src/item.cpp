@@ -38,6 +38,20 @@ bool Item::getSuccess() const { return m_success; }
 
 const QString &Item::getArgs() const { return m_args; }
 
+unsigned int Item::getFromID() const { return m_fromID; }
+
+unsigned int Item::getToID() const { return m_toID; }
+
+const QString &Item::getToNick() const { return m_toNick; }
+
+Item::Accessibility Item::getAccessibility() const { return m_accessibility; }
+
+Item::Encryption Item::getEncryption() const { return m_encryption; }
+
+bool Item::getAnswer() const { return m_answer; }
+
+const QString &Item::getData() const { return m_data; }
+
 //Setters
 void Item::setID(int ID) { m_ID = ID; }
 
@@ -61,18 +75,6 @@ void Item::clear() {
 	m_encryption = Encryption::PLAIN_TEXT;
 	m_answer = false;
 	m_data = "";
-}
-
-//Other methods
-std::string Item::serialize(int ID) const {
-    std::string output = std::to_string(ID);
-
-    output += FORMAT_SEPARATOR;
-    output += m_nick.toStdString();
-    output += FORMAT_SEPARATOR;
-    output += m_passwordHash.toStdString();
-    output += FORMAT_NEW_LINE;
-    return output;
 }
 
 //Validation system
@@ -140,11 +142,11 @@ int Item::isValidChatSourceDest() const{
     if(m_fromID != std::numeric_limits<unsigned int>::max() && (m_toID != std::numeric_limits<unsigned int>::max() || !m_toNick.isEmpty()))
 		return Status::SUCCESS;
 	else
-		return Status::INVALID_CMND;
+		return Status::INVALID_JSON;
 }
 
 int Item::isValidChatRequest() const{
-	if(m_encryption != Encryption::PLAIN_TEXT || m_encryption != Encryption::SHARED_KEY)
+	if(m_encryption != Encryption::PLAIN_TEXT && m_encryption != Encryption::SHARED_KEY)
 		return Status::INVALID_JSON;
 	else
 		return isValidChatSourceDest();
@@ -164,24 +166,20 @@ int Item::isValidChatData() const{
 //Parsing system
 void Item::parse(const QJsonObject &json) {
 
-    if (DEBUG)std::cout << "\nItem::parse called" << std::endl;
-
     //Checking if method is invalid
     if (json["method"].toString().isEmpty()) {
+		if(DEBUG_BIN)std::cout << "\nItem::parse : error - JSON message has empty method\n" << std::endl;
 		m_methodType = MethodType::INVALID_CMND;
 		return;
 	}
 
     //Checking if method = register
     if (json["method"].toString() == "register") {
-        if (DEBUG)std::cout << "\nItem::parse -> register" << std::endl;
         if (json["messageType"].toString() == "REGISTER_REQUEST") {
-            if (DEBUG)std::cout << "\nREGISTER_REQUEST" << std::endl;
             parseRegisterRequest(json);
             return;
         }
         if (json["messageType"].toString() == "REGISTER_RESPONSE") {
-            if (DEBUG)std::cout << "\nREGISTER_RESPONSE" << std::endl;
             parseRegisterResponse(json);
             return;
         }
@@ -221,6 +219,7 @@ void Item::parse(const QJsonObject &json) {
      * +-----------------------------------------------------------------------------------+
      */
 
+	if(DEBUG_BIN)std::cout << "\nItem::parse : error - JSON message has UNKNOWN method\n" << std::endl;
     m_methodType = MethodType::UNKNOWN;
 }
 
@@ -254,7 +253,11 @@ void Item::parseRegisterResponse(const QJsonObject &json) {
     m_nick = args["nickname"].toString();
     m_ID = args["ID"].toInt();
     //m_nick_modified = args["modified_nickname"].toBool(); //repair message first
-    m_success = args["success"].toInt();
+
+	if(args["success"].toInt() == 1)
+		m_success = true;
+	else
+		m_success = false;
 
 }
 
@@ -291,8 +294,8 @@ void Item::parseChatSourceDest(const QJsonObject &json){
 	if (args.empty()) {
 		m_methodType = MethodType::INVALID_CMND;
 	} else {
-		m_fromID = static_cast<unsigned int>(args["fromID"].toInt());
-		m_toID = static_cast<unsigned int>(args["toID"].toInt());
+		m_fromID = args["fromID"].toString().toUInt();
+		m_toID = args["toID"].toString().toUInt();
 	}
 }
 
@@ -306,7 +309,7 @@ void Item::parseChatRequest(const QJsonObject &json){
 		m_methodType = MethodType::CHAT;
 		parseChatSourceDest(json);
 		m_toNick = args["toNick"].toString();
-		m_encryption = static_cast<Encryption>(args["dataEncryption"].toInt());
+		m_encryption = static_cast<Encryption>(args["dataEncryption"].toString().toUInt());
 	}
 }
 
@@ -319,7 +322,7 @@ void Item::parseChatResponse(const QJsonObject &json){
 	} else {
 		m_methodType = MethodType::CHAT;
 		parseChatSourceDest(json);
-		m_accessibility = static_cast<Accessibility>(args["accessibility"].toInt());
+		m_accessibility = static_cast<Accessibility>(args["accessibility"].toString().toUInt());
 		m_answer = args["answer"].toBool();
 	}
 }
@@ -337,17 +340,11 @@ void Item::parseChatData(const QJsonObject &json){
 	}
 }
 
-unsigned int Item::getToID() const {
-    return m_toID;
-}
-
-const QString &Item::getToNick() const {
-    return m_toNick;
-}
-
 
 //Other methods
 void Item::increaseNick() {
     m_nick = m_nickOriginal + QString::number(m_extension);
     m_extension++;
 }
+
+

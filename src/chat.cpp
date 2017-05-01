@@ -6,19 +6,10 @@ using Kyrys::Chat;
 
 //Constructors
 
-Chat::Chat() {
-	clear();
-}
+Chat::Chat() { clear(); }
 
+Chat::Chat(QSslSocket* socket, const Kyrys::Friend &ChatSender, const Kyrys::Friend &ChatReceiver) : m_socket(socket), m_ChatSender(ChatSender), m_ChatReceiver(ChatReceiver){}
 
-/*Chat::Chat(const Kyrys::Friend &m_ChatSender,
-		   const Kyrys::Friend &m_ChatReceiver,
-		   Kyrys::Chat::Accessibility m_Accessibility,
-		   Kyrys::Chat::Encryption m_Encryption) : m_ChatSender(m_ChatSender),
-												   m_ChatReceiver(m_ChatReceiver),
-												   m_Accessibility(m_Accessibility),
-												   m_Encryption(m_Encryption) {}
-*/
 //Setters
 void Chat::clear(){
 	m_ChatSender = Friend();
@@ -84,4 +75,13 @@ QJsonDocument Chat::jsonCreateChatData(const Friend &from, const Friend &recipie
 	root_obj.insert("args", args_obj);
 
 	return QJsonDocument(root_obj);
+}
+
+int Chat::callID(unsigned int fromID, unsigned int toID){
+	m_ChatReceiver = Friend(toID);
+	m_ChatSender = Friend(fromID);
+
+
+
+	return 0;
 }

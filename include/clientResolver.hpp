@@ -12,7 +12,7 @@ namespace Kyrys {
 
     private:
         QString m_path;    // path to database of friends
-        Item m_item;    // incoming response from server
+        Item m_item;       // incoming response from server
 
     private:
         /**
@@ -26,8 +26,6 @@ namespace Kyrys {
         //Constructors
         /**
          * @brief      Constructor creates a resolver object.
-         *
-         * @param[in]  path  The path to the directory which should contain database file.
          */
         ClientResolver();
 
@@ -45,6 +43,7 @@ namespace Kyrys {
          * @return     Return success if succeeded, fail otherwise.
          */
         int parse(const QString &data, Mode m = Mode::USE_JSON);
+
 
 		//Don't delete comment below this yet
         /**

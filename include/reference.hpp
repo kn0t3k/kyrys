@@ -25,6 +25,7 @@
 #include <QtCore/QThread>
 #include <QtCore/QList>
 #include <QtCore/QDir>
+#include <QtCore/QBuffer>
 
 //Qt SQL
 #include <QtSql/QSqlDatabase>

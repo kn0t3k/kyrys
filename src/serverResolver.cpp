@@ -93,6 +93,7 @@ int ServerResolver::execute() {
 }
 
 int ServerResolver::forwardChat(){
+	// todo save cpy of received data
     QString toNick = m_item.getToNick();
     if(toNick.isEmpty()){
         m_IDofRecipient = m_item.getToID();

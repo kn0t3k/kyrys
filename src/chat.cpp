@@ -6,19 +6,10 @@ using Kyrys::Chat;
 
 //Constructors
 
-Chat::Chat() {
-	clear();
-}
+Chat::Chat() { clear(); }
 
+Chat::Chat(const Kyrys::Friend &ChatSender, const Kyrys::Friend &ChatReceiver) : m_ChatSender(ChatSender), m_ChatReceiver(ChatReceiver){}
 
-/*Chat::Chat(const Kyrys::Friend &m_ChatSender,
-		   const Kyrys::Friend &m_ChatReceiver,
-		   Kyrys::Chat::Accessibility m_Accessibility,
-		   Kyrys::Chat::Encryption m_Encryption) : m_ChatSender(m_ChatSender),
-												   m_ChatReceiver(m_ChatReceiver),
-												   m_Accessibility(m_Accessibility),
-												   m_Encryption(m_Encryption) {}
-*/
 //Setters
 void Chat::clear(){
 	m_ChatSender = Friend();
@@ -42,8 +33,8 @@ QJsonDocument Chat::jsonCreateChatRequest(const Friend& recipient) const{
 	root_obj["messageType"] = "CHAT_REQUEST";
 	root_obj["method"] = "chat";
 
-	args_obj["fromID"] = m_ChatSender.getID();
-	args_obj["toID"] = recipient.getID();
+	args_obj["fromID"] = (int)(m_ChatSender.getID());
+	args_obj["toID"] = (int)recipient.getID();
 	args_obj["toNick"] = QString::fromStdString(recipient.getNickname());
 
 	root_obj.insert("args", args_obj);
@@ -60,8 +51,8 @@ QJsonDocument Chat::jsonCreateChatResponse(const Friend& recipient, bool answer)
 	root_obj["messageType"] = "CHAT_RESPONSE";
 	root_obj["method"] = "chat";
 
-	args_obj["fromID"] = m_ChatReceiver.getID();
-	args_obj["toID"] = recipient.getID();
+	args_obj["fromID"] = (int)m_ChatReceiver.getID();
+	args_obj["toID"] = (int)recipient.getID();
 	args_obj["accessibility"] = m_Accessibility;
 	args_obj["answer"] = answer;
 
@@ -77,11 +68,20 @@ QJsonDocument Chat::jsonCreateChatData(const Friend &from, const Friend &recipie
 	root_obj["messageType"] = "CHAT_DATA";
 	root_obj["method"] = "chat";
 
-	args_obj["fromID"] = from.getID();
-	args_obj["toID"] = recipient.getID();
+	args_obj["fromID"] = (int)from.getID();
+	args_obj["toID"] = (int)recipient.getID();
 	args_obj["data"] = data;
 
 	root_obj.insert("args", args_obj);
 
 	return QJsonDocument(root_obj);
+}
+
+int Chat::callID(unsigned int fromID, unsigned int toID){
+	m_ChatReceiver = Friend(toID);
+	m_ChatSender = Friend(fromID);
+
+
+
+	return 0;
 }

@@ -4,7 +4,8 @@
 #include <QtCore/QJsonDocument>
 #include <clientResolver.hpp>
 
-#define CLIENT_PROMPT >
+#define CLIENT_PROMPT ">"
+#define CHAT_PROMPT ">>"
 
 using Kyrys::Client;
 using Kyrys::Enums::JsonMessage::MessageType;
@@ -14,6 +15,24 @@ typedef Kyrys::Enums::Client::Registration::Status rStatus;                     
 typedef Kyrys::Enums::Client::Registration::PasswordSecQuality passwordQuality;
 using Kyrys::Enums::Resolver::Status;
 
+class ChatThread : public QThread{
+
+
+public:
+	ChatThread();
+
+protected:
+	void run();
+};
+
+ChatThread::ChatThread() {
+	std::cout << "chatthread ctor" << std::endl;
+}
+
+void ChatThread::run() {
+	std::cout << "reading input" << std::endl;
+}
+
 
 //Constructors
 Client::Client(const QString &hostName, quint16 port, QObject *parent) :
@@ -21,9 +40,7 @@ Client::Client(const QString &hostName, quint16 port, QObject *parent) :
         m_socket(0),
         m_user(),
         m_hostname(hostName),
-        m_port(port){
-	//m_chat = Chat();
-}
+        m_port(port){}
 
 
 //Destructors
@@ -329,7 +346,7 @@ void Client::run(std::istream &in) {
 			continue;
 		}
 		if(command == "chat"){
-			//todo
+			chat();
 			continue;
 		}
 
@@ -342,34 +359,115 @@ void Client::copyRegistrationItem(const Item& item) {
 	m_user.setNickname(item.getNick().toStdString());
 }
 
-void Client::Foo(){
-	m_socket->readAll();
+void Bar(){
+	std::cout << "bar running" << std::endl;
+
+	string command;
+	std::getline(std::cin, command);
+
+	std::cout << "you wrote: " << command << std::endl;
 }
 
+//Chatting system
 int Client::chat(std::istream &in) {
-
+	std::cout << "running chat" << std::endl;
 
 	connect(m_socket, SIGNAL(readyRead()),
-			this, SLOT(Foo()));
+			this, SLOT(messageIncoming()));
 
-	/*
-	 *  Pseudo algorithm:
-	 *  1. chat vytvori vlastny run pre vlastne prikazy s prefixom #
-	 *  2. prikazy budu:
-	 *  #addFriend						 - prida priatela do friendlistu - zatial bude mozne toto robit iba z rozhrania clienta, zatial nie z rozhrania chatu
-	 *  #callNick	@param nickname		 - zahaji chat s uzivatelom podla jeho nicku
-	 *  #callID		@param ID			 - zahaji chat s uzivatelom podla jeho ID
-	 *  #friendlist @param firstNFriends - vypise prvych N priatelov v tvare: ID nick etc.
-	 *  #callHistory @param lastNCalls	 - vypise poslednych N uzivatelov s ktorymi user komunikoval v rovnakom formate ako friendlist
-	 *  #quit		 @param stayONLINE	 - ukonci chat, nastavy accesibility na OFFLINE a vrati uzivatela do rozhrania clienta
-	 *
-	 *  3. posle na server chatRequest
-	 *  4. prijme od serveru preposlany chatResponse, ktory vytvoril druhy klient
-	 *  5. Potomto bude jasne ci druhy uzivatel prijal ziadost o chat - druhy klient by mal asynchronne pocuvat ci neprichadzaju nejake chatRequesty a odpovedat na ne podla hodnoty Accessibility m_Accessibility nastavenej na ONLINE, OFFLINE alebo chating
-	 *  6. Procedura na shared-key handshake - zatial sme nevyriesili
-	 *  7. Vsetko OK, mozeme si zacat preposielat spravy pomocou JSON spravy CHAT_MESSAGE pokym niekto nezada prikaz #quit
-	 *  8. ked pocas chatu pride sprava tak sa vypise vo formate:
-	 *  [ YOU ]: data alebo [NICK of second user]: data pricom ak je nick dlhsi ako 5 znakov tak sa odsekne koniec
-	 */
+	//QtConcurrent::run( Bar );
+
+	runChat();
+
 	return 1;
+}
+
+void Client::messageIncoming(){
+
+	//Receiving some CHAT message: it is CHAT_RESPONSE or CHAT_DATA
+	QByteArray incomingMessage;
+	if(receive(incomingMessage)) {
+		if(DEBUG)std::cout << "\nClient::CHAT - CHAT message arrived - size: " << incomingMessage.length() << std::endl;
+	} else {
+		if(DEBUG)std::cout << "\nClient::CHAT - CHAT message - FAIL" << std::endl;
+	}
+
+	//Starting parser
+	ClientResolver clientResolver;
+	int returnState = clientResolver.parse(incomingMessage);
+
+
+	//Parsing received message
+	if(returnState == Status::SUCCESS) {
+		if(clientResolver.getItem().getMessageType() == MessageType::CHAT_RESPONSE){
+			//todo
+		}
+		if(clientResolver.getItem().getMessageType() == MessageType::CHAT_DATA){
+			printMessage(clientResolver.getItem());
+		}
+	} else{
+		if (DEBUG)std::cout << "Client::messageIncoming: FAIL" << std::endl;
+		return;
+	}
+}
+
+
+void Client::runChat(std::istream &in) {
+	std::string command;
+
+	do {
+		std::cout << "\n" << CHAT_PROMPT << " " << std::flush;
+		std::getline(in, command);
+
+		if(command == "#callid"){
+			//todo
+			continue;
+		}
+
+		if(command == "#callnick"){
+			//todo
+			continue;
+		}
+
+		if(command == "#history"){
+			//todo
+			continue;
+		}
+
+		if(command == "#sendto"){
+			sendTo();
+			//todo: ak je druhy klient v chat interface, tak sa mu pernamentne bez nadviazavania spojenia zobrazi sprava
+			continue;
+		}
+
+		if(command == "#quit"){
+			break;
+		}
+
+		std::cout << "\nUNKNOWN CHAT COMMAND\n" << std::endl;
+	}while(command != "#quit");
+}
+
+void Client::sendTo(){
+
+	//Preparing fromID, toID and inicializing Chat class
+	std::cout << "\n" << CHAT_PROMPT << " to ID:" << std::flush;
+	unsigned int toID;
+	std::string buffer;
+	std::getline(std::cin, buffer);
+	toID = static_cast<unsigned int>(std::stoul(buffer));
+	Friend sender(m_user.getID());
+	Friend receiver(toID);
+	Chat chat(sender, receiver);
+
+	//Preparing CHAT_DATA message and sending it to server
+	std::cout << "\n" << CHAT_PROMPT << " [You]: " << std::flush;
+	getline(std::cin, buffer);
+	QString chatData = chat.jsonCreateChatData(sender, receiver, QString::fromStdString(buffer)).toJson();
+	send(chatData);
+}
+
+void Client::printMessage(const Item& incomingMessage){
+	if(incomingMessage.isValid())
+		std::cout << "\n" << CHAT_PROMPT << " [FROM ID " << incomingMessage.getFromID() << "]: " << incomingMessage.getData().toStdString() << std::endl;
 }

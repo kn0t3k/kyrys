@@ -1,6 +1,7 @@
 #pragma once
 #include <reference.hpp>
 #include <friend.hpp>
+#include <QtNetwork/QSslSocket>
 
 
 namespace Kyrys {
@@ -26,6 +27,8 @@ namespace Kyrys {
 		Encryption	  m_Encryption;		//Holds flag if chat will be encrypted against the server or not.
 		//reference vector callHistory	//SK: List uzivatelov s ktorymi som si chatoval aj takych, ktory niesu priatelia
 		//reference vector friendList   //List of my friends
+		//QSslSocket *m_socket = nullptr;
+
 
 
 
@@ -33,7 +36,7 @@ namespace Kyrys {
 
 		Chat();
 
-		//Chat(const Friend &m_ChatSender, const Friend &m_ChatReceiver, Accessibility m_Accessibility, Encryption m_Encryption);
+		Chat(const Friend &ChatSender, const Friend &ChatReceiver);
 
 
 		/**
@@ -103,5 +106,12 @@ namespace Kyrys {
                    }
 		 */
 		QJsonDocument jsonCreateChatData(const Friend &from, const Friend &recipient, const QString &data) const;
+
+
+		int callID(unsigned int fromID, unsigned int toID);
+
+
+		//will make handshake ...
+		int handshake();
 	};
 }

@@ -15,12 +15,13 @@ namespace Kyrys {
         typedef Kyrys::Enums::JsonMessage::MessageType MessageType;
 		typedef Kyrys::Chat Chat;
 
+
     private:
         QSslSocket *m_socket = nullptr;
         User m_user;
         QString m_hostname;
         quint16 m_port;
-		//Chat m_chat;
+
 
     private slots:
 
@@ -33,6 +34,8 @@ namespace Kyrys {
         void socketError(QAbstractSocket::SocketError error);
 
         void copyRegistrationItem(const Item &item); //copy informations from Item to client and user
+
+		void messageIncoming();
 
     public:
         //Constructors
@@ -182,6 +185,28 @@ namespace Kyrys {
         bool receive(QByteArray &response);
 
 
+		/*
+	 *  Pseudo algorithm:
+	 *  1. chat vytvori vlastny run pre vlastne prikazy s prefixom #
+	 *  2. prikazy budu:
+	 *  addFriend						 - prida priatela do friendlistu - zatial bude mozne toto robit iba z rozhrania clienta, zatial nie z rozhrania chatu
+	 *  callNick	 @param nickname	 - zahaji chat s uzivatelom podla jeho nicku
+	 *  callID		 @param ID			 - zahaji chat s uzivatelom podla jeho ID
+	 *  friendlist 	 @param firstNFriends- vypise prvych N priatelov v tvare: ID nick etc.
+	 *  history		 @param lastNCalls	 - vypise poslednych N uzivatelov s ktorymi user komunikoval v rovnakom formate ako friendlist
+	 *  quit		 @param stayONLINE	 - ukonci chat, nastavy accesibility na OFFLINE a vrati uzivatela do rozhrania clienta
+	 *  sendTo		 @param ID			 - posle bez ziadneho vytvarania spojenia spravu druhemu klientovi pomocou CHAT_DATA
+	 *  reply		 					 - posle spravu poslednemu uzivatelovi, ktory vas kontaktoval pomocou metody sendTo
+	 *
+	 *  3. posle na server chatRequest
+	 *  4. prijme od serveru preposlany chatResponse, ktory vytvoril druhy klient
+	 *  5. Potomto bude jasne ci druhy uzivatel prijal ziadost o chat - druhy klient by mal asynchronne pocuvat ci neprichadzaju nejake chatRequesty a odpovedat na ne podla hodnoty Accessibility m_Accessibility nastavenej na ONLINE, OFFLINE alebo chating
+	 *  6. Procedura na shared-key handshake - zatial sme nevyriesili
+	 *  7. Vsetko OK, mozeme si zacat preposielat spravy pomocou JSON spravy CHAT_MESSAGE pokym niekto nezada prikaz #quit
+	 *  8. ked pocas chatu pride sprava tak sa vypise vo formate:
+	 *  [ YOU ]: data alebo [NICK of second user]: data pricom ak je nick dlhsi ako 5 znakov tak sa odsekne koniec
+	 */
+
 		/**
 		 * @brief This method will iniciate chat with some another user
 		 * @param in
@@ -196,6 +221,16 @@ namespace Kyrys {
 		 */
 		//int addFriend(); //todo
 
-		void Foo();
+
+
+		//Covers chat interface for writting commands
+		void runChat(std::istream &in = std::cin);
+		
+
+		//Sends message directly to second client without any handshake with risk of making DoS on second client
+		void sendTo();
+
+		void printMessage(const Item& incomingMessage);
+
     };
 }

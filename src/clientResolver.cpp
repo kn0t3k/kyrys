@@ -27,6 +27,7 @@ int ClientResolver::execute() { //I will probably delete this method
 		case (MethodType::UNKNOWN) 		: return Status::UNKNOWN_METHOD;
 		case (MethodType::REGISTER)		: return Status::SUCCESS;
 		case (MethodType::LOGIN)		: return Status::SUCCESS;
+		case (MethodType::CHAT)			: return Status::SUCCESS;
 		default							: return Status::FAILED;
 	}
 }
@@ -37,8 +38,7 @@ if(DEBUG)std::cout << "\nClientResolver::parse called" << std::endl;
 	if (m == Mode::USE_JSON) {
 
 		QJsonDocument jsonDoc = QJsonDocument::fromJson(data.toUtf8());	// input data is JSON message in QString
-		if(DEBUG)std::cout << "\nClient::Resolver - JSON is empty : " << data.isEmpty() << std::endl;
-		if(DEBUG)std::cout << "\nClient::Resolver - JSON is empty : " << jsonDoc.isEmpty() << std::endl;
+
 		if (jsonDoc.isNull())
 			return Status::INVALID_JSON;								// fail - invalid JSON
 

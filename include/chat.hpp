@@ -27,7 +27,7 @@ namespace Kyrys {
 		Encryption	  m_Encryption;		//Holds flag if chat will be encrypted against the server or not.
 		//reference vector callHistory	//SK: List uzivatelov s ktorymi som si chatoval aj takych, ktory niesu priatelia
 		//reference vector friendList   //List of my friends
-		QSslSocket *m_socket = nullptr;
+		//QSslSocket *m_socket = nullptr;
 
 
 
@@ -36,7 +36,7 @@ namespace Kyrys {
 
 		Chat();
 
-		Chat(QSslSocket* socket, const Friend &ChatSender, const Friend &ChatReceiver);
+		Chat(const Friend &ChatSender, const Friend &ChatReceiver);
 
 
 		/**
@@ -111,7 +111,7 @@ namespace Kyrys {
 		int callID(unsigned int fromID, unsigned int toID);
 
 
-		//will make hand
+		//will make handshake ...
 		int handshake();
 	};
 }

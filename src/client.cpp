@@ -4,7 +4,8 @@
 #include <QtCore/QJsonDocument>
 #include <clientResolver.hpp>
 
-#define CLIENT_PROMPT >
+#define CLIENT_PROMPT ">"
+#define CHAT_PROMPT ">>"
 
 using Kyrys::Client;
 using Kyrys::Enums::JsonMessage::MessageType;
@@ -13,6 +14,24 @@ typedef Kyrys::Enums::Client::Login::Status lStatus;                            
 typedef Kyrys::Enums::Client::Registration::Status rStatus;                     //registration status
 typedef Kyrys::Enums::Client::Registration::PasswordSecQuality passwordQuality;
 using Kyrys::Enums::Resolver::Status;
+
+class ChatThread : public QThread{
+
+
+public:
+	ChatThread();
+
+protected:
+	void run();
+};
+
+ChatThread::ChatThread() {
+	std::cout << "chatthread ctor" << std::endl;
+}
+
+void ChatThread::run() {
+	std::cout << "reading input" << std::endl;
+}
 
 
 //Constructors
@@ -327,7 +346,7 @@ void Client::run(std::istream &in) {
 			continue;
 		}
 		if(command == "chat"){
-			//todo
+			chat();
 			continue;
 		}
 
@@ -340,14 +359,25 @@ void Client::copyRegistrationItem(const Item& item) {
 	m_user.setNickname(item.getNick().toStdString());
 }
 
+void Bar(){
+	std::cout << "bar running" << std::endl;
+
+	string command;
+	std::getline(std::cin, command);
+
+	std::cout << "you wrote: " << command << std::endl;
+}
 
 //Chatting system
 int Client::chat(std::istream &in) {
-
+	std::cout << "running chat" << std::endl;
 
 	connect(m_socket, SIGNAL(readyRead()),
 			this, SLOT(messageIncoming()));
 
+	//QtConcurrent::run( Bar );
+
+	runChat();
 
 	return 1;
 }
@@ -355,16 +385,16 @@ int Client::chat(std::istream &in) {
 void Client::messageIncoming(){
 
 	//Receiving some CHAT message: it is CHAT_RESPONSE or CHAT_DATA
-	QByteArray registerResponse;
-	if(receive(registerResponse)) {
-		if(DEBUG)std::cout << "\nClient::CHAT - CHAT message arrived - size: " << registerResponse.length() << std::endl;
+	QByteArray incomingMessage;
+	if(receive(incomingMessage)) {
+		if(DEBUG)std::cout << "\nClient::CHAT - CHAT message arrived - size: " << incomingMessage.length() << std::endl;
 	} else {
 		if(DEBUG)std::cout << "\nClient::CHAT - CHAT message - FAIL" << std::endl;
 	}
 
 	//Starting parser
 	ClientResolver clientResolver;
-	int returnState = clientResolver.parse(registerResponse);
+	int returnState = clientResolver.parse(incomingMessage);
 
 
 	//Parsing received message
@@ -373,7 +403,7 @@ void Client::messageIncoming(){
 			//todo
 		}
 		if(clientResolver.getItem().getMessageType() == MessageType::CHAT_DATA){
-			//todo
+			printMessage(clientResolver.getItem());
 		}
 	} else{
 		if (DEBUG)std::cout << "Client::messageIncoming: FAIL" << std::endl;
@@ -381,39 +411,63 @@ void Client::messageIncoming(){
 	}
 }
 
-//covers signals from QBuffer
-void Client::writtingCommand(){
-	//todo
-}
-
 
 void Client::runChat(std::istream &in) {
 	std::string command;
 
 	do {
-		std::cout << "\n\t# " << std::flush;
+		std::cout << "\n" << CHAT_PROMPT << " " << std::flush;
 		std::getline(in, command);
 
-		if(command == "callID"){
+		if(command == "#callid"){
 			//todo
 			continue;
 		}
 
-		if(command == "callNick"){
+		if(command == "#callnick"){
 			//todo
 			continue;
 		}
 
-		if(command == "history"){
+		if(command == "#history"){
 			//todo
 			continue;
 		}
 
-		if(command == "sendTo"){
+		if(command == "#sendto"){
+			sendTo();
 			//todo: ak je druhy klient v chat interface, tak sa mu pernamentne bez nadviazavania spojenia zobrazi sprava
 			continue;
 		}
 
-		std::cout << "\nUNKNOWN COMMAND\n" << std::endl;
+		if(command == "#quit"){
+			break;
+		}
+
+		std::cout << "\nUNKNOWN CHAT COMMAND\n" << std::endl;
 	}while(command != "#quit");
+}
+
+void Client::sendTo(){
+
+	//Preparing fromID, toID and inicializing Chat class
+	std::cout << "\n" << CHAT_PROMPT << " to ID:" << std::flush;
+	unsigned int toID;
+	std::string buffer;
+	std::getline(std::cin, buffer);
+	toID = static_cast<unsigned int>(std::stoul(buffer));
+	Friend sender(m_user.getID());
+	Friend receiver(toID);
+	Chat chat(sender, receiver);
+
+	//Preparing CHAT_DATA message and sending it to server
+	std::cout << "\n" << CHAT_PROMPT << " [You]: " << std::flush;
+	getline(std::cin, buffer);
+	QString chatData = chat.jsonCreateChatData(sender, receiver, QString::fromStdString(buffer)).toJson();
+	send(chatData);
+}
+
+void Client::printMessage(const Item& incomingMessage){
+	if(incomingMessage.isValid())
+		std::cout << "\n" << CHAT_PROMPT << " [FROM ID " << incomingMessage.getFromID() << "]: " << incomingMessage.getData().toStdString() << std::endl;
 }

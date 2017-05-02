@@ -199,6 +199,7 @@ void Item::parse(const QJsonObject &json) {
 
     //Checking if method = chat
     if(json["method"].toString() == "chat"){
+		// todo: ulozit kopii zpravy do QDocument
         if(json["messageType"].toString() == "CHAT_REQUEST"){
             parseChatRequest(json);
             return;

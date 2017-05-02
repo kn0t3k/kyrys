@@ -35,6 +35,8 @@ namespace Kyrys {
 
         void copyRegistrationItem(const Item &item); //copy informations from Item to client and user
 
+		void messageIncoming();
+
     public:
         //Constructors
         /**
@@ -219,11 +221,16 @@ namespace Kyrys {
 		 */
 		//int addFriend(); //todo
 
-		void messageIncoming();
+
 
 		//Covers chat interface for writting commands
 		void runChat(std::istream &in = std::cin);
+		
 
-		void writtingCommand();
+		//Sends message directly to second client without any handshake with risk of making DoS on second client
+		void sendTo();
+
+		void printMessage(const Item& incomingMessage);
+
     };
 }

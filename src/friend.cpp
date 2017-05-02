@@ -10,6 +10,7 @@ Friend::Friend(){ clear(); }
 
 Friend::Friend(unsigned int ID) : m_ID(ID) {}
 
+Friend::Friend(unsigned int ID, const std::string& nickname): m_ID(ID), m_nickname(nickname){}
 
 //Setters
 void Friend::clear(){

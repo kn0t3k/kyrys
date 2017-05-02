@@ -225,7 +225,7 @@ namespace Kyrys {
 
 		//Covers chat interface for writting commands
 		void runChat(std::istream &in = std::cin);
-		
+
 
 		//Sends message directly to second client without any handshake with risk of making DoS on second client
 		void sendTo();

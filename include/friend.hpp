@@ -21,6 +21,8 @@ namespace Kyrys {
 
 		Friend(unsigned int ID);
 
+		Friend(unsigned int ID, const std::string& nickname);
+
 
 		//Setters
 		void clear();

@@ -242,6 +242,7 @@ void Item::parseRegisterRequest(const QJsonObject &json) {
     m_nickOriginal = m_nick;
 }
 
+
 void Item::parseRegisterResponse(const QJsonObject &json) {
     m_messageType = MessageType::REGISTER_RESPONSE;
 
@@ -262,6 +263,7 @@ void Item::parseRegisterResponse(const QJsonObject &json) {
 
 }
 
+
 void Item::parseLoginRequest(const QJsonObject &json) {
     m_messageType = MessageType::LOGIN_REQUEST;
 
@@ -274,6 +276,7 @@ void Item::parseLoginRequest(const QJsonObject &json) {
     m_nick = args["nickname"].toString();
     m_passwordHash = args["password"].toString();
 }
+
 
 void Item::parseLoginResponse(const QJsonObject &json) {
     m_messageType = MessageType::LOGIN_RESPONSE;
@@ -289,16 +292,18 @@ void Item::parseLoginResponse(const QJsonObject &json) {
     m_success = args["success"].toInt();
 }
 
+
 void Item::parseChatSourceDest(const QJsonObject &json){
 	QJsonObject args = json["args"].toObject();
-    m_args = QString(QJsonDocument(args).toJson());
+    m_args = QString(QJsonDocument(args).toJson()); //remove this line if you don't need it in serverResolver
 	if (args.empty()) {
 		m_methodType = MethodType::INVALID_CMND;
 	} else {
-		m_fromID = args["fromID"].toString().toUInt();
-		m_toID = args["toID"].toString().toUInt();
+		m_fromID = args["fromID"].toInt();
+		m_toID = args["toID"].toInt();
 	}
 }
+
 
 void Item::parseChatRequest(const QJsonObject &json){
 	m_messageType = MessageType::CHAT_REQUEST;
@@ -314,6 +319,7 @@ void Item::parseChatRequest(const QJsonObject &json){
 	}
 }
 
+
 void Item::parseChatResponse(const QJsonObject &json){
 	m_messageType = MessageType::CHAT_RESPONSE;
 
@@ -327,6 +333,7 @@ void Item::parseChatResponse(const QJsonObject &json){
 		m_answer = args["answer"].toBool();
 	}
 }
+
 
 void Item::parseChatData(const QJsonObject &json){
 	m_messageType = MessageType::CHAT_DATA;
@@ -347,5 +354,3 @@ void Item::increaseNick() {
     m_nick = m_nickOriginal + QString::number(m_extension);
     m_extension++;
 }
-
-

@@ -68,8 +68,8 @@ QJsonDocument Chat::jsonCreateChatData(const Friend &from, const Friend &recipie
 	root_obj["messageType"] = "CHAT_DATA";
 	root_obj["method"] = "chat";
 
-	args_obj["fromID"] = (int)from.getID();
-	args_obj["toID"] = (int)recipient.getID();
+	args_obj["fromID"] = static_cast<int>(from.getID());
+	args_obj["toID"] = static_cast<int>(recipient.getID());
 	args_obj["data"] = data;
 
 	root_obj.insert("args", args_obj);

@@ -4,6 +4,8 @@
 #include <item.hpp>
 #include <enums.hpp>
 #include <limits>
+#include <chat.hpp>
+#include <friend.hpp>
 
 using Kyrys::Item;
 using Kyrys::Enums::Item::MethodType;
@@ -11,6 +13,10 @@ using Kyrys::Enums::JsonMessage::MessageType;
 using Kyrys::Enums::Resolver::Status;
 using Kyrys::Enums::Chat::DataEncryption;
 using Kyrys::Enums::Chat::Accessibility ;
+using Kyrys::Chat;
+using Kyrys::Friend;
+
+#define ENABLE_JSON_EXAMPLES 1
 
 TEST_CASE("Item constructor all valid") {
     QString json = "{\"messageType\" : \"REGISTER_REQUEST\", \"method\": \"register\",\"args\": {\"nickname\": \"Jak\"}}";
@@ -255,6 +261,41 @@ TEST_CASE("Item - parse & valid - valid REGISTER_RESPONSE"){
 	//REQUIRE(item.getSuccess());
 
 	REQUIRE(item.isValid() == Status::SUCCESS);
+}
+
+
+TEST_CASE("Item - parse & valid - valid CHAT_DATA"){
+	if(ENABLE_JSON_EXAMPLES)std::cout << "\nItem - parse & valid - valid CHAT_DATA\n" << std::endl;
+	Friend sender(13, "Alice");
+	Friend receiver(17, "Bob");
+	QString message = "Hello World, this is testing message";
+	Chat chat(sender, receiver);
+
+	//Creating JSON CHAT_DATA message
+	QJsonDocument jsonDocument = chat.jsonCreateChatData(sender, receiver, message);
+	QJsonObject jsonObject = jsonDocument.object();
+
+	//Printing example of valid CHAT_DATA message in output of test
+	if(ENABLE_JSON_EXAMPLES) {
+		std::string messageSTD = jsonDocument.toJson().toStdString();
+		std::cout << "EXAMPLE OF VALID CHAT_DATA MESSAGE: \n" << messageSTD << std::endl;
+	}
+
+	//Parsing
+	Item item;
+	item.parse(jsonObject);
+
+	//Controlling if messageType and method was parsed right
+	REQUIRE(MethodType::CHAT == item.getMethodType());
+	REQUIRE(MessageType::CHAT_DATA == item.getMessageType());
+
+	//Controlling right parsing of message's args
+	REQUIRE(13 == item.getFromID());
+	REQUIRE(17 == item.getToID());
+	REQUIRE(message == item.getData());
+
+	//Validating of received valid JSON CHAT_DATA message
+	REQUIRE(item.isValid());
 }
 
 /*

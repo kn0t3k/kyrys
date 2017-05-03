@@ -7,13 +7,11 @@ using Kyrys::Server;
 using Kyrys::SocketThread;
 
 
-Server::Server(QObject *parent)
-        :
-        QTcpServer(parent) {
+Server::Server(QObject *parent) : QTcpServer(parent) {
     m_loggedUsers = {};
 }
 
-void Server::startServer(qint16 port_no) {
+void Server::startServer(quint16 port_no) {
     if (!listen(QHostAddress::Any, port_no)) {
         qDebug() << "server could not start";
     } else {
@@ -22,31 +20,34 @@ void Server::startServer(qint16 port_no) {
 }
 
 void Server::incomingConnection(int descriptor) {
-    qDebug() << "conneciton incoming" << descriptor;
+    QThread *thread = new QThread;
+    SocketThread *worker = new SocketThread(descriptor, this);
 
-    SocketThread *thr = new SocketThread(descriptor, "C:\\__TEMP__\\", &m_mutexFile, this);
-    connect(thr, SIGNAL(finished()), thr, SLOT(deleteLater()));
-    thr->start();
+    worker->moveToThread(thread);
+    connect(thread, SIGNAL(finished()), worker, SLOT(deleteLater()));
+    connect(thread, SIGNAL(started()), worker, SLOT(run()));
+    connect(worker, SIGNAL(socketThreadFinished()), worker, SLOT(deleteLater()));
+    connect(worker, SIGNAL(socketThreadFinished()), thread, SLOT(quit()));
+
+    thread->start();
 }
 
-void Server::logUser(int ID, QSslSocket *const userSocket) {
-    qDebug() << "logging in: " << ID;
-    m_mutexLoggedVector.lock();
+void Server::logUser(int ID, SocketThread *const userSocket) {
     if (m_loggedUsers.find(ID) != m_loggedUsers.end()) {    // if user is already logged in, replace its socket
         m_loggedUsers.erase(ID);
     }
     m_loggedUsers.insert(std::make_pair(ID, userSocket));
-    for (auto &item : m_loggedUsers) {
-        std::cout << "logged: " << item.first << std::endl;
-    }
-    m_mutexLoggedVector.unlock();
 }
 
-QSslSocket *Server::getUserSocket(int ID) {
-    auto userSocketIterator = m_loggedUsers.find(ID);
-    if(userSocketIterator == m_loggedUsers.end()){
+SocketThread *Server::getTargetUserThread(int ID) {
+    auto userIterator = m_loggedUsers.find(ID);
+    if (userIterator == m_loggedUsers.end()) {
         return nullptr;
     }
-    return userSocketIterator->second;
+    return userIterator->second;
+}
+
+void Server::logOut(int ID) {
+    m_loggedUsers.erase(ID);
 }
 

@@ -15,6 +15,7 @@
 #include <QtCore/QString>
 #include <QtCore/QVector>
 #include <QtCore/QObject>
+#include <QtCore/QJsonValue>
 #include <QtCore/QDebug>
 #include <QtCore/QCoreApplication>
 #include <QtCore/QFile>
@@ -25,6 +26,9 @@
 #include <QtCore/QThread>
 #include <QtCore/QList>
 #include <QtCore/QDir>
+#include <QtCore/QBuffer>
+
+#include <QtConcurrent/QtConcurrent>
 
 //Qt SQL
 #include <QtSql/QSqlDatabase>
@@ -35,6 +39,7 @@
 //STD library
 #include <iostream>
 #include <fstream>
+#include <limits>
 
 //Our own *.hpp files from include directory
 #include <enums.hpp>

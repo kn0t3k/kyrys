@@ -11,7 +11,7 @@
 
 
 namespace Kyrys {
-    class SocketThread : public QThread {
+    class SocketThread : public QObject {
         typedef Kyrys::ServerResolver Resolver;
         typedef Kyrys::Server Server;
     Q_OBJECT
@@ -31,11 +31,17 @@ namespace Kyrys {
 
         void readData();
 
-        void sendData(const QString &data);
+        void sendData(const QByteArray &data);
 
         void quit();
 
         void encrypted();
+
+        void sslError(QList<QSslError> errors);
+
+    signals:
+
+        void socketThreadFinished();
 
     public:
         /**
@@ -44,18 +50,15 @@ namespace Kyrys {
          * @param socketID Socket descriptor of the new connection.
          * @param parent QT parent object.
          */
-        explicit SocketThread(int socketID, const QString &resolverPath, QMutex *const mutexFile, Server *parent = 0);
+        explicit SocketThread(int socketID, Server *parent = 0);
+
+    public slots:
 
         /**
          * @brief Starts the execution of the newly created thread.
          * That means communicating with the client, sending responses etc.
          */
-        void run() override;
-
-    public slots:
-
-        void sslError(QList<QSslError> errors);
-
+        void run();
     };
 
 }

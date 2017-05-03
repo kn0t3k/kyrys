@@ -6,14 +6,12 @@
 #include <QtCore/QMutex>
 
 namespace Kyrys {
+    class SocketThread;     // forward declaration because of circular include
+
     class Server : public QTcpServer {
-    Q_OBJECT
     private:
 
-        std::map<int, QSslSocket *> m_loggedUsers;
-
-        QMutex m_mutexLoggedVector;
-        QMutex m_mutexFile;
+        std::map<int, SocketThread *> m_loggedUsers;
 
     public:
         /**
@@ -30,16 +28,18 @@ namespace Kyrys {
          *
          * @param port_no Port number.
          */
-        void startServer(qint16 port_no);
+        void startServer(quint16 port_no);
 
         /**
          * Add user to the vector of logged users so we can later send messages to it.
          * @param ID ID of the user.
          * @param userSocket Socket through which we can communicate with the user.
          */
-        void logUser(int ID, QSslSocket *const userSocket);
+        void logUser(int ID, SocketThread *const userSocket);
 
-        QSslSocket *getUserSocket(int ID);
+        void logOut(int ID);
+
+        SocketThread *getTargetUserThread(int ID);
 
     protected:
         void incomingConnection(int descriptor);

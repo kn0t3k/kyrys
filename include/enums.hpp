@@ -4,6 +4,8 @@
 
 #define DEBUG 0
 
+#define DEBUG_BIN 0		//Debugging binary files kyrysClient.exe and kyrysServer.exe, don't turn on this macro for kyrys_test.exe
+
 #define DATABASE_FILENAME "users.db"
 #define PASSWORDS_FILENAME "passwords"
 #define DATABASE_DIRECTORY "database"
@@ -72,6 +74,7 @@ namespace Kyrys {
                 LOGIN,
                 FORWARD,
                 INVALID_CMND,
+				CHAT,
                 UNKNOWN
             };
         }
@@ -82,7 +85,21 @@ namespace Kyrys {
                 LOGIN_REQUEST,
                 LOGIN_RESPONSE,
                 FORWARD,
+                CHAT_REQUEST,
+                CHAT_RESPONSE,
+				CHAT_DATA,
                 UNKNOWN
+            };
+        }
+        namespace Chat {
+            enum Accessibility {
+                ONLINE,         //User will get notice about incoming chat
+                OFFLINE,        //User's chat will automatically send back refusing CHAT_RESPONSE message
+                CHATTING,       //This status is active during some chat and inform sender about this status, also program will create history of tries and inform receiver about missed CHAT_REQUESTs
+            };
+            enum DataEncryption {
+                PLAIN_TEXT,         //Data part of message between 2 users will be plaintext
+                SHARED_KEY          //                                        -||- encrypted by symetric cipher by sharedkey
             };
         }
     }

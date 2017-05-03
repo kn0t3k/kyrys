@@ -1,44 +1,50 @@
 #pragma once
+
 #include <reference.hpp>
 #include <QtCore/QCryptographicHash>
 #include <userNetworkOptions.hpp>
 
 namespace Kyrys {
-	/**
-	 * @brief	class User represents one registrating, logging in or logged in user in client
-	 * @param	m_nickname
-	 * 			m_passwordHash
-	 * 			m_usedHashAlgorithm - there is set which algorithm was used for hashing password
-	 * @note 	I expect that this class will be modified in future
-	 *
-	 */
-	class User {
-		unsigned int 					m_ID;
-		std::string 					m_nickname;
-		QByteArray  					m_passwordHash;
-		QCryptographicHash::Algorithm 	m_usedHashAlgorithm;
-		UserNetworkOptions				m_userNetworkOptions;
+    /**
+     * @brief	class User represents one registrating, logging in or logged in user in client
+     * @param	m_nickname
+     * 			m_passwordHash
+     * 			m_usedHashAlgorithm - there is set which algorithm was used for hashing password
+     * @note 	I expect that this class will be modified in future
+     *
+     */
+    class User {
+        unsigned int m_ID;
+        std::string m_nickname;
+        QByteArray m_passwordHash;
+        UserNetworkOptions m_userNetworkOptions;
 
-		//TODO: Add list of friends and maybe more member atributes
+        //TODO: Add list of friends(HASH TABLE) and maybe more member atributes
+        //add userHistory
 
-	public:
-		//Constructors
-		User() = default;
-		User(const std::string &nickname, const QByteArray &passwordHash, QCryptographicHash::Algorithm usedHashAlgorithm);
+    public:
+        //Constructors
+        User() = default;
 
-		//Getters
-		const std::string &getNickname() const;
-		const QByteArray &getPasswordHash() const;
-		QCryptographicHash::Algorithm getUsedHashAlgorithm() const;
+        User(const std::string &nickname, const QByteArray &passwordHash);
 
-		unsigned int getID() const;
+        //Getters
+        const std::string &getNickname() const;
 
-		//Setters
-		void setNickname(const std::string &m_nickname);
-		void setPasswordHash(const QByteArray &m_passwordHash);
-		void setID(unsigned int m_ID);
+        const QByteArray &getPasswordHash() const;
 
-		//Printers
-		void printUser();
-	};
+        unsigned int getID() const;
+
+        //Setters
+        void setNickname(const std::string &m_nickname);
+
+        void setPasswordHash(const QByteArray &m_passwordHash);
+
+        void setID(unsigned int m_ID);
+
+        void clear();
+
+        //Printers
+        void printUser();
+    };
 }

@@ -3,6 +3,7 @@
 #include <reference.hpp>
 #include <item.hpp>
 #include <user.hpp>
+
 #include <QtNetwork/QSslSocket>
 #include <QtCore/QMutex>
 
@@ -16,15 +17,17 @@ namespace Kyrys {
     private:
         int m_result;   // general result value to hold return values of various functions
         int m_IDofRecipient;    // id of user that the message shall be forwarded to
-        Item m_item;                 // incoming request from client
+        Item incomingItem;                 // incoming request from client
         bool m_stateIsLogin;    // if resolver is in state of logging a user in
         bool m_stateIsForward;  // if resolver is in state of forwarding a message
-        User m_user;                 // info about user, from database
-        QMutex *const m_mutexFile;      // mutex to protect file from data race
-        QSqlDatabase db;
+        User m_userFromDB;                 // info about user, from database
+        QSqlDatabase m_dbHandle;
+        QString m_messageDataToForward;
 
         //Getters
-        int getUserID(const QString &nickName);
+        int getUserIDFromDB(const QString &nickName);
+
+        void getUserPassword(int userID);
 
         //Other methods
         int execute();
@@ -38,17 +41,18 @@ namespace Kyrys {
 
         int loginUser();
 
-        void getUserPassword(int userID);
+        int forwardChat();
+
+        QByteArray prepareRegisterResponse();
+
+        QByteArray prepareLoginResponse();
 
     public:
         //Constructors
         /**
          * Construct a resolver object.
-         * @param path The path to the directory which should contain database file.
-         * @param file The file name which shall contain the DB.
-         * @param mutexFile Lock of the file to prevent data race.
          */
-        ServerResolver(QMutex *const mutexFile = nullptr);
+        ServerResolver();
 
 
         //Getters
@@ -67,7 +71,6 @@ namespace Kyrys {
         const Item &getItem() const;
 
         int getRecipientID() const;
-
 
         //Other methods
         /**

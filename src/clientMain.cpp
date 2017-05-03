@@ -1,7 +1,6 @@
 #include <reference.hpp>
 #include <client.hpp>
 
-#include <iostream>
 
 int main(int argc, char **argv) {
     int portNo = Kyrys::Enums::Defaults::DefaultPortNumber::DEFAULT_PORT;
@@ -31,16 +30,17 @@ int main(int argc, char **argv) {
     if (parser.isSet("p")) {
         portNo = parser.value("p").toInt();
     }
-    Kyrys::Client client(hostName, portNo, &a);
-    if (!client.secureConnect()) {
-        qDebug() << "client could not connect to server: " << hostName << ":" << portNo;
-    } else {
-        client.run(); //runs infinite loop parsing commands
-        //client.sendData("{\"method\": \"register\",\"args\": {\"name\": \"Jan Novak\",\"nick\": \"Jaak\", \"password\":\"mojetajneheslo\"}}");
-        //client.sendData("{\"method\": \"login\",\"args\": {\"nick\": \"Jaak1\", \"password\":\"somepass\"}}");
-        //client.sendData("{\"method\": \"forward\",\"to\": \"Jaak1\", \"args\" : {\"from\" : \"me\", \"message\" : \"ahoj, jak to jde?\"}}");
-    }
 
+    QThread *clientThread = new QThread;
+    Kyrys::Client *client = new Kyrys::Client(hostName, static_cast<quint16>(portNo));
+
+    client->moveToThread(clientThread);
+
+    QObject::connect(clientThread, SIGNAL(finished()), client, SLOT(deleteLater()));
+    QObject::connect(clientThread, SIGNAL(started()), client, SLOT(secureConnect()));
+    QObject::connect(client, SIGNAL(clientFinished()), client, SLOT(deleteLater()));
+
+    clientThread->start();
 
     return a.exec();
 }

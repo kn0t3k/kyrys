@@ -9,11 +9,9 @@ using Kyrys::Enums::Resolver::Mode;
 using Kyrys::Item;
 
 //Constructors
-ServerResolver::ServerResolver(QMutex *const mutexFile)
-        : m_item(),
-          m_user("", "",
-                 QCryptographicHash::Sha3_512),
-          m_mutexFile(mutexFile) {
+ServerResolver::ServerResolver()
+        : incomingItem(),
+          m_userFromDB("", "") {
     clear();
 
     QString databasePath = QString(DATABASE_DIRECTORY) + "/" + QString(DATABASE_FILENAME);
@@ -22,39 +20,30 @@ ServerResolver::ServerResolver(QMutex *const mutexFile)
         QDir().mkdir(DATABASE_DIRECTORY);
     }
 
-    db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(databasePath);
-    if (db.open()) {
-        qDebug() << "db opened successfully";
-    } else {
+    m_dbHandle = QSqlDatabase::addDatabase("QSQLITE");
+    m_dbHandle.setDatabaseName(databasePath);
+    if (!m_dbHandle.open()) {
         qDebug() << "db failed to open at " + databasePath;
         return;
     }
 
-    if (!db.tables().contains(QLatin1String("users"))) {
-        qDebug() << "need to create a table";
+    if (!m_dbHandle.tables().contains(QLatin1String("users"))) {
         QSqlQuery query;
         query.prepare("CREATE TABLE users(ids integer primary key, nickname text)");
         if (!query.exec()) {
             qDebug() << "craete table error:  " << query.lastError();
             return;
         }
-    } else {
-        qDebug() << "table users already created";
     }
 
-    if (!db.tables().contains(QLatin1String("passwords"))) {
-        qDebug() << "need to create a table";
+    if (!m_dbHandle.tables().contains(QLatin1String("passwords"))) {
         QSqlQuery query;
         query.prepare("CREATE TABLE passwords(ids integer primary key, password text)");
         if (!query.exec()) {
             qDebug() << "craete table error:  " << query.lastError();
             return;
         }
-    } else {
-        qDebug() << "table passwords already created";
     }
-
 }
 
 //Getters
@@ -62,19 +51,19 @@ bool ServerResolver::isForward() { return m_stateIsForward; }
 
 bool ServerResolver::isLogin() { return m_stateIsLogin; }
 
-const Item &ServerResolver::getItem() const { return m_item; }
+const Item &ServerResolver::getItem() const { return incomingItem; }
 
 //Other methods
 int ServerResolver::execute() {
     m_stateIsForward = false;
     m_stateIsLogin = false;
 
-    int s = m_item.isValid();
+    int s = incomingItem.isValid();
     if (s != Status::SUCCESS) {
         return s;
     }
 
-    switch (m_item.getMethodType()) {
+    switch (incomingItem.getMethodType()) {
         case MethodType::REGISTER : {
             return registerUser();
         }
@@ -84,14 +73,8 @@ int ServerResolver::execute() {
         case MethodType::UNKNOWN : {
             return Status::UNKNOWN_METHOD;
         }
-        case MethodType::FORWARD : {
-            m_IDofRecipient = getUserID(m_item.getRecepient());
-            if (m_IDofRecipient != -1) {
-                m_stateIsForward = true;
-                return Status::SUCCESS;
-            } else {
-                return Status::INVALID_CMND;
-            }
+        case MethodType::CHAT : {
+            return forwardChat();
         }
         default: {
             return Status::INVALID_CMND;
@@ -99,8 +82,24 @@ int ServerResolver::execute() {
     }
 }
 
+int ServerResolver::forwardChat() {
+    QString toNick = incomingItem.getToNick();
+    if (toNick.isEmpty()) {
+        m_IDofRecipient = incomingItem.getToID();
+    } else {
+        m_IDofRecipient = getUserIDFromDB(toNick);
+    }
+    if (m_IDofRecipient != -1) {
+        m_stateIsForward = true;
+        return Status::SUCCESS;
+    }
+    return Status::INVALID_CMND;
+
+}
+
 int ServerResolver::parse(const QString &data, Mode m) {
     clear();
+    m_messageDataToForward = data;
     if (m == Mode::USE_JSON) {
         QJsonDocument d = QJsonDocument::fromJson(data.toUtf8());
 
@@ -109,8 +108,8 @@ int ServerResolver::parse(const QString &data, Mode m) {
 
         QJsonObject object = d.object();
 
-        m_item.clear();
-        m_item.parse(object);
+        incomingItem.clear();
+        incomingItem.parse(object);
 
         m_result = execute();
 
@@ -127,13 +126,13 @@ int ServerResolver::registerUser() {
     //if it does, make it unique
     query.prepare("SELECT ids FROM users WHERE nickname = (:nickname)");
     while (true) {
-        query.bindValue(":nickname", m_item.getNick());
+        query.bindValue(":nickname", incomingItem.getNick());
         if (!query.exec()) {
             qDebug() << "select error:  " << query.lastError();
             return Status::FAILED;
         } else {
             if (query.next()) {
-                m_item.increaseNick();
+                incomingItem.increaseNick();
             } else {
                 break;
             }
@@ -142,15 +141,25 @@ int ServerResolver::registerUser() {
 
     //insert the user into database
     query.prepare("INSERT INTO users (nickname) VALUES (:nickname)");
-    query.bindValue(":nickname", m_item.getNick());
+    query.bindValue(":nickname", incomingItem.getNick());
     if (!query.exec()) {
         qDebug() << "insert error:  " << query.lastError();
         return Status::FAILED;
     }
 
+    query.prepare("SELECT MAX(ids) FROM users");
+    if (!query.exec()) {
+        qDebug() << "select max ids error:  " << query.lastError();
+        return Status::FAILED;
+    } else {
+        if (query.next()) {
+            incomingItem.setID(query.value(0).toInt());
+        }
+    }
+
     //insert the user's password into database
     query.prepare("INSERT INTO passwords (password) VALUES (:password)");
-    query.bindValue(":password", m_item.getPasswordHash());
+    query.bindValue(":password", incomingItem.getPasswordHash());
     if (!query.exec()) {
         qDebug() << "insert error:  " << query.lastError();
         return Status::FAILED;
@@ -160,35 +169,19 @@ int ServerResolver::registerUser() {
 }
 
 QByteArray ServerResolver::prepareResponse() {
-    QJsonObject root_obj;
-    QJsonObject args_obj;
-    QJsonDocument document;
+    QByteArray response;
 
-    switch (m_item.getMethodType()) {
+    switch (incomingItem.getMethodType()) {
         case MethodType::REGISTER : {
-            root_obj["messageType"] = "REGISTER_RESPONSE";
-            root_obj["method"] = "register";
-            if (m_result == Status::SUCCESS) {
-                args_obj["nickname"] = m_item.getNick();
-                args_obj["ID"] = m_item.getID();
-                args_obj["success"] = 1;
-            } else {
-                args_obj["success"] = 0;
-            }
-
-            root_obj.insert("args", args_obj);
+            response = prepareRegisterResponse();
             break;
         }
         case MethodType::LOGIN : {
-            root_obj["messageType"] = "LOGIN_RESPONSE";
-            root_obj["method"] = "login";
-            args_obj["success"] = static_cast<int>(m_stateIsLogin);
-            root_obj.insert("args", args_obj);
+            response = prepareLoginResponse();
             break;
         }
-        case MethodType::FORWARD : {
-            root_obj["method"] = "forward";
-            root_obj["args"] = m_item.getArgs();
+        case MethodType::CHAT : {
+            response = m_messageDataToForward.toLocal8Bit();
             break;
         }
         default : {
@@ -196,10 +189,10 @@ QByteArray ServerResolver::prepareResponse() {
         }
     }
 
-    return QJsonDocument(root_obj).toJson();
+    return response;
 }
 
-int ServerResolver::getUserID(const QString &nickName) {
+int ServerResolver::getUserIDFromDB(const QString &nickName) {
     int userID = -1;
 
     QSqlQuery query;
@@ -218,30 +211,29 @@ int ServerResolver::getUserID(const QString &nickName) {
 
 void ServerResolver::clear() {
     m_result = Status::FAILED;
-    m_item = Item();
+    incomingItem = Item();
     m_stateIsForward = false;
     m_stateIsLogin = false;
-    m_user = User("", "", QCryptographicHash::Sha3_512);
+    m_userFromDB = User("", "");
     m_IDofRecipient = -1;
 }
 
 int ServerResolver::loginUser() {
     // get user ID from db, search by nick, set this ID to m_item
-    int ID = getUserID(m_item.getNick());
+    int ID = getUserIDFromDB(incomingItem.getNick());
     if (ID == -1) {
         return Status::INVALID_CRED;
     } else {
         getUserPassword(ID);
         // compare received hash with the one from database
-        if (m_item.getPasswordHash() == QString(m_user.getPasswordHash())) {
-            m_item.setID(ID);
+        if (incomingItem.getPasswordHash().toLocal8Bit() == m_userFromDB.getPasswordHash()) {
+            incomingItem.setID(ID);
             m_stateIsLogin = true;
         } else {
             return Status::INVALID_CRED;
         }
     }
     return Status::SUCCESS;
-
 }
 
 int ServerResolver::getRecipientID() const {
@@ -257,7 +249,37 @@ void ServerResolver::getUserPassword(int userID) {
     } else {
         if (query.next()) {
             QString pass = query.value(0).toString();
-            m_user.setPasswordHash(pass.toLocal8Bit());
+            m_userFromDB.setPasswordHash(pass.toLocal8Bit());
         }
     }
+}
+
+QByteArray ServerResolver::prepareRegisterResponse() {
+    QJsonObject root_obj;
+    QJsonObject args_obj;
+
+    root_obj["messageType"] = "REGISTER_RESPONSE";
+    root_obj["method"] = "register";
+    if (m_result == Status::SUCCESS) {
+        args_obj["nickname"] = incomingItem.getNick();
+        args_obj["ID"] = incomingItem.getID();
+        args_obj["success"] = 1;
+    } else {
+        args_obj["success"] = 0;
+    }
+
+    root_obj.insert("args", args_obj);
+    return QJsonDocument(root_obj).toJson();
+}
+
+QByteArray ServerResolver::prepareLoginResponse() {
+    QJsonObject root_obj;
+    QJsonObject args_obj;
+
+    root_obj["messageType"] = "LOGIN_RESPONSE";
+    root_obj["method"] = "login";
+    args_obj["success"] = static_cast<int>(m_stateIsLogin);
+    root_obj.insert("args", args_obj);
+
+    return QJsonDocument(root_obj).toJson();
 }

@@ -12,7 +12,7 @@ namespace Kyrys {
 
     private:
         QString m_path;    // path to database of friends
-        Item m_item;    // incoming response from server
+        Item m_item;       // incoming response from server
 
     private:
         /**
@@ -26,14 +26,14 @@ namespace Kyrys {
         //Constructors
         /**
          * @brief      Constructor creates a resolver object.
-         *
-         * @param[in]  path  The path to the directory which should contain database file.
          */
         ClientResolver();
 
         //Getters
         const Item &getItem() const;
 
+
+		//Other methods
         /**
          * @brief      Parse input string using specified mode.
          *
@@ -44,6 +44,8 @@ namespace Kyrys {
          */
         int parse(const QString &data, Mode m = Mode::USE_JSON);
 
+
+		//Don't delete comment below this yet
         /**
          * @brief		This metod analyze REGISTER_RESPONSE message from server and returns for client result of server's response
          * @param[in] 	item	Item created from RESPONSE_MESSAGE
@@ -53,8 +55,6 @@ namespace Kyrys {
          *				MODIFIED_NICKNAME   - User wrote nickname which is already registered, so server changed it to similar and unique form
          *				SERVER_ERROR	   		//Uknown error on server's side
          */
-
-
 
     };
 }

@@ -4,7 +4,7 @@
 //Kyrys project header files
 #include <reference.hpp>
 #include <enums.hpp>
-#include <client.hpp>
+#include <chatInterface.hpp>
 
 //Standard c++ library header files
 #include <iostream>
@@ -13,7 +13,7 @@
 #include <QtCore/QCryptographicHash>
 
 
-using Kyrys::Client;
+using Kyrys::ChatInterface;
 
 using std::string;
 using std::istringstream;
@@ -24,6 +24,7 @@ typedef Kyrys::Enums::Client::Login::Status lStatus;
 typedef Kyrys::Enums::Client::Registration::Status rStatus;
 typedef Kyrys::Enums::JsonMessage::MessageType MessageType;
 
+ChatInterface client(nullptr);
 
 //For more info check: http://en.cppreference.com/w/cpp/string/basic_string/getline
 TEST_CASE("Client - loadLoginCredentials - automatic istream demonstration") {
@@ -38,7 +39,6 @@ TEST_CASE("Client - loadLoginCredentials - automatic istream demonstration") {
 
     in.str(nicknameControl + "\n" + passwordControl + "\n"); //this is prepared fake input
 
-    Client client("localhost", 12345);
     int returnValue = client.loadLoginCredentials(nicknameBuffer, passwordBuffer, in);
     REQUIRE(returnValue == lStatus::SUCCESS);
     REQUIRE(nicknameControl == nicknameBuffer);
@@ -58,7 +58,6 @@ TEST_CASE("Client - LoadRegistrationCredentials - successfull registration") {
     string passwordBuffer;
     string badPassword = "bad password";
     string password8charslong = "88888888";
-    Client client("localhost", 12345);
 
     //Test of same password after 1th try
     in.str(nicknameControl + "\n" + passwordControl + "\n" + passwordControl + "\n");
@@ -108,7 +107,6 @@ TEST_CASE("Client - LoadRegistrationCredentials - failed registration") {
     string password7charslong = "777|777";
     string nicknameBuffer;
     string passwordBuffer;
-    Client client("localhost", 12345);
 
     //Test of different passwords
     in.str(nicknameControl + "\n" + passwordControl + "\n" + badPassword + "\n"

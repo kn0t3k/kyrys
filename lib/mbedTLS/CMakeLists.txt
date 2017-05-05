@@ -1,3 +1,3 @@
 include_directories(include)
-set(MBEDTLS_SOURCE_FILES library/sha512.c)
+file(GLOB MBEDTLS_SOURCE_FILES src/*.c)
 add_library(mbedTLS ${MBEDTLS_SOURCE_FILES})

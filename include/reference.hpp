@@ -44,4 +44,8 @@
 //Our own *.hpp files from include directory
 #include <enums.hpp>
 
+//mbedTLS Library: files needed for entropy, random numbers generator, Diffie-Hellman algorithm and AES cipher
+#include "mbedtls/aes.h"
+
+
 typedef std::string string;

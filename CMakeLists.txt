@@ -39,8 +39,6 @@ add_subdirectory(test)
 #executable
 add_executable(${SERVER_NAME} "src/serverMain.cpp")
 add_executable(${CLIENT_NAME} "src/clientMain.cpp")
-target_link_libraries(${SERVER_NAME} src_library) 	# not linking mbedTLS
-target_link_libraries(${CLIENT_NAME} src_library)	# not linking mbedTLS
 target_link_libraries(${SERVER_NAME} src_library mbedTLS)   #added mbdTLS
 target_link_libraries(${CLIENT_NAME} src_library mbedTLS)   #added mbdTLS
 qt5_use_modules(${SERVER_NAME} ${QT_USED_MODULES})

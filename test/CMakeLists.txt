@@ -10,7 +10,6 @@ file(GLOB TEST_SOURCES *.cpp)
 
 add_executable(${TEST_NAME} ${TEST_SOURCES})
 target_include_directories(Catch INTERFACE ${CATCH_DIR})
-target_link_libraries(${TEST_NAME} Catch src_library)
-target_link_libraries(${TEST_NAME} Catch src_library mbedTLS)   #added mbdTLS
+target_link_libraries(${TEST_NAME} Catch src_library mbedTLS)
 
 qt5_use_modules(${TEST_NAME} ${QT_USED_MODULES})

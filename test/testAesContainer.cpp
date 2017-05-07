@@ -4,7 +4,6 @@
 //Kyrys project header files
 #include <reference.hpp>
 
-/*
 
 #include <AesContainer.hpp>
 
@@ -25,7 +24,5 @@ TEST_CASE("AesContainer - test"){
 
 	AesContainer aes(key, message, 128);
 	//aes.encrypt()
-	REQUIRE(message == aes.m_data);
+	//REQUIRE(message == aes.m_data);	// here use a getter, m_data is private obviously
 }
-
- */

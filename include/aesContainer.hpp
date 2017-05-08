@@ -4,11 +4,12 @@
 
 namespace Kyrys {
 	/**
-	 * @brief	AesContainer encapsulates AES 128bit cipher from mbedTLS library into C++ class and simplify using of the code
-	 * @param[in]	m_version	Holds version of AES cipher which you want to use. Default version is AES with 128bits long key
-	 * @warning					A lot of conversions inside this class is from unsigned to signed char which means, that this class accept only
-	 * 							ASCII chars with value from 0 to 127 ! more info here: https://en.wikipedia.org/wiki/ASCII
+	 * @brief					AesContainer encapsulates AES 128bit cipher from mbedTLS library into C++ class and simplify using of the code
 	 *
+	 * @param[in]	m_version	Holds version of AES cipher which you want to use. Default version is AES with 128bits long key
+	 *
+	 * @warning					A lot of conversions inside this class is from unsigned to signed char which means, that this class accept only
+	 * 							ASCII chars with value from 0 to 127 ! more info here: http://en.cppreference.com/w/cpp/language/ascii
 	 */
 	class AesContainer {
 
@@ -23,14 +24,14 @@ namespace Kyrys {
 		//mbedTLS variables
 		unsigned char m_key[16];			//key used for encryption/decryption - 128bit long
 		mbedtls_aes_context m_aes;			//AES context
-		unsigned char m_iv[16];  			//Initialization Vector - vector of really random numbers
-		unsigned char m_block_input[128];	//block of data from m_data
-		unsigned char m_block_output[128];	//block of encrypted data created by encrypting m_block_input
+		unsigned char m_iv[16];  			//Initialization Vector - vector of really random numbers, should be created by mbedTLS generator of random numbers in next version
+		unsigned char m_block_input[128];	//128B long block of data from m_data, not ended by binary zero '\0'
+		unsigned char m_block_output[128];	//128B long block of encrypted data created by encrypting m_block_input
 
 
 	public:
 		//Constructors
-		AesContainer(unsigned char* key, const std::string& plain_input, unsigned int version = 128);
+		AesContainer(unsigned char *key, unsigned char *iv, const std::string &plain_input, unsigned int version = 128);
 
 		//Getters
 		unsigned int getVersion() const;
@@ -58,17 +59,42 @@ namespace Kyrys {
 
 		//Setters
 		void clear();
-		void initializeIV();
 
+		/**
+		 * @brief			setIV sets m_iv atribute
+		 *
+		 * @param iv[in]	You can use own initializer vector consisting of random chars with values
+		 * 					lesser than 128(ASCII chars) or set this param to nullptr and then will be
+		 * 					used default vector inside method.
+		 *
+		 * @warning			Don't set value of any part of vector to zero or \0, strcpy could interpret
+		 * 					this value as end of array and then it will be cut in this place and rest of
+		 * 					string will be not copyied into m_iv atribute.
+		 */
+		void setIV(unsigned char *iv = nullptr); //done
 
 		//Other methods
 		std::string encrypt();
+
 		std::string decrypt();
 
+		//Service methods for testing
+		void printArray(const unsigned char* array, unsigned int length, const std::string& mode) const;
 
 	private:
 		int prepareBlock(unsigned int iterator); //copy i-th block of data pointed by iterator into m_block_input
 
+
+		/**
+		 * @brief					addPadding method adds padding at the end of m_data depepending on paddingType
+		 *
+		 * @param paddingType[in]	Supports 2 pading types, PKCS#7 and padding by zeros at the end of m_data
+		 */
+		void addPadding(const std::string& paddingType);
+
+		void addPKCS7Padding();
+
+		void addZerosPadding();
 
 	};
 }

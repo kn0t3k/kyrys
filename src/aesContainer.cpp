@@ -74,7 +74,11 @@ std::string AesContainer::encrypt() {
 	std::string buffer;
 	std::string outputBuffer;
 
-	for(unsigned int i = 0; i < m_output_length / (m_version / 8); ++i){
+	//Adding padding before encryption
+	addPadding("PKCS#7");
+
+	//Encryption by blocks of data
+	for(unsigned int i = 0; i < m_output_length / m_version; ++i){
 		prepareBlock(i);
 		if(mbedtls_aes_crypt_cbc( &m_aes, MBEDTLS_AES_ENCRYPT, 128, m_iv, m_block_input, m_block_output ) == MBEDTLS_ERR_AES_INVALID_INPUT_LENGTH){
 			std::cout << "AesContainer::encrypt::mbettls_aes_crypt_cbc: error after calling mbedTLS ecnryption function" << std::endl;
@@ -108,21 +112,44 @@ int AesContainer::prepareBlock(unsigned int iterator){
 	return 0;
 }
 
+//Padding system
 void AesContainer::addPadding(const std::string& paddingType){
 	if(paddingType == "PKCS#7"){
-		addPKCS7Padding();
+		addPKCS7Padding((char)getPaddingLength());
 	}
 	else if(paddingType == "ZEROS"){
 		addZerosPadding();
 	}
 }
 
-void AesContainer::addPKCS7Padding(){
+void AesContainer::removePadding(const std::string &paddingType, string &decryptedOutput) {
+	if(paddingType == "PKCS#7"){
+		removePKCS7Padding(decryptedOutput);
+	}
+	else if(paddingType == "ZEROS"){
+		//todo
+	}
+}
 
+void AesContainer::addPKCS7Padding(char paddingSymbol){
+	if(getPaddingLength() != 0){
+		std::string paddingString((int)getPaddingLength(), paddingSymbol);
+		m_data.append(paddingString);
+	}
 }
 
 void AesContainer::addZerosPadding(){
+	addPKCS7Padding((char)0);
+}
 
+void AesContainer::removePKCS7Padding(string &decryptedOutput) {
+	if(getPaddingLength() != 0){
+		decryptedOutput.erase(decryptedOutput.length() - getPaddingLength(), decryptedOutput.length());
+	}
+}
+
+void AesContainer::removeZerosPadding(){
+//todo
 }
 
 

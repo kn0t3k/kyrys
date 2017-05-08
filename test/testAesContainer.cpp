@@ -61,8 +61,6 @@ TEST_CASE("AesContainer - Constructor"){
 	REQUIRE(message.length() + (128 - (message.length() % aes.getVersion())) == aes.getOutput_length());
 	REQUIRE(aes.getPaddingLength() < aes.getVersion());
 
-
-
 	//Test of another message longer than one block of 128B
 	message = "Hello world, this is very long message. Message longer than block of 128B. I hope that encryption will finish OK. And because previous text is too short, I need to add some more of it.";
 	AesContainer aes2(key, defaultVector, message, 128);
@@ -93,4 +91,14 @@ TEST_CASE("AesContainer - Constructor"){
 	REQUIRE(message.length() == aes2.getInput_length());
 	REQUIRE(message.length() + (128 - (message.length() % aes2.getVersion())) == aes2.getOutput_length());
 	REQUIRE(aes2.getPaddingLength() < aes2.getVersion());
+}
+
+
+TEST_CASE("AesContainer - padding"){
+
+}
+
+
+TEST_CASE("AesContainer - encryption / decryption"){
+
 }

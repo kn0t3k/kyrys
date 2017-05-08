@@ -15,7 +15,7 @@ namespace Kyrys {
 
 	private:
 		unsigned int m_version;				//version of AES, but also length of encrypting block in Bytes, length of key in bits, ...
-		const std::string& m_data;			//input plain text
+		const std::string& m_data;				//input text - can be plain but also encrypted data depending if you are encrypting or decrypting
 
 		unsigned long m_input_length;		//Length of m_data
 		unsigned long m_output_length;		//Length of m_block_output
@@ -81,10 +81,7 @@ namespace Kyrys {
 		//Service methods for testing
 		void printArray(const unsigned char* array, unsigned int length, const std::string& mode) const;
 
-	private:
-		int prepareBlock(unsigned int iterator); //copy i-th block of data pointed by iterator into m_block_input
-
-
+		//Padding methods
 		/**
 		 * @brief					addPadding method adds padding at the end of m_data depepending on paddingType
 		 *
@@ -92,9 +89,25 @@ namespace Kyrys {
 		 */
 		void addPadding(const std::string& paddingType);
 
-		void addPKCS7Padding();
+		/**
+		 * @brief					addPadding method adds padding at the end of m_data depepending on paddingType
+		 *
+		 * @param paddingType[in]	Supports 2 pading types, PKCS#7 and padding by zeros at the end of m_data
+		 */
+		void removePadding(const std::string &paddingType, string &decryptedOutput);
+
+	private:
+		int prepareBlock(unsigned int iterator); //copy i-th block of data pointed by iterator into m_block_input
+
+
+		//Padding methods
+		void addPKCS7Padding(char paddingSymbol);
 
 		void addZerosPadding();
+
+		void removePKCS7Padding(string &decryptedOutput);
+
+		void removeZerosPadding();
 
 	};
 }

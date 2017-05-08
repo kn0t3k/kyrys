@@ -134,7 +134,7 @@ void AesContainer::removePadding(const std::string &paddingType, string &decrypt
 void AesContainer::addPKCS7Padding(char paddingSymbol){
 	if(getPaddingLength() != 0){
 		std::string paddingString((int)getPaddingLength(), paddingSymbol);
-		m_data.append(paddingString);
+		//m_encrypted_data.append(paddingString);
 	}
 }
 

@@ -15,7 +15,8 @@ namespace Kyrys {
 
 	private:
 		unsigned int m_version;				//version of AES, but also length of encrypting block in Bytes, length of key in bits, ...
-		const std::string& m_data;				//input text - can be plain but also encrypted data depending if you are encrypting or decrypting
+		const std::string& m_data;			//input text - can be plain but also encrypted data depending if you are encrypting or decrypting
+		//std::string m_encrypted_data;
 
 		unsigned long m_input_length;		//Length of m_data
 		unsigned long m_output_length;		//Length of m_block_output

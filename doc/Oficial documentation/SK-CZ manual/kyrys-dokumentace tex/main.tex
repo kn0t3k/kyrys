@@ -1,0 +1,126 @@
+\documentclass[a4paper]{article}
+
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage{hyperref}
+
+\title{Kyrys Dokumentace}
+\author{Martin Brakl, Martin Knotek}
+
+\begin{document}
+\maketitle
+
+\section{Úvod}
+
+Tento dokument se zabývá popisem implementace projektu Kyrys, zobrazením základních příkazů a použití. Projekt Kyrys je komunikační program se zaměřením na bezpečný přenos zašifrovaných zpráv mezi uživateli.
+Popíšeme implementaci, zmíníme základní bezpečnostní analýzu a předvedeme postup pro použití a přeložení programu.
+
+
+\section{Popis implementace}
+
+\subsection{Použité nástroje}
+
+Projekt byl napsán v jazyce C++, s použitím knihoven Qt, MbedTLS a Catch. Překlad byl vyzkoušen s použitím g++5.3 a g++6.2. Verze Qt byla použita 5.8. Projekt je vystavěn pomocí CMake, který umožňuje přenositelnost a dobrou údržbu. Primárně byl spouštěn a testován na systémech Win 7 a Win 8. Zkompilování bylo otestováno i v IDE Clion a přes standartní příkazový řádek. Pro správný chod programu je důležité, aby knihovna Qt obsahovala pluginy SQL, které jsou použity jako databázový systém.
+
+\subsection{Struktura}
+
+Projekt je i na úrovní zdrojových kódů rozělen na dvě části - server a klient. Následující kapitoly obsahují popis jednotlivých částí.
+
+\subsection{Server}
+
+Server plní funkci přijímání příchozích připojení od klientů a plnění jejich požadavků. Každé příchozí připojení od klienta je obsluhováno v jednom vlákně, server je tedy konkurentní a schopen obsloužit více klientů najednou.
+
+Vlákna jsou vytvářena pomocí QThread a tato vytvořená vlákna jsou serverem udržována v paměti tak, aby byl server schopen přeposlat zprávu od jednoho klienta druhému.
+
+Požadavky od klienta jsou posílány ve formátu JSON, ve kterém se specifikuje jakou funkci má server vykonat a s jakými parametry. Tyto JSON zprávy jsou posílány přes QSslSocket.
+Kyrys tedy používá ssl spojení a to tak, že klient i server jsou distribuovány s certifikáty, které ověřují totožnost serveru. V případě nesouhlasu certifikátu na straně klienta a certifikátu poslaného serverem, je spojení odmítnuto.
+
+Zpracování JSON zpráv je vykonáno konečným automatem (v projektu možno najít pod názvem \textit{Resolver}). Tento automat mění svůj vnitřní stav podle příchozích zpráv a poté vykoná akci danou jeho vnitřním stavem.
+
+Jak bylo řečeno výše, server zpracovává požadavky od klientů; mezi takovéto požadavky patří např. registrace nového uživatele, přihlášení uživatele do systému nebo zahájení chatování. Aby se uživatel mohl přihlásit, musí se nejdříve zaregistrovat.
+
+Pro uchování dat uživatelů byla použita SQL databáze, ke které přistupujeme pomocí knihovny Qt. Pro přeložení projektu je potřeba mít Qt distribuováno s touto knihovnou a potřebnými pluginy. V databázi se hesla uchovávají v zahashované podobě a to pomocí algoritmu SHA3\_512.
+
+\subsection{Klient}
+
+Kyrys klient je samostatný program, který spouští uživatel a zadává do něj příkazy. Příkazy od uživatele jsou poté zvalidovány a pokud jsou zadány správně (zadán známý příkaz, při registraci správně zadáno heslo, atp.) jsou tyto příkazy přepsány do formátu JSON a odeslány serveru. Server zprávu zpracuje a podle jejího obsahu vytvoří odpovídající odpověď.
+
+I v klientovi je použito QThread, a sice pro zajištění možnosti zároveň psát i přijímat zprávy. Přijímání zpráv je zajištění pomocí zaregistrování callbacků, které se volají když klient nějakou zprávu přijme. V dalším vláknu potom běží rozhraní, které slouží pro zadávání klientsých příkazů.
+
+Pokud klient posílá zprávu jinému klientovi, je tato zpráva zašifrována pomocí algoritmu AES. Klíče pro de\/šifrování jsou napevno zadány ve zdrojovém kódu, viz. \hyperref[sec:unfinished]{známé\ nedostatky}
+
+
+\section{Použití Kyrys}
+Tato kapitola popisuje postup jak nainstalovat a zkompilovat Kyrys a jak jej používat.
+\subsection{Kompilace}
+
+Pro zkompilování potřebujete:
+\begin{itemize}
+\item g++5.3
+\item Qt 5.8 + qslq pluginy
+\item CMake 3.0+
+\item MbedTLS
+\item Catch
+\item mingw, popř. jiný nástroj make
+\end{itemize}
+Archiv s projektem rozbalte a v kořenové složce projektu v souboru CMakeLists.txt upravte lokaci Qt (řádky obsahující '\textit{QT\_INCLUDE\_DIR}' a '\textit{CMAKE\_PREFIX\_PATH}'). Tímto upravíte CMakeLists.txt podle vaší instalace Qt. Cesty, které zadáte musí ukazovat ke stejným souborům jaké jsou již zadány.
+
+V kořenovém adresáři projektu spusťtě příkaz '\textit{cmake . -G "MinGW Makefiles"}'. Tímto nakonfigurujete cmake a vytvoříte makefily pro váš stroj.
+
+Makefily máte vytvořené, můžete se pustit do kompilace: '\textit{mingw32-make <-j N>}', kde '-j N' je nepovinný přepínač, který spustí kompilaci na N jádrech a tím ji zrychlí.
+
+Pokud kompilace proběhla úspěšně, měla by být vytvořená složka bin, která obsahuje certifikáty, dvě dll knihovny a dva spustitelé soubory - klient a server aplikace.
+
+V jednom příkazovém řádku spusťte kyrys Server, měli byste vidět hlášku že server poslouchá na portu.
+
+V jiném přík. řádku spusťte klienta a uvidíte uživatelské rozhraní.
+
+\subsection{Registrace, login, chat}
+
+Pro zaregistrování nového uživatele zadejte příkaz 'register' a postupujte podle pokynů na obrazovce. Pro přihlášení zadejte příkaz 'login' a postupujte podle pokynů.
+
+Pokud se vám povedlo příhlásit, pomocí příkazu 'chat' vstoupíte do chatovacího okna, kde pomocí '\#sendTo' můžete poslat zprávu nějakému uživateli, jehož ID musíte znát.
+
+\section{Známé nedostatky}
+\label{sec:unfinished}
+Z důvodu časového vytížení jsme několik následujících věcí nestihli dodělat do konce a nachází se proto v rozpracovaném nebo vynechaném stavu:
+\begin{itemize}
+\item Hesla se ukládají v hashované podobě, server nepřidává žádný salt,
+\item Odeslání zprávy probíha ne zcela dokončeným rozhraním, zejména pomocí funkce \textit{sendTo}, která nemusí být zrovna příjemná pro použití, zejména kvůli nutnosti znát ID příjemce,
+\item Server i klient obsahují certifikát, který je navržen pro použití na localhostu, nicméně k použití i ve větších sítí, popř. internetu je Kyrys připraven právě díky konceptu přeposílání zpráv přes server, ovšem takové použití by vyžadovalo spuštení Kyrys serveru na stroji s veřejnou IP a vygenerování certifikátu, který obsahuje správné údaje i o tomto stroji a předání takového certifikátu klientům,
+\item Zprávy, které si vyměňuje klient se serverem neobsahují číslování,
+\item Pokud komunikuje klient s jiným klientem, jejich zprávy jsou přeposílány serverem. Tyto zprávy jsou zašifrovány, bohužel klíč, který jsme použili jsme museli napevno zapsat do kódu. Tento nedostatek lze vyřešit použitím nějaké obměny algoritmu Diffie-Hellman, při kterém by se oba klienti podíleli na tvorbě šifrovacího klíče. Takto předpokládáme, že klienti (skuteční uživatelé) si klíč zvolí sami a sdělí si jej jinou formou komunikace.
+\end{itemize}
+
+O těchto nedostatcích víme a jejich dokončení je otázka následující práce ve volném čase.
+
+\section{Bezpečnostní analýza}
+V této části popíšeme několik potenciálních útoků na Kyrys a pokusíme se poukázat na řešení v projektu.
+
+\subsection{Útok na spojení mezi účastníky}
+\paragraph{Ztráta zprávy při přenosu sítí} Přenos zprávy zo stanice A do B je zajištěn protokolem TCP, který garantuje doručení zpráv.
+\paragraph{Zablokování zprávy útočníkem, popř. Man in the middle útok} Útočník odchytí zprávu a nepošle ji dál, popř. se vydává za někoho jiného. 
+
+Obsah zprávy je šifrovaný, útočník tedy není schopen odchycenou zprávu přečíst, viz dočasná limitace v \hyperref[sec:unfinished]{známé nedostatky}.
+
+Spojení mezi klientem a serverem je šifrováno pomocí SSL, což zajišťuje jistou úroveň bezpečnosti, navíc klient je dodán s certifikátem serveru.
+
+\paragraph{DoS útok} Možná zranitelnost, není implementována žádna forma obrany?
+
+\paragraph{Replay, reflection útok} Možná zranitelnost, není implementována žádna forma obrany?
+
+\subsection{Útok na klienta}
+\paragraph{Snaha získat heslo klienta} V tomto případě je nutné aby klient zajistil svou vlastní bezpečnost, bezpečně ukládal a zadával heslo, jeho PC neobsahoval viry atd.
+\paragraph{Snaha vydávat se za jiného klienta} Klient se při přihlašování prokazuje už. jménem a heslem. Server může přeposlat zprávu pouze na přihlášené uživatele.
+
+\subsection{Útok na server}
+\paragraph{Pokus o převzítí kontroly nad serverem} Server běží na nějakém PC, je otázka jak dobře je toto PC zabezpečeno, jak je přístupné, kteří lidé k němu mají přístup a od toho se odvíjí i bezpečnost serveru.
+\paragraph{Pokus o ukradnití databáze hesel} Hesla jsou uložena v hashovaném formátu. Dočasná limitace viz. \hyperref[sec:unfinished]{známé nedostatky}.
+\paragraph{Úplná nedostupnost serveru} Server může být odstaven DoS útokem.
+
+\end{document}

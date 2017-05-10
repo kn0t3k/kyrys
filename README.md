@@ -4,7 +4,7 @@ Kyrys is small terminal app used for P2P encrypted chat between 2 clients. We ar
 
 ---
 
-Oficial documentationk:
+Oficial documentation:
 * [Documentation and manual in CZ/SK languages for final review in subject PB173](https://github.com/kn0t3k/kyrys/tree/master/doc/Oficial%20documentation/SK-CZ%20manual)
 
 ---

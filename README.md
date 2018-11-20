@@ -1,5 +1,7 @@
 What's Kyrys project
 ---
+This project is no longer in development. Don't fork it, we still have some bugs in code that cause problems.
+---
 Kyrys is small terminal app used for P2P encrypted chat between 2 clients. We are developing this project for purpose not to create second [WhatsApp](https://www.whatsapp.com/), but to learn something about secure coding, communication through internet and application of cryptography theory into real project.
 
 ---
